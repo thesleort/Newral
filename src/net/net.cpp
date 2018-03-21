@@ -1,12 +1,10 @@
 /**
  * @brief 
  * 
- * @file filters.hpp
+ * @file net.cpp
  * @author Troels Blicher Petersen
  * @date 2018-03-21
  */
 
-#ifndef __FILTERS_HPP
-#define __FILTERS_HPP
+#include "net/net.hpp"
 
-#endif

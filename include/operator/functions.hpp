@@ -6,8 +6,8 @@
  * @date 2018-03-21
  */
 
-#ifndef __functions_hpp
-#define __functions_hpp
+#ifndef __FUNCTIONS_HPP
+#define __FUNCTIONS_HPP
 
 #include <cmath>
 

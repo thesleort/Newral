@@ -1,6 +1,7 @@
 {
 	"files.associations": {
-		"fstream": "cpp"
+		"fstream": "cpp",
+		"cstdlib": "cpp"
 	},
 	"clang-format.executable": "${workspaceRoot}/.clang-format"
 }

@@ -6,12 +6,12 @@
  * @date 2018-03-21
  */
 
-#ifndef __net_hpp
-#define __net_hpp
+#ifndef __NET_HPP
+#define __NET_HPP
 
 #include "neuron/neuron.hpp"
 
-typedef std::vector<neuron> Layer;
+typedef std::vector<neuron> layer;
 
 class net {
 public:

@@ -6,13 +6,13 @@
  * @date 2018-03-21
  */
 
-#ifndef __neuron_hpp
-#define __neuron_hpp
+#ifndef __NEURON_HPP
+#define __NEURON_HPP
 
 #include <vector>
 #include <cstdlib>
 
-struct connction{
+typedef struct connection {
     double weight;
     double delta_weight;
 } connection;
@@ -22,7 +22,6 @@ public:
     neuron(unsigned num_outputs);
 
 private:
-    
 };
 
 #endif
