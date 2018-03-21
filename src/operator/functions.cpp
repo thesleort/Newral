@@ -6,8 +6,14 @@
  * @date 2018-03-21
  */
 
-#include "functions.hpp"
+#include "operator/functions.hpp"
 
-d
 
+double tanh_transfer_function(double input) {
+	return tanh(input);
+}
+
+double tanh_transfer_function_derivative(double input) {
+	return 1.0 - input * input;
+}
 

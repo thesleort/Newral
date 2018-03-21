@@ -17,7 +17,7 @@
 #ifdef __APPLE__
     #include "OpenCL/opencl.h"
 #else
-    #include "CL/cl.h"
+    #include <CL/cl.h>
 #endif
 
 typedef std::vector<double> t_vals;

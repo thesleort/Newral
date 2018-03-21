@@ -9,6 +9,8 @@
 #ifndef __functions_hpp
 #define __functions_hpp
 
+#include <cmath>
+
 /*
  *               1  * * * * * * *
  *               |*

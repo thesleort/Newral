@@ -1,6 +1,6 @@
     #Made by Troels Blicher Petersen (trpet15)
 
-EXE = newral
+EXE = newral.out
 
 TEST = programtest
 
@@ -10,7 +10,7 @@ OBJ_DIR = build
 MOD_DIR = src/modules
 INC_ALL = -Iinclude/ $(INC_MOD)
 
-MODULES = $(filter-out $(MOD_DIR)/README.md, $(wildcard $(MOD_DIR)/*))
+MODULES = $(filter-out $(MOD_DIR)/README.md $(wildcard $(SRC_DIR)/*.cpp), $(wildcard $(MOD_DIR)/* $(SRC_DIR)/*/))
 
 MAIN_DIR = main
 TEST_DIR = tests
@@ -19,17 +19,19 @@ INC_MOD = $(addprefix -I, $(wildcard $(MOD_DIR)/*/include/))
 
 SRC = $(filter-out $(wildcard $(SRC_DIR)/tests.c), \
 				$(wildcard $(SRC_DIR)/*.cpp \
+				$(SRC_DIR)/*/*.cpp \
 				$(MOD_DIR)/*/*.cpp ) )
 INC = 	$(INC_DIR) \
 		$(INC_MOD)
-OBJRT 	= $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
-OBJMOD 	= $(OBJRT:$(MOD_DIR)/*/%.c=$(OBJ_DIR)/modules/*/%.o)
+OBJRT 	= $(SRC:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
+OBJOTH  = $(OBJRT:$(SRC_DIR)/*/%.cpp=$(OBJ_DIR)/*/%.o)
+OBJMOD 	= $(OBJOTH:$(MOD_DIR)/*/%.cpp=$(OBJ_DIR)/modules/*/%.o)
 OBJ = $(OBJMOD)
 LIB = $(LDFLAGS)
 
 TEST_SRC = $(filter-out $(wildcard src/main.c) $(MOD_DIR)/README.md, \
-				$(wildcard $(SRC_DIR)/*.c $(MOD_DIR)/symbol_tree/*.c))
-TEST_OBJ = $(TEST_SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+				$(wildcard $(SRC_DIR)/*.cpp $(MOD_DIR)/symbol_tree/*.cpp))
+TEST_OBJ = $(TEST_SRC:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
 TC_SRC = $(filter-out $(wildcard src/main.c) $(wildcard $(SRC_DIR)/scan_parse.c \), \
 				$(wildcard $(SRC_DIR)/*.c $(MOD_DIR)/symbol_tree/*.c))
@@ -37,7 +39,7 @@ TC_SRC = $(filter-out $(wildcard src/main.c) $(wildcard $(SRC_DIR)/scan_parse.c 
 CC = g++
 
 CPPFLAGS += $(INC)								# -I is a preprocessor flag, not a compiler flag
-CFLAGS += -std=c11 -Wall -Wextra -pedantic -g	# some warnings about bad code
+CFLAGS += -std=c++11 -Wall -Wextra -pedantic -g	# some warnings about bad code
 
 # -L is a linker flag
 LDFLAGS += -Llib
@@ -55,7 +57,7 @@ $(EXE): $(OBJ)
 ###
 ## Module and object building
 ### 
-$(OBJ_DIR)/modules/*/%.o: $(MOD_DIR)/*/%.c
+$(OBJ_DIR)/modules/*/%.o: $(MOD_DIR)/*/%.cpp
 	mkdir -p $(OBJ_DIR)/modules/*
 	$(CC) $(INC) $(CFLAGS) -c $< -o $@
 
@@ -68,7 +70,7 @@ $(TEST): $(TEST_OBJ)
 ###
 ## Project files object creation
 ###
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	mkdir -p $(addprefix $(OBJ_DIR)/, $(MODULES:$(SRC_DIR)/%=%))
 	$(CC) $(INC) $(CFLAGS) -c $< -o $@
 
