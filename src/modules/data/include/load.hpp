@@ -6,13 +6,19 @@
  * @date 2018-03-20
  */
 
-#ifndef __data_h
-#define __data_h
+#ifndef __data_hpp
+#define __data_hpp
 
 #include <iostream>
 #include <vector>
 #include <fstream>
 #include <sstream>
+
+#ifdef __APPLE__
+    #include "OpenCL/opencl.h"
+#else
+    #include "CL/cl.h"
+#endif
 
 typedef std::vector<double> t_vals;
 
