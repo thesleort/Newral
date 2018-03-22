@@ -6,8 +6,8 @@
  * @date 2018-03-20
  */
 
-#ifndef __DATA_HPP
-#define __DATA_HPP
+#ifndef __MODULE_DATA_HPP
+#define __MODULE_DATA_HPP
 
 #include <iostream>
 #include <vector>

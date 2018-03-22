@@ -12,9 +12,7 @@
 #include "config.h"
 #include "net/net.hpp"
 
-
 double net::m_recent_average_smoothing_factor = RECENT_AVERAGE_SMOOTHING_FACTOR; // Number of training samples to average over
-
 
 void net::init(const std::vector<unsigned> &topology) {
     unsigned num_layers = topology.size();
@@ -36,7 +34,7 @@ void net::init(const std::vector<unsigned> &topology) {
 }
 
 void net::feed_forward(const std::vector<double> &input_vals) {
-//    std::cout << "layers_ " << m_layers[0].size() << std::endl;
+    //    std::cout << "layers_ " << m_layers[0].size() << std::endl;
     //assert(inputVals.size() == m_layers[0].size() - 1);
 
     // Assign (latch) the input values into the input neurons
@@ -64,15 +62,12 @@ void net::back_prop(const std::vector<double> &target_vals) {
         m_error += delta * delta;
     }
 
-    m_error /= output_layer.size() - 1;  // Get average squared
+    m_error /= output_layer.size() - 1; // Get average squared
     m_error = sqrt(m_error);            // RMS
-
 
     // Implement a recent average measurement
     m_recent_average_error =
-            (m_recent_average_error * m_recent_average_smoothing_factor + m_error)
-            / (m_recent_average_smoothing_factor + 1.0);
-
+        (m_recent_average_error * m_recent_average_smoothing_factor + m_error) / (m_recent_average_smoothing_factor + 1.0);
 
     // Calculate output layer gradients
     for (unsigned neuron = 0; neuron < output_layer.size() - 1; ++neuron) {
@@ -128,6 +123,6 @@ void net::net_info(std::vector<Layer> **layers) {
     *layers = &m_layers;
     std::cout << "m_layers address2: " << &m_layers << std::endl;
     std::cout << "  layers address2: " << layers << std::endl;
-//    std::cout << "  weight address: " << &m_layers[0][0].getOutputWeights()[0].weight << std::endl;
-//    std::cout << " Layer size: " << sizeof(m_layers) << std::endl;
+    //    std::cout << "  weight address: " << &m_layers[0][0].getOutputWeights()[0].weight << std::endl;
+    //    std::cout << " Layer size: " << sizeof(m_layers) << std::endl;
 }

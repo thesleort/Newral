@@ -36,7 +36,8 @@
                 "/usr/include",
 				"/usr/include/CL/",
 				"${workspaceRoot}/include",
-				"${workspaceRoot}/src/modules/data/include"
+				"${workspaceRoot}/src/modules/data/include",
+				"${workspaceRoot}/src/modules/text/include"				
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",
