@@ -8,6 +8,8 @@
 
 #include <iostream>
 #include "operator/functions.hpp"
-int main(int argc, int **argv) {
-	std::cout << "Hello, World\n";
+#include "start.hpp"
+
+int main(int argc, const char * argv[]) {
+	std::cout << "Hello, World!\n";
 }
