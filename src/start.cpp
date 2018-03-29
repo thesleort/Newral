@@ -12,7 +12,7 @@
 #include "start.hpp"
 #include "net/net.hpp"
 #include "model/model.hpp"
-#include "text.hpp"
+// #include "text.hpp"
 
 enum MODE { CLASSIFY,
             TRAIN };

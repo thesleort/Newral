@@ -12,8 +12,3 @@
 #include "config.h"
 #include "net/net.hpp"
 
-class net {
-public:
-	
-private:
-};

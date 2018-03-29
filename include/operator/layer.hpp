@@ -9,9 +9,12 @@
 #ifndef __LAYER_HPP
 #define __LAYER_HPP
 
-typedef feature_map;
+#include "net/net.hpp"
 
+void max_pool(feature_map &map, unsigned kernel, unsigned stride);
 
-void convolution(feature_map &map, unsigned kernel, unsigned stride, int padding = 0);
+void convolution(feature_map &map, unsigned kernel, unsigned stride, int padding);
+
+void fully_connect(feature_map &map);
 
 #endif

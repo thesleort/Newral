@@ -15,7 +15,6 @@
 
 class neuron; 
 
-typedef std::vector<neuron> Layer;
 
 typedef struct connection {
     double weight;
