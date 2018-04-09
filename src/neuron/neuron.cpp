@@ -11,7 +11,7 @@
 #include "net/net.hpp"
 #include "operator/functions.hpp"
 
-neuron::neuron(unsigned num_outputs) {
+neuron::neuron(feature_map_config *fmc) {
     for (unsigned connection = 0; connection < num_outputs; ++connection) {
 		m_output_weights.push_back(Connection());
 		m_output_weights.back().weight = random_weight();

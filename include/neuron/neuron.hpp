@@ -23,7 +23,7 @@ typedef struct connection {
 
 class neuron {
 public:
-	neuron(unsigned num_outputs);
+	neuron(feature_map_config *fmc);
 	void set_output_val(double output_val);
 	double get_output_val();
 
