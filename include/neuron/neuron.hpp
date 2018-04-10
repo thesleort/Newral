@@ -12,6 +12,7 @@
 #include <vector>
 #include <cstdlib>
 
+#include "net/net.hpp"
 
 class neuron; 
 

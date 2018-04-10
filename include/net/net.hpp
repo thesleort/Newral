@@ -16,28 +16,30 @@
 enum type { CONVOLUTION,
             MAXPOOL,
             FULLY,
-			INPUT };
+            INPUT };
+
+typedef struct layer;
+typedef struct filter;
+
 
 typedef struct feature_map_config {
-	type layer_type;
-	unsigned filters = 1;
-	unsigned stride = 1;
-	unsigned size;
-	int padding;
+    type layer_type;
+    unsigned filters = 1;
+    unsigned stride = 1;
+    unsigned size;
+    int padding;
 
-	// For neuron
-	layer *layer_prev;
-	layer *layer_next;
+    // For neuron
+    layer *layer_prev;
+    layer *layer_next;
 } feature_map_config;
 
 typedef struct net_config {
-	unsigned width;
-	unsigned height;
-	unsigned filters;	// Typically color for images
-	std::vector<feature_map_config> layer_feature_map;
+    unsigned width;
+    unsigned height;
+    unsigned filters; // Typically color for images
+    std::vector<feature_map_config> layer_feature_map;
 } net_config;
-
-
 
 typedef struct class_object {
     double object; // Class of object defines as a number
@@ -48,28 +50,25 @@ typedef struct class_object {
 } class_object;
 
 typedef struct feature_map { // Filter / feature map
-    neuron *map; // To make NxN feature map
-	type map_type;
+    neuron *map;             // To make NxN feature map
+    type map_type;
 } feature_map;
 
-
-typedef struct filter{
-	unsigned width;
-	unsigned height;
-	neuron **neuron; // To make NxN feature map
+typedef struct filter {
+    unsigned width;
+    unsigned height;
+    neuron **neurons; // To make NxN feature map
 } filter;
 
 typedef struct layer {
-	feature_map_config *fmc;
-	filter *filter; // Every layer contains n feature maps
+    feature_map_config *fmc;
+    filter *filters; // Every layer contains n feature maps
 } layer;
 
 typedef struct Topology {
-	unsigned num_layers;
+    unsigned num_layers;
     layer *layers; // The topology constists of m layers
 } Topology;
-
-
 
 /**
  * @brief 
@@ -85,7 +84,7 @@ public:
 
 private:
     Topology m_topology;
-	net_config m_net_config;
+    net_config m_net_config;
 };
 
 unsigned filter_size_calc(unsigned length, unsigned filter, int padding, unsigned stride);
