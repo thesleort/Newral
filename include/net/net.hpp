@@ -11,7 +11,6 @@
 
 #include <vector>
 
-#include "neuron/neuron.hpp"
 
 enum type { CONVOLUTION,
             MAXPOOL,
@@ -19,8 +18,7 @@ enum type { CONVOLUTION,
             INPUT };
 
 typedef struct layer;
-typedef struct filter;
-
+typedef struct neuron;
 
 typedef struct feature_map_config {
     type layer_type;

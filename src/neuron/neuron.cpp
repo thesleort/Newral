@@ -19,10 +19,10 @@ neuron::neuron(feature_map_config *fmc, unsigned x, unsigned y, unsigned filter)
         m_input_weights = (neuron ***)malloc(sizeof(neuron *) * fmc->size);
 
         // Make appropriate filter from previous layer point to this neuron.
-        for (int offset_x = 0; offset_x < fmc->size + 2 * fmc->padding; (offset_x = offset_x + fmc->stride)) {
+        for (unsigned offset_x = 0; offset_x < fmc->size + 2 * fmc->padding; (offset_x = offset_x + fmc->stride)) {
 
             m_input_weights[x] = (neuron **)malloc(sizeof(neuron) * fmc->size);
-            for (int offset_y = 0; offset_y < fmc->size + 2 * fmc->padding; (offset_y = offset_y + fmc->stride)) {
+            for (unsigned offset_y = 0; offset_y < fmc->size + 2 * fmc->padding; (offset_y = offset_y + fmc->stride)) {
                 //Connection conn2{.weight = random_weight(), .delta_weight = 0, .edge = this};
                 fmc->layer_prev->filters[filter].neurons[offset_x][offset_y].set_output_weight(this, x, y);
                 m_input_weights[x][y] = fmc->layer_prev->filters[filter].neurons[offset_x][offset_y].get_output_weight(x, y)->edge;
