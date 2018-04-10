@@ -12,7 +12,7 @@
 
 neuron::neuron(feature_map_config *fmc, unsigned x, unsigned y, unsigned filter) {
 
-    m_output_weights = (Connection ***)malloc(sizeof(Connection *) * filter_size(fmc->layer_next->fmc->filters, fmc->layer_next->fmc));
+    m_output_weights = (Connection ***)malloc(sizeof(Connection *) * filter_size(&fmc->layer_next->fmc->filters, fmc->layer_next->fmc));
 
     if (fmc->layer_type != INPUT) {
 

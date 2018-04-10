@@ -50,12 +50,12 @@ net::net(net_config nc) {
             for (unsigned filter_num = 0; filter_num < this_layer->fmc->size; ++filter_num) {
                 filter *this_filter = this_layer[layer_num].filters;
 
-                this_filter->width = filter_size(prev_layer->filters[0].width, this_layer->fmc);
-                this_filter->height = filter_size(prev_layer->filters[0].height, this_layer->fmc);
+                this_filter->width = filter_size(&prev_layer->filters[0].width, this_layer->fmc);
+                this_filter->height = filter_size(&prev_layer->filters[0].height, this_layer->fmc);
 
-                this_filter->neurons = (neuron **)malloc(sizeof(neuron *) * filter_size(this_filter->width, this_layer->fmc));
+                this_filter->neurons = (neuron **)malloc(sizeof(neuron *) * filter_size(&this_filter->width, this_layer->fmc));
                 for (unsigned x = 0; x < this_filter->width; ++x) {
-                    this_filter->neurons[x] = (neuron *)malloc(sizeof(neuron *) * filter_size(this_filter->height, this_layer->fmc));
+                    this_filter->neurons[x] = (neuron *)malloc(sizeof(neuron *) * filter_size(&this_filter->height, this_layer->fmc));
 
                     for (unsigned y = 0; y < this_filter->height; ++y) {
                         this_filter->neurons[x][y] = neuron(this_layer->fmc, x, y, filter_num);
@@ -66,10 +66,10 @@ net::net(net_config nc) {
     }
 }
 
-unsigned filter_size_calc(unsigned length, unsigned filter, int padding, unsigned stride, int num) {
-    return (length - filter + 2 * padding) / stride + 1;
+unsigned filter_size_calc(unsigned *length, unsigned filter, int padding, unsigned stride) {
+    return (*length - filter + 2 * padding) / stride + 1;
 }
 
 unsigned filter_size(unsigned *length, feature_map_config *fmc) {
-    return filter_size_calc(*length, fmc->filters, fmc->padding, fmc->stride);
+    return filter_size_calc(length, fmc->filters, fmc->padding, fmc->stride);
 }
