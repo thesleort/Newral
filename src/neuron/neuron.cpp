@@ -12,6 +12,11 @@
 #include "operator/functions.hpp"
 
 neuron::neuron(feature_map_config *fmc) {
+	if (fmc->layer_prev->fmc->layer_type == INPUT) {
+
+		
+
+	}
     for (unsigned connection = 0; connection < num_outputs; ++connection) {
 		m_output_weights.push_back(Connection());
 		m_output_weights.back().weight = random_weight();

@@ -13,10 +13,10 @@
 
 #include "neuron/neuron.hpp"
 
-enum type { CONV,
-            MAXP,
-            FULL,
-			INPU };
+enum type { CONVOLUTION,
+            MAXPOOL,
+            FULLY,
+			INPUT };
 
 typedef struct feature_map_config {
 	type layer_type;
@@ -24,6 +24,10 @@ typedef struct feature_map_config {
 	unsigned stride = 1;
 	unsigned size;
 	int padding;
+
+	// For neuron
+	layer *layer_prev;
+	layer *layer_next;
 } feature_map_config;
 
 typedef struct net_config {
@@ -86,7 +90,7 @@ private:
 
 unsigned filter_size_calc(unsigned length, unsigned filter, int padding, unsigned stride);
 
-unsigned filter_size(unsigned length, feature_map_config fmc);
+unsigned filter_size(unsigned length, feature_map_config *fmc);
 
 #endif
 

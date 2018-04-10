@@ -14,39 +14,50 @@
 
 net::net(net_config nc) {
     m_net_config = nc;
-    m_topology.layers = (layer *)malloc(sizeof(layer()) * m_net_config.layer_feature_map.size());
 
-    for (int layer = 0; layer < m_net_config.layer_feature_map.size(); ++layer) {
-        m_topology.layers[layer].fmc = &m_net_config.layer_feature_map[0];
+    m_topology.layers = (layer *)malloc(sizeof(layer) * m_net_config.layer_feature_map.size);
+    m_topology.num_layers = m_net_config.layer_feature_map.size;
 
-        m_topology.layers[layer].fmc = &m_net_config.layer_feature_map[0];
-        m_topology.layers[layer].filter = (filter *)malloc(sizeof(filter) * m_net_config.filters);
+    for (int layer_num = 0; layer_num < m_topology.num_layers; ++layer_num) {
+        layer *this_layer = &m_topology.layers[layer_num];
+        this_layer->fmc = &m_net_config.layer_feature_map[layer_num];
+        this_layer->filter = (filter *)malloc(sizeof(filter) * this_layer->fmc->filters);
 
-        for (int color = 0; color < m_net_config.layer_feature_map[layer].filters; ++color) {
-            m_topology.layers[layer].filter[color].neuron = (neuron **)malloc(sizeof(neuron) * m_topology);
+        // Allocate input data structure
+        if (this_layer->fmc->layer_type == INPUT) {
+            for (int filter_num = 0; filter_num < this_layer->fmc->size; ++filter_num) {
+                filter *this_filter = this_layer[layer_num].filter;
 
-            if (layer == 0) {
-				m_topology.layers[layer].filter[color].width = m_net_config.width;
-				m_topology.layers[layer].filter[color].height = m_net_config.height;
+                this_filter->width = m_net_config.width;
+                this_filter->height = m_net_config.height;
+                this_filter->neuron = (neuron **)malloc(sizeof(neuron *) * this_filter->width);
 
-                for (int width = 0; width < m_net_config.width; ++width) {
-                    m_topology.layers[layer].filter[color].neuron[width] = (neuron *)malloc(sizeof(neuron) * m_net_config.height);
+                for (int x = 0; x < m_net_config.width; ++x) {
+                    this_filter->neuron[x] = (neuron *)malloc(sizeof(neuron) * this_filter->height);
 
-                    for (int height = 0; height < m_net_config.height; ++height) {
-                        m_topology.layers[layer].filter[color].neuron[width][height] = neuron(&m_net_config.layer_feature_map[layer]);
+                    for (int y = 0; y < m_net_config.height; ++y) {
+                        this_filter->neuron[x][y] = neuron(this_layer->fmc);
                     }
                 }
-            } else {
-				unsigned width = filter_size(m_topology.layers[layer-1].filter[0].width, m_net_config.layer_feature_map[layer]);
-				unsigned height = filter_size(m_topology.layers[layer-1].filter[0].height, m_net_config.layer_feature_map[layer]);
-				m_topology.layers[layer].filter[color].width = width;
-				m_topology.layers[layer].filter[color].height = height;
+            }
+        } else if (this_layer->fmc->layer_type == MAXPOOL || // Allocate maxpool and convolution data structures
+                   this_layer->fmc->layer_type == CONVOLUTION) {
+            layer *prev_layer = &m_topology.layers[layer_num - 1];
 
-                for (int x = 0; x < width; ++x) {
-                    m_topology.layers[layer].filter[color].neuron[x] = (neuron *)malloc(sizeof(neuron) * height);
+			this_layer->fmc->layer_prev = &m_topology.layers[layer_num - 1];
 
-                    for (int y = 0; y < height; ++y) {
-                        m_topology.layers[layer].filter[color].neuron[width][height] = neuron(&m_net_config.layer_feature_map[layer]);
+            for (int filter_num = 0; filter_num < this_layer->fmc->size; ++filter_num) {
+                filter *this_filter = this_layer[layer_num].filter;
+
+                this_filter->width = filter_size(prev_layer->filter[0].width, this_layer->fmc);
+                this_filter->height = filter_size(prev_layer->filter[0].height, this_layer->fmc);
+
+                this_filter->neuron = (neuron **)malloc(sizeof(neuron *) * filter_size(this_filter->width, this_layer->fmc));
+                for (int x = 0; x < this_filter->width; ++x) {
+                    this_filter->neuron[x] = (neuron *)malloc(sizeof(neuron *) * filter_size(this_filter->height, this_layer->fmc));
+
+                    for (int y = 0; y < this_filter->height; ++y) {
+                        this_filter->neuron[x][y] = neuron(this_layer->fmc);
                     }
                 }
             }
@@ -58,26 +69,6 @@ unsigned filter_size_calc(unsigned length, unsigned filter, int padding, unsigne
     return (length - filter + 2 * padding) / stride + 1;
 }
 
-unsigned filter_size(unsigned length, feature_map_config fmc) {
-	return filter_size_calc(length, fmc.filters, fmc.padding, fmc.stride);
+unsigned filter_size(unsigned *length, feature_map_config *fmc) {
+    return filter_size_calc(*length, fmc->filters, fmc->padding, fmc->stride);
 }
-
-
-/*
-net::net(net_config nc) {
-
-	m_topology.layers = (layer*) malloc(sizeof(layer()));
-	m_topology.layers[0].filter = (filter*) malloc(sizeof(filter) * nc.filters);
-    for (int color = 0; color < nc.filters; ++color) {
-		m_topology.layers[0].filter[color].feature_map = (feature_map**) malloc(sizeof(feature_map) * nc.width);
-        for (int width = 0; width < nc.width; ++width) {
-			m_topology.layers[0].filter[color].feature_map[width] = (feature_map*) malloc(sizeof(feature_map) * nc.height);
-            for (int height = 0; height < nc.height; ++height) {
-				feature_map new_feature_map;
-				new_feature_map.map
-                m_topology.layers[0].filter[color].feature_map[width][height] = neuron();
-            }
-        }
-    }
-}
-*/
