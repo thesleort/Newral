@@ -36,7 +36,7 @@ net::net(net_config nc) {
                     this_filter->neuron[x] = (neuron *)malloc(sizeof(neuron) * this_filter->height);
 
                     for (int y = 0; y < m_net_config.height; ++y) {
-                        this_filter->neuron[x][y] = neuron(this_layer->fmc);
+                        this_filter->neuron[x][y] = neuron(this_layer->fmc, x, y, filter_num);
                     }
                 }
             }
@@ -57,7 +57,7 @@ net::net(net_config nc) {
                     this_filter->neuron[x] = (neuron *)malloc(sizeof(neuron *) * filter_size(this_filter->height, this_layer->fmc));
 
                     for (int y = 0; y < this_filter->height; ++y) {
-                        this_filter->neuron[x][y] = neuron(this_layer->fmc);
+                        this_filter->neuron[x][y] = neuron(this_layer->fmc, x, y, filter_num);
                     }
                 }
             }
