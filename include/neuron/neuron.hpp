@@ -33,7 +33,6 @@ public:
 
     void set_output_weight(neuron *edge, unsigned x, unsigned y);
     void set_output_weights(double weight, double delta_weight);
-    std::vector<Connection> *get_output_weights();
 
 private:
 	double random_weight(); //static
