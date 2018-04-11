@@ -85,9 +85,9 @@ private:
     net_config m_net_config;
 };
 
-unsigned filter_size_calc(unsigned length, unsigned filter, int padding, unsigned stride);
+unsigned filter_size_calc(unsigned *length, unsigned filter, int padding, unsigned stride);
 
-unsigned filter_size(unsigned length, feature_map_config *fmc);
+unsigned filter_size(unsigned *length, feature_map_config *fmc);
 
 #endif
 
