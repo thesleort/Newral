@@ -15,6 +15,8 @@
 #include "net/net.hpp"
 
 class neuron; 
+typedef struct feature_map_config;
+typedef struct layer;
 
 
 typedef struct connection {
@@ -25,23 +27,22 @@ typedef struct connection {
 
 class neuron {
 public:
-	neuron(feature_map_config *fmc, unsigned x, unsigned y, unsigned filter);
+	neuron(feature_map_config &fmc, unsigned x, unsigned y, unsigned filter);
 	void set_output_val(double output_val);
 	double get_output_val();
-
-	Connection *get_output_weight(unsigned x, unsigned y);
-
     void set_output_weight(neuron *edge, unsigned x, unsigned y);
+	Connection *get_output_weight(unsigned x, unsigned y);
     void set_output_weights(double weight, double delta_weight);
+	void feed_forward(const layer &prev_layer);
 
 private:
 	double random_weight(); //static
-	void init_connection(Connection *conn, neuron *edge);
+	void init_connection(Connection &conn, neuron *edge);
 	static double eta;
 	static double alpha;
 	double m_gradient;
 	double m_output_val;
-	Connection ***m_output_weights;
+	Connection ***m_output_weights;		// Same as input, but with weights as well
 	neuron ***m_input_weights;
 };
 

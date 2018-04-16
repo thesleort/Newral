@@ -11,6 +11,8 @@
 
 #include <vector>
 
+#include "neuron/neuron.hpp"
+
 
 enum type { CONVOLUTION,
             MAXPOOL,
@@ -18,7 +20,7 @@ enum type { CONVOLUTION,
             INPUT };
 
 typedef struct layer;
-typedef struct neuron;
+class neuron;
 
 typedef struct feature_map_config {
     type layer_type;
@@ -48,7 +50,7 @@ typedef struct class_object {
 } class_object;
 
 typedef struct feature_map { // Filter / feature map
-    neuron *map;             // To make NxN feature map
+    neuron **map;             // To make NxN feature map
     type map_type;
 } feature_map;
 
@@ -77,7 +79,7 @@ public:
     net(net_config nc);
     void add_layer(feature_map_config config);
     layer get_layer(unsigned index);
-    void feed_forward();
+    void feed_forward(std::vector<std::vector<std::vector<double>>> &input);
     void backpropagate(std::vector<class_object> objects); // TODO: Rewrite to use pointer instead at some point
 
 private:
@@ -87,7 +89,7 @@ private:
 
 unsigned filter_size_calc(unsigned *length, unsigned filter, int padding, unsigned stride);
 
-unsigned filter_size(unsigned *length, feature_map_config *fmc);
+unsigned filter_size(unsigned &length, feature_map_config *fmc);
 
 #endif
 
