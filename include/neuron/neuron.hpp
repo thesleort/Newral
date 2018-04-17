@@ -22,6 +22,7 @@ typedef struct layer;
 typedef struct connection {
     double weight;
     double delta_weight;
+	unsigned num_edges;
 	neuron *edge;
 } Connection;
 
@@ -32,6 +33,7 @@ public:
 	double get_output_val();
     void set_output_weight(neuron *edge, unsigned x, unsigned y);
 	Connection *get_output_weight(unsigned x, unsigned y);
+	Connection **get_output_weights();
     void set_output_weights(double weight, double delta_weight);
 	void feed_forward(const layer &prev_layer);
 
@@ -42,6 +44,7 @@ private:
 	static double alpha;
 	double m_gradient;
 	double m_output_val;
+	unsigned m_num_outputs;
 	Connection ***m_output_weights;		// Same as input, but with weights as well
 	neuron ***m_input_weights;
 };

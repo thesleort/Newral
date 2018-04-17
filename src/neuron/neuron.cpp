@@ -26,6 +26,7 @@ neuron::neuron(feature_map_config &fmc, unsigned x, unsigned y, unsigned filter)
                 //Connection conn2{.weight = random_weight(), .delta_weight = 0, .edge = this};
                 fmc.layer_prev->filters[filter].neurons[offset_x][offset_y].set_output_weight(this, x, y);
                 m_input_weights[x][y] = fmc.layer_prev->filters[filter].neurons[offset_x][offset_y].get_output_weight(x, y)->edge;
+				fmc.layer_prev->filters[filter].neurons[offset_x][offset_y].get_output_weight(x, y)->num_edges++;
             }
         }
     }
@@ -50,6 +51,10 @@ Connection *neuron::get_output_weight(unsigned x, unsigned y) {
 	return m_output_weights[x][y];
 }
 
+Connection **neuron::get_output_weights() {
+
+}
+
 // std::vector<Connection> *neuron::get_output_weights() {
 //     return &m_output_weights;
 // }
@@ -60,7 +65,7 @@ void neuron::feed_forward(const layer &prev_layer) {
 			break;
 		case MAXPOOL:
 			for(unsigned filter = 0; filter < prev_layer.fmc->filters; ++filter) {
-				
+
 			}
 			break;
 		case FULLY:
@@ -77,5 +82,6 @@ double neuron::random_weight() {
 void neuron::init_connection(Connection &conn, neuron *edge) {
 	conn.weight = random_weight();
 	conn.delta_weight = 0;
+	conn.num_edges = 0;
 	conn.edge = edge;
 }
