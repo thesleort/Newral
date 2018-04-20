@@ -17,7 +17,8 @@
 enum type { CONVOLUTION,
             MAXPOOL,
             FULLY,
-            INPUT };
+            INPUT,
+			OUTPUT };
 
 typedef struct layer;
 class neuron;

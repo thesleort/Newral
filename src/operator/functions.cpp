@@ -9,11 +9,11 @@
 #include "operator/functions.hpp"
 
 
-double tanh_transfer_function(double input) {
+float tanh_transfer_function(float input) {
 	return tanh(input);
 }
 
-double tanh_transfer_function_derivative(double input) {
+float tanh_transfer_function_derivative(float input) {
 	return 1.0 - input * input;
 }
 

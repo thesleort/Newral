@@ -21,7 +21,7 @@ void layer_op::max_pool(filter &filter_map, feature_map_config &config) {
 
     for (int x = 0 - config.padding; x < filter_map.width + config.padding; x = x + config.stride) {
         for (int y = 0 - config.padding; y < filter_map.height + config.padding; y = y + config.stride) {
-            double max = 0;
+            float max = 0;
             for (unsigned pool_x = x; pool_x < config.size + x; ++pool_x) {
                 for (unsigned pool_y = y; pool_y < config.size + y; ++pool_y) {
                     if ((x < 0 || x > filter_map.width) || (y < 0 || y > filter_map.height)) {
@@ -40,9 +40,9 @@ void layer_op::max_pool(filter &filter_map, feature_map_config &config) {
             // output
 
 			// TODO: How to set the values for all output neurons?
-            for (unsigned filter_num = 0; filter_num < filter_map.neurons[x][y].get_output_weights(; ++i) {
+            // for (unsigned filter_num = 0; filter_num < filter_map.neurons[x][y].get_output_weights(); ++filter_num) {
 				
-            }
+            // }
         }
     }
 }

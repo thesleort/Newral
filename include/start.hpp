@@ -13,6 +13,6 @@
 
 int options(int argc, const char * argv[]);
 
-void show_vector_vals(std::string label, std::vector<double> &v);
+void show_vector_vals(std::string label, std::vector<float> &v);
 
 #endif

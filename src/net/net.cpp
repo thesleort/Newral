@@ -27,7 +27,7 @@ net::net(net_config nc) {
         // Allocate input data structure
         if (this_layer->fmc->layer_type == INPUT) {
             for (unsigned filter_num = 0; filter_num < this_layer->fmc->size; ++filter_num) {
-                filter *this_filter = this_layer[layer_num].filters;
+                filter *this_filter = &this_layer[layer_num].filters[filter_num];
 
                 this_filter->width = m_net_config.width;
                 this_filter->height = m_net_config.height;
@@ -35,7 +35,7 @@ net::net(net_config nc) {
 
                 for (unsigned x = 0; x < m_net_config.width; ++x) {
                     this_filter->neurons[x] = (neuron *)malloc(sizeof(neuron) * this_filter->height);
-
+					// TODO: ? Create fmc output filters per filter in current layer.
                     for (unsigned y = 0; y < m_net_config.height; ++y) {
                         this_filter->neurons[x][y] = neuron(*this_layer->fmc, x, y, filter_num);
                     }
@@ -48,7 +48,7 @@ net::net(net_config nc) {
             this_layer->fmc->layer_prev = &m_topology.layers[layer_num - 1];
 
             for (unsigned filter_num = 0; filter_num < this_layer->fmc->size; ++filter_num) {
-                filter *this_filter = this_layer[layer_num].filters;
+                filter *this_filter = &this_layer[layer_num].filters[filter_num;
 
                 this_filter->width = filter_size(prev_layer->filters[0].width, this_layer->fmc);
                 this_filter->height = filter_size(prev_layer->filters[0].height, this_layer->fmc);
@@ -66,7 +66,7 @@ net::net(net_config nc) {
     }
 }
 
-void net::feed_forward(std::vector<std::vector<std::vector<double>>> &input) {
+void net::feed_forward(std::vector<std::vector<std::vector<float>>> &input) {
     if (&m_net_config != NULL) {
 
         if (input.size() == m_net_config.filters && input[0].size() == m_net_config.width && input[0][0].size() == m_net_config.height) {
