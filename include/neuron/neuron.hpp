@@ -18,12 +18,16 @@ class neuron;
 typedef struct feature_map_config;
 typedef struct layer;
 
+typedef struct neuron_filter {
 
-typedef struct connection {
+} neuron_filter;
+
+
+typedef struct neuron_connection {
     float weight;
     float delta_weight;
 	neuron *edge;			// Where does this connection come from/go to
-} Connection;
+} neuron_connection;
 
 class neuron {
 public:
@@ -31,21 +35,21 @@ public:
 	void set_output_val(float output_val);
 	float get_output_val();
     void set_output_weight(neuron *edge, unsigned x);
-	Connection *get_output_weight(unsigned x);
-	Connection **get_output_weights();
+	neuron_connection *get_output_weight(unsigned x);
+	neuron_connection **get_output_weights();
     void set_output_weights(float weight, float delta_weight);
 	void feed_forward(const layer &prev_layer);
 
 private:
 	float random_weight(); //static
-	void init_connection(Connection &conn, neuron *edge);
+	void init_connection(neuron_connection &conn, neuron *edge);
 	neuron *get_edge(unsigned index, neuron *edge);
 	static float eta;
 	static float alpha;
 	float m_gradient;
 	float m_ouptut_val;
 	unsigned m_num_outputs;
-	Connection *m_output_weights;		// Same as input, but with weights as well.
+	neuron_connection *m_output_weights;		// Same as input, but with weights as well.
 	neuron **m_input_weights;			// Only for fully connected?
 };
 

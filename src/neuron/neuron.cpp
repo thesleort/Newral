@@ -58,7 +58,7 @@ neuron::neuron(feature_map_config &fmc, unsigned x, unsigned y, unsigned filter)
 		// Allocate space for output weights.
 		m_output_weights = (Connection *)malloc(sizeof(Connection) * fmc.layer_next->fmc->filters);
 		// Initialize output weights.
-		for( unsigned)
+		//for( unsigned)
         break;
     }
     case FULLY:
