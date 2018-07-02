@@ -15,35 +15,38 @@
 #include "net/net.hpp"
 
 class neuron; 
+typedef struct feature_map_config;
+typedef struct layer;
 
 
 typedef struct connection {
-    double weight;
-    double delta_weight;
-	neuron *edge;
+    float weight;
+    float delta_weight;
+	neuron *edge;			// Where does this connection come from/go to
 } Connection;
 
 class neuron {
 public:
-	neuron(feature_map_config *fmc, unsigned x, unsigned y, unsigned filter);
-	void set_output_val(double output_val);
-	double get_output_val();
-
-	Connection *get_output_weight(unsigned x, unsigned y);
-
-    void set_output_weight(neuron *edge, unsigned x, unsigned y);
-    void set_output_weights(double weight, double delta_weight);
-    std::vector<Connection> *get_output_weights();
+	neuron(feature_map_config &fmc, unsigned x, unsigned y, unsigned filter);
+	void set_output_val(float output_val);
+	float get_output_val();
+    void set_output_weight(neuron *edge, unsigned x);
+	Connection *get_output_weight(unsigned x);
+	Connection **get_output_weights();
+    void set_output_weights(float weight, float delta_weight);
+	void feed_forward(const layer &prev_layer);
 
 private:
-	double random_weight(); //static
-	void init_connection(Connection *conn, neuron *edge);
-	static double eta;
-	static double alpha;
-	double m_gradient;
-	double m_output_val;
-	Connection ***m_output_weights;
-	neuron ***m_input_weights;
+	float random_weight(); //static
+	void init_connection(Connection &conn, neuron *edge);
+	neuron *get_edge(unsigned index, neuron *edge);
+	static float eta;
+	static float alpha;
+	float m_gradient;
+	float m_ouptut_val;
+	unsigned m_num_outputs;
+	Connection *m_output_weights;		// Same as input, but with weights as well.
+	neuron **m_input_weights;			// Only for fully connected?
 };
 
 #endif

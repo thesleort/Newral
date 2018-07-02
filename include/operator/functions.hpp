@@ -24,7 +24,7 @@ double tanh_transfer_function(double input);
 double tanh_transfer_function_derivative(double input);
 
 /*
- *               1     * * * * * * 
+ *               1    . * * * * * * 
  *               |  *
  *               |* 
  *               *

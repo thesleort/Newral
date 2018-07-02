@@ -20,7 +20,7 @@
     #include <CL/cl.h>
 #endif
 
-typedef std::vector<double> t_vals;
+typedef std::vector<float> t_vals;
 
 class data {
 public:

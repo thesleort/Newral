@@ -11,10 +11,11 @@
 
 #include "net/net.hpp"
 
-void max_pool(feature_map &map, unsigned kernel, unsigned stride);
-
-void convolution(feature_map &map, unsigned kernel, unsigned stride, int padding);
-
-void fully_connect(feature_map &map);
-
+class layer_op {
+public:
+    void max_pool(filter &filter_map, feature_map_config &config);
+    void convolution(feature_map &map, unsigned kernel, unsigned stride, int padding);
+    void fully_connect(feature_map &map);
+private:
+};
 #endif
