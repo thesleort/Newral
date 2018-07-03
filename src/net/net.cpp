@@ -16,21 +16,37 @@
 net::net(net_config nc) {
     m_net_config = nc;
 
-    m_topology.layer_num = (layer *)malloc(sizeof(layer) * m_net_config.layer_config.size());
-    m_topology.num_layers = m_net_config.layer_config.size();
+    m_net_config.layer_num = (layer *)malloc(sizeof(layer) * m_net_config.layer_config.size());
+    m_net_config.num_layers = m_net_config.layer_config.size();
 
-    for (unsigned layer_num = 0; layer_num < m_topology.num_layers; ++layer_num) {
-        layer *this_layer = &m_topology.layer_num[layer_num];
-        this_layer->layer_config = &m_net_config.layer_config[layer_num];
-        this_layer->filter_num = (filter *)malloc(sizeof(filter) * this_layer->layer_config->num_filters);
+    for (unsigned layer_num = 0; layer_num < m_net_config.num_layers; ++layer_num) {
+        layer *this_layer = &m_net_config.layer_num[layer_num];
+        this_layer->layer_config = m_net_config.layer_config[layer_num];
 
-        // Allocate input data structure
-        if (this_layer->layer_config->layer_type == INPUT) {
-            
-        } else if (this_layer->layer_config->layer_type == MAXPOOL || // Allocate maxpool and convolution data structures
-                   this_layer->layer_config->layer_type == CONVOLUTION) {
-            
+        //Allocate input data structure
+        add_layer(this_layer->layer_config);
+
+        switch (this_layer->layer_config.layer_type) {
+        case INPUT:
+            break;
+        case MAXPOOL:
+            // Create filters
+            for (unsigned i = 0; i < this_layer->layer_config.num_filters; i++) {
+                add_filter(this_layer->layer_config.filter_configs[i]);
+            }
+            break;
+        case CONVOLUTION:
+            // Create filters
+            for (unsigned i = 0; i < this_layer->layer_config.num_filters; i++) {
+                add_filter(this_layer->layer_config.filter_configs[i]);
+            }
+
+            // Connect neurons
+
+            break;
         }
+
+        // Connect neurons to neurons in previous layer amd vice versa.
     }
 }
 
@@ -69,4 +85,68 @@ unsigned filter_size_calc(unsigned &length, unsigned &filter, int &padding, unsi
 
 unsigned filter_size(unsigned &length, feature_map_config *fmc) {
     return filter_size_calc(length, fmc->filters, fmc->padding, fmc->stride);
+}
+
+/**
+ * @brief To add the volumes containing the actual neurons.
+ * 
+ * @param config 
+ */
+void net::add_layer(layer_config &config) {
+    config.layer_this->neurons = (neuron ***)malloc(sizeof(neuron **) * config.width);
+
+    for (unsigned x = 0; x < config.width; ++x) {
+        config.layer_this->neurons[x] = (neuron **)malloc(sizeof(neuron *) * config.height);
+
+        for (unsigned y = 0; y < config.height; ++y) {
+            config.layer_this->neurons[x][y] = (neuron *)malloc(sizeof(neuron) * config.depth);
+
+            for (unsigned z = 0; z < config.depth; ++z) {
+                // Init neuron
+                config.layer_this->neurons[x][y][z] = neuron(config, x, y, z, NEURON);
+                config.layer_this->neurons[x][y][z].set_input_weights(config.layer_prev->layer_config.filter_configs[z]);
+            }
+        }
+    }
+}
+
+/**
+ * @brief To add the filters that will be applied. These filters are stored 
+ * separately to allow for easier parameter/weight sharing.
+ * 
+ * @param config 
+ */
+void net::add_filter(filter_config &config) {
+    config.filter->neurons = (neuron ***)malloc(sizeof(neuron **) * config.width);
+
+    for (unsigned x = 0; x < config.width; ++x) {
+        config.filter->neurons[x] = (neuron **)malloc(sizeof(neuron *) * config.height);
+
+        for (unsigned y = 0; y < config.height; ++y) {
+            config.filter->neurons[x][y] = (neuron *)malloc(sizeof(neuron) * config.depth);
+
+            for (unsigned z = 0; z < config.depth; ++z) {
+                // Init filter neuron
+                config.filter->neurons[x][y][z] = neuron(*config.layer_config, x, y, z, FILTER);
+                config.filter->neurons[x][y][z].set_input_weights(config, config.layer_config->layer_prev->layer_config);
+            }
+        }
+    }
+}
+
+/**
+ * @brief Connects the neurons in the current layer with the respective 
+ * neurons in the filter before it.
+ * 
+ * @param lc 
+ * @param fc 
+ */
+// TODO: Remove, since unnecessary ?
+void net::connect_neurons(layer_config &lc, filter_config &fc) {
+    for (unsigned x = 0; x < lc.width; ++x) {
+        for (unsigned y = 0; y < lc.height; ++y) {
+            for (unsigned filter_z = 0; filter_z < lc.depth; ++filter_z) {
+            }
+        }
+    }
 }

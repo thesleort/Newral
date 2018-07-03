@@ -18,24 +18,26 @@
  * @param y 
  * @param filter 
  */
-neuron::neuron(feature_map_config &fmc, unsigned x, unsigned y, unsigned filter) {
+neuron::neuron(layer_config &lc, unsigned x, unsigned y, unsigned filter, enum neuron_type) {
 
     //m_output_weights = (Connection ***)malloc(sizeof(Connection *) * 
 	//filter_size(fmc.layer_next->fmc->filters, fmc.layer_next->fmc));
 
-    switch (fmc.layer_type) {
+    switch (lc.layer_type) {
     case INPUT: {
-        unsigned num_filters = fmc.layer_next->fmc->filters;
+        layer *next_layer = lc.layer_next;
+        unsigned num_filters = next_layer->layer_config.num_filters; // Determines how many neurons each neuron should connect to in next layer.
 
-        m_output_weights = (Connection *)malloc(sizeof(Connection) * num_filters);
+        m_output_axon = (neuron_connection***)malloc(sizeof(neuron_connection*) * next_layer->layer_config.width);
+        for (unsigned x = 0; x < lc.)
         for (unsigned i = 0; i < num_filters; ++i) {
-            init_connection(m_output_weights[i], NULL);
+            init_connection(m_output_axon[i], NULL);
         }
         break;
     }
     case CONVOLUTION: {
-        unsigned num_filters_next = fmc.layer_next->fmc->filters;
-        unsigned num_filters_prev = fmc.layer_prev->fmc->filters;
+        unsigned num_filters_next = lc.layer_next->num_filters;
+        unsigned num_filters_prev = lc.layer_prev->depth;
 
 		/**
 		 * @brief Add input neurons
@@ -56,7 +58,7 @@ neuron::neuron(feature_map_config &fmc, unsigned x, unsigned y, unsigned filter)
 		 * 
 		 */
 		// Allocate space for output weights.
-		m_output_weights = (Connection *)malloc(sizeof(Connection) * fmc.layer_next->fmc->filters);
+		m_output_weights = (neuron_connection *)malloc(sizeof(neuron_connection) * fmc.layer_next->fmc->filters);
 		// Initialize output weights.
 		//for( unsigned)
         break;
@@ -119,12 +121,11 @@ void neuron::set_output_weight(neuron *edge, unsigned pos) {
 
     // init_connection(m_output_weights[pos], edge);
 }
-
-Connection *neuron::get_output_weight(unsigned x) {
+neuron_connection *neuron::get_output_weight(unsigned x) {
     return &m_output_weights[x];
 }
 
-Connection **neuron::get_output_weights() {
+neuron_connection **neuron::get_output_weights() {
 }
 
 // std::vector<Connection> *neuron::get_output_weights() {
@@ -150,9 +151,9 @@ float neuron::random_weight() {
     return rand() / float(RAND_MAX);
 }
 
-void neuron::init_connection(Connection &conn, neuron *edge) {
-    conn.weight = random_weight();
-    conn.delta_weight = 0;
+void neuron::init_connection(neuron_connection &conn, neuron *edge) {
+    conn.weights.weight = random_weight();
+    conn.weights.delta_weight = 0;
     conn.edge = edge;
 }
 
