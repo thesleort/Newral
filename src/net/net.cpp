@@ -24,18 +24,23 @@ net::net(net_config nc) {
         this_layer->layer_config = m_net_config.layer_config[layer_num];
 
         //Allocate input data structure
-        add_layer(this_layer->layer_config);
 
         switch (this_layer->layer_config.layer_type) {
         case INPUT:
+
+            add_layer(this_layer->layer_config, INPUT);
             break;
         case MAXPOOL:
+
+            add_layer(this_layer->layer_config, MAXPOOL);
             // Create filters
             for (unsigned i = 0; i < this_layer->layer_config.num_filters; i++) {
                 add_filter(this_layer->layer_config.filter_configs[i]);
             }
             break;
         case CONVOLUTION:
+
+            add_layer(this_layer->layer_config, CONVOLUTION);
             // Create filters
             for (unsigned i = 0; i < this_layer->layer_config.num_filters; i++) {
                 add_filter(this_layer->layer_config.filter_configs[i]);
@@ -92,7 +97,7 @@ unsigned filter_size(unsigned &length, feature_map_config *fmc) {
  * 
  * @param config 
  */
-void net::add_layer(layer_config &config) {
+void net::add_layer(layer_config &config, enum type type) {
     config.layer_this->neurons = (neuron ***)malloc(sizeof(neuron **) * config.width);
 
     for (unsigned x = 0; x < config.width; ++x) {
@@ -104,7 +109,11 @@ void net::add_layer(layer_config &config) {
             for (unsigned z = 0; z < config.depth; ++z) {
                 // Init neuron
                 config.layer_this->neurons[x][y][z] = neuron(config, x, y, z, NEURON);
-                config.layer_this->neurons[x][y][z].set_input_weights(config.layer_prev->layer_config.filter_configs[z]);
+                if (type == CONVOLUTION) {
+                    config.layer_this->neurons[x][y][z].set_input_weights(config.layer_prev->layer_config.filter_configs[z]);
+                } else {
+					config.layer_this->neurons[x][y][z].set_input_weights(config.layer_prev->layer_config);
+				}
             }
         }
     }

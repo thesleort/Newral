@@ -98,7 +98,7 @@ public:
     void backpropagate(std::vector<class_object> objects); // TODO: Rewrite to use pointer instead at some point
 
 private:
-    void add_layer(layer_config &config);
+    void add_layer(layer_config &config, enum type type);
     void add_filter(filter_config &config);
     void connect_neurons(layer_config &lc, filter_config &fc);
     //Topology m_topology;

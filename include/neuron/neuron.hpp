@@ -45,6 +45,7 @@ public:
     void set_output_weight(neuron *edge, unsigned x);
 	neuron_connection *get_output_weight(unsigned x);
 	neuron_connection **get_output_weights();
+	void set_input_weights(layer_config &lc);
 	void set_input_weights(filter_config &fc);
 	void set_input_weights(filter_config &fc, layer_config &lc);
     void set_output_weights(float weight, float delta_weight);
