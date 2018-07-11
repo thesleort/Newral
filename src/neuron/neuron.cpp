@@ -179,8 +179,11 @@ void neuron::init_connection(neuron_connection &conn, layer_config &lc, unsigned
 
     switch (lc.layer_type) {
     case CONVOLUTION:
-        conn.weights->weight = lc.filter_configs[filter].filter->filter_weight[x][y][filter].weights->weight;
-        conn.weights->delta_weight = lc.filter_configs[filter].filter->filter_weight[x][y][filter].weights->delta_weight;
+        conn.weights->weight = random_weight();
+        conn.weights->delta_weight = 0;
+
+        // conn.weights->weight = lc.filter_configs[filter].filter->filter_weight[x][y][filter].weights->weight;
+        // conn.weights->delta_weight = lc.filter_configs[filter].filter->filter_weight[x][y][filter].weights->delta_weight;
         break;
     case FULLY:
         conn.weights->weight = random_weight();

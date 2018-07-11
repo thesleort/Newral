@@ -38,6 +38,9 @@ typedef struct filter_config {
     filter *filter;
     // For neuron
     layer_config *layer_config;
+
+    // Has all weights been initialized for this filter
+    bool initialized = false;
 } feature_map_config;
 
 typedef struct layer_config {

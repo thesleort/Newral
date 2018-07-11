@@ -34,7 +34,7 @@ typedef struct neuron_weight {
 
 typedef struct neuron_connection {
     neuron_weight *weights;// Array of weights from filter
-	neuron ***edge;			// All input neurons
+	neuron ****edge;			// All input neurons
 } neuron_connection;
 
 class neuron {
