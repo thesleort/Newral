@@ -67,7 +67,7 @@ typedef struct net_config {
 
 typedef struct filter {
     filter_config *filter_config;
-    neuron ***neurons; // To make NxNxDepth feature map
+    neuron_filter ***filter_weight; // To make NxNxDepth feature map
 } filter;
 
 typedef struct layer {

@@ -24,7 +24,7 @@ enum neuron_type {
 };
 
 typedef struct neuron_filter {
-	neuron_weight weights;
+	neuron_weight *weights;
 } neuron_filter;
 
 typedef struct neuron_weight {
@@ -33,13 +33,13 @@ typedef struct neuron_weight {
 } neuron_weight;
 
 typedef struct neuron_connection {
-    neuron_weight *weights;
-	neuron *edge;			// Where does this connection come from/go to
+    neuron_weight *weights;// Array of weights from filter
+	neuron ***edge;			// All input neurons
 } neuron_connection;
 
 class neuron {
 public:
-	neuron(layer_config &lc, unsigned x, unsigned y, unsigned filter /* y */, enum neuron_type);
+	neuron(layer_config &lc, unsigned x, unsigned y, unsigned filter /* y */);
 	void set_output_val(float output_val);
 	float get_output_val();
     void set_output_weight(neuron *edge, unsigned x);
@@ -53,7 +53,7 @@ public:
 
 private:
 	float random_weight(); //static
-	void init_connection(neuron_connection &conn, neuron *edge);
+	void init_connection(neuron_connection &conn, layer_config &lc, unsigned x, unsigned y, unsigned filter);
 	neuron *get_edge(unsigned index, neuron *edge);
 	static float eta;
 	static float alpha;

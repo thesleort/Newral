@@ -34,17 +34,17 @@ net::net(net_config nc) {
 
             add_layer(this_layer->layer_config, MAXPOOL);
             // Create filters
-            for (unsigned i = 0; i < this_layer->layer_config.num_filters; i++) {
-                add_filter(this_layer->layer_config.filter_configs[i]);
-            }
+            // for (unsigned i = 0; i < this_layer->layer_config.num_filters; i++) {
+            //     add_filter(this_layer->layer_config.filter_configs[i]);
+            // }
             break;
         case CONVOLUTION:
 
             add_layer(this_layer->layer_config, CONVOLUTION);
             // Create filters
-            for (unsigned i = 0; i < this_layer->layer_config.num_filters; i++) {
-                add_filter(this_layer->layer_config.filter_configs[i]);
-            }
+            // for (unsigned i = 0; i < this_layer->layer_config.num_filters; i++) {
+            //     add_filter(this_layer->layer_config.filter_configs[i]);
+            // }
 
             // Connect neurons
 
@@ -108,7 +108,7 @@ void net::add_layer(layer_config &config, enum type type) {
 
             for (unsigned z = 0; z < config.depth; ++z) {
                 // Init neuron
-                config.layer_this->neurons[x][y][z] = neuron(config, x, y, z, NEURON);
+                config.layer_this->neurons[x][y][z] = neuron(config, x, y, z);
                 if (type == CONVOLUTION) {
                     config.layer_this->neurons[x][y][z].set_input_weights(config.layer_prev->layer_config.filter_configs[z]);
                 } else {
@@ -125,23 +125,23 @@ void net::add_layer(layer_config &config, enum type type) {
  * 
  * @param config 
  */
-void net::add_filter(filter_config &config) {
-    config.filter->neurons = (neuron ***)malloc(sizeof(neuron **) * config.width);
+// void net::add_filter(filter_config &config) {
+//     config.filter->neurons = (neuron ***)malloc(sizeof(neuron **) * config.width);
 
-    for (unsigned x = 0; x < config.width; ++x) {
-        config.filter->neurons[x] = (neuron **)malloc(sizeof(neuron *) * config.height);
+//     for (unsigned x = 0; x < config.width; ++x) {
+//         config.filter->neurons[x] = (neuron **)malloc(sizeof(neuron *) * config.height);
 
-        for (unsigned y = 0; y < config.height; ++y) {
-            config.filter->neurons[x][y] = (neuron *)malloc(sizeof(neuron) * config.depth);
+//         for (unsigned y = 0; y < config.height; ++y) {
+//             config.filter->neurons[x][y] = (neuron *)malloc(sizeof(neuron) * config.depth);
 
-            for (unsigned z = 0; z < config.depth; ++z) {
-                // Init filter neuron
-                config.filter->neurons[x][y][z] = neuron(*config.layer_config, x, y, z, FILTER);
-                config.filter->neurons[x][y][z].set_input_weights(config, config.layer_config->layer_prev->layer_config);
-            }
-        }
-    }
-}
+//             for (unsigned z = 0; z < config.depth; ++z) {
+//                 // Init filter neuron
+//                 config.filter->neurons[x][y][z] = neuron(*config.layer_config, x, y, z, FILTER);
+//                 config.filter->neurons[x][y][z].set_input_weights(config, config.layer_config->layer_prev->layer_config);
+//             }
+//         }
+//     }
+// }
 
 /**
  * @brief Connects the neurons in the current layer with the respective 
