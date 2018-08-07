@@ -133,11 +133,11 @@ neuron::neuron(layer_config &lc, unsigned x, unsigned y, unsigned filter) {
 }
 
 void neuron::set_output_val(float output_val) {
-    m_ouptut_val = output_val;
+    m_output_val = output_val;
 }
 
 float neuron::get_output_val() {
-    return m_ouptut_val;
+    return m_output_val;
 }
 
 void neuron::set_output_weight(neuron *edge, unsigned pos) {
@@ -179,11 +179,12 @@ void neuron::init_connection(neuron_connection &conn, layer_config &lc, unsigned
 
     switch (lc.layer_type) {
     case CONVOLUTION:
-        conn.weights->weight = random_weight();
-        conn.weights->delta_weight = 0;
+        // conn.weights->weight = random_weight();
+        // conn.weights->delta_weight = 0;
 
-        // conn.weights->weight = lc.filter_configs[filter].filter->filter_weight[x][y][filter].weights->weight;
-        // conn.weights->delta_weight = lc.filter_configs[filter].filter->filter_weight[x][y][filter].weights->delta_weight;
+        // lc.filter_configs[filter].filter->filter_weight[x][y][filter].weights->weight = random_weight();
+
+        conn.weights = lc.filter_configs[filter].filter->filter_weight[x][y][filter].weights;
         break;
     case FULLY:
         conn.weights->weight = random_weight();

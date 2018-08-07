@@ -58,7 +58,7 @@ private:
 	static float eta;
 	static float alpha;
 	float m_gradient;
-	float m_ouptut_val;
+	float m_output_val;
 	unsigned m_num_outputs;
 	neuron_connection ***m_input_weights;		// Same as input, but with weights as well.
 	neuron_connection ***m_output_axon;			// Only for fully connected?
