@@ -46,6 +46,7 @@ neuron::neuron(layer_config &lc, unsigned x, unsigned y, unsigned filter) {
         layer *prev_layer = lc.layer_prev;
         unsigned num_filters = prev_layer->layer_config.depth; // .num_filters maybe?
         unsigned stride = prev_layer->layer_config.filter_configs[filter].stride;
+        unsigned padding = prev_layer->layer_config.filter_configs[filter].padding;
 
         // TODO: Don't allocate space for padding neurons
         m_input_weights = (neuron_connection ***)malloc(sizeof(neuron_connection *) * prev_layer->layer_config.filter_configs[filter].width);
@@ -57,102 +58,38 @@ neuron::neuron(layer_config &lc, unsigned x, unsigned y, unsigned filter) {
                 m_input_weights[input_x][input_y] = (neuron_connection *)malloc(sizeof(neuron_connection *) * prev_layer->layer_config.filter_configs[filter].depth);
 
                 for (unsigned input_z = 0; input_z < prev_layer->layer_config.filter_configs[filter].depth; ++input_z) {
-                    // init_connection(m_input_weights[input_x][input_y][input_z], prev_layer->layer_config, x, y, filter);
                     // Set shared weight for connection
                     m_input_weights[input_x][input_y][input_z].weights = lc.filter_configs[filter].filter->filter_weight[x][y][filter].weights;
 
-                    // unsigned padding = lc.filter_configs[filter].padding;
-
                     // Set specific connected neuron in previous layer
-                    // calculation might be wrong - test
-                    m_input_weights[input_x][input_y][input_z].edge = &prev_layer->neurons[x * stride + input_x][y * stride + input_y][input_z];
+                    // calculation might be wrong - please test
+                    if (x - padding >= 0 && x + padding < prev_layer->layer_config.width) {
 
-                    // if (x - padding < 0 && y - padding < 0) {
-                    //     if (input_x - padding >= 0 && input_y - padding >= 0) {
-                    //         m_input_weights[input_x - padding][input_y - padding][input_z] = &prev_layer->neurons[]
-                    //     }
-
-                    // } else if (x - padding < 0) {
-                    //     m_input_weights[input_x][input_y][input_z].edge = &prev_layer->neurons[input_x - padding][input_y - padding][input_z];
-
-                    // } else if (y - lc.padding < 0) {
-                    // }
+                        if (y - padding >= 0 && y + padding < prev_layer->layer_config.width) {
+                            m_input_weights[input_x][input_y][input_z].edge = &prev_layer->neurons[x * stride + input_x][y * stride + input_y][input_z];
+                        }
+                    } else if (x - padding < 0 || x - padding > prev_layer->layer_config.width) {
+                        
+                        if (y - padding < 0 || y - padding > prev_layer->layer_config.width) {
+                            m_input_weights[input_x][input_y][input_z].edge = &prev_layer->neurons[x * stride + input_x][y * stride + input_y][input_z];
+                        }
+                    }
                 }
             }
         }
         break;
     }
-    // case CONVOLUTION: {
-    //     unsigned num_filters_next = lc.layer_next->layer_config.num_filters;
-    //     unsigned num_filters_prev = lc.layer_prev->layer_config.depth;
-
-    // 	/**
-    // 	 * @brief Add input neurons
-    // 	 *
-    // 	 */
-    //     // Allocate space for input neurons.
-    //     m_input_weights = (neuron **)malloc(sizeof(neuron *) * fmc.layer_prev->fmc->size * 2);
-    // 	// Set input neurons.
-    //     for (unsigned offset_x = x; offset_x < fmc.layer_prev->fmc->size + x; ++offset_x) {
-    //         for (unsigned offset_y = y; offset_y < fmc.layer_prev->fmc->size + y; ++offset_y) {
-    //             m_input_weights[(1 + offset_x - x) * (offset_y - y)] =
-    //                 &fmc.layer_prev->filters[filter].neurons[offset_x][offset_y];
-    //         }
-    //     }
-
-    // 	/**
-    // 	 * @brief Add output weights (and edges) for neuron.
-    // 	 *
-    // 	 */
-    // 	// Allocate space for output weights.
-    // 	m_output_weights = (neuron_connection *)malloc(sizeof(neuron_connection) * fmc.layer_next->fmc->filters);
-    // 	// Initialize output weights.
-    // 	//for( unsigned)
-    //     break;
-    // }
     case FULLY:
+        /* Could maybe be similar to CONVOLUTION, but with filter size equal to layer size,
+         * so that all neurons from previous layer are connected to each neuron in the current
+         * layer
+         */
         break;
     case MAXPOOL:
+        // Similar in structure to CONVOLUTION, however, padding is often not used.
         break;
     case OUTPUT:
     }
-    // if (fmc.layer_type != INPUT && fmc.layer_type != CONVOLUTION) {
-    //     m_input_weights = (neuron ***)malloc(sizeof(neuron *));
-    //     m_input_weights[0] = (neuron **)malloc(sizeof(neuron *));
-    //     m_input_weights[0][0] = (neuron *)malloc(sizeof(neuron *));
-
-    // 	unsigned calc_x = fmc.layer_prev->fmc->stride;
-    // 	unsigned calc_y;
-
-    //     m_input_weights[0][0] = fmc.layer_prev
-    //                                 ->filters[filter]
-    //                                 .neurons[offset_x][offset_y]
-    //                                 .get_output_weight(x, y)
-    //                                 ->edge;
-    // } else if (fmc.layer_type == FULLY) {
-    //     m_input_weights = (neuron ***)malloc(sizeof(neuron *) * fmc.size);
-
-    //     // Make appropriate filter from previous layer point to this neuron.
-    //     for (unsigned offset_x = 0; offset_x < fmc.size + 2 * fmc.padding;
-    //          (offset_x = offset_x + fmc.stride)) {
-
-    //         m_input_weights[x] = (neuron **)malloc(sizeof(neuron) * fmc.size);
-    //         for (unsigned offset_y = 0; offset_y < fmc.size + 2 * fmc.padding;
-    //              (offset_y = offset_y + fmc.stride)) {
-    //             //Connection conn2{.weight = random_weight(), .delta_weight = 0, .edge = this};
-    //             fmc.layer_prev
-    //                 ->filters[filter]
-    //                 .neurons[offset_x][offset_y]
-    //                 .set_output_weight(this, x, y);
-
-    //             m_input_weights[x][y] = fmc.layer_prev
-    //                                         ->filters[filter]
-    //                                         .neurons[offset_x][offset_y]
-    //                                         .get_output_weight(x, y)
-    //                                         ->edge;
-    //         }
-    //     }
-    // }
 }
 
 void neuron::set_output_val(float output_val) {
