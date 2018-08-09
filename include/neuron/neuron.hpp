@@ -33,8 +33,9 @@ typedef struct neuron_weight {
 } neuron_weight;
 
 typedef struct neuron_connection {
-    neuron_weight *weights;// Array of weights from filter
-	neuron ****edge;			// All input neurons
+    neuron_weight *weights;	// CONV: Pointer to shared weight in the filter.
+							// ELSE: Pointer to weight.
+	neuron *edge;			// The connected neuron from previous layer.
 } neuron_connection;
 
 class neuron {
@@ -53,7 +54,8 @@ public:
 
 private:
 	float random_weight(); //static
-	void init_connection(neuron_connection &conn, layer_config &lc, unsigned x, unsigned y, unsigned filter);
+	void init_connection(neuron_connection &conn, layer_config &lc, unsigned &x, unsigned &y, unsigned &filter);
+	unsigned calc_filter_pos();
 	neuron *get_edge(unsigned index, neuron *edge);
 	static float eta;
 	static float alpha;

@@ -13,7 +13,7 @@
 /**
  * @brief Construct a new neuron::neuron object
  * 
- * @param fmc 
+ * @param lc 
  * @param x 
  * @param y 
  * @param filter 
@@ -45,18 +45,41 @@ neuron::neuron(layer_config &lc, unsigned x, unsigned y, unsigned filter) {
     case CONVOLUTION: {
         layer *prev_layer = lc.layer_prev;
         unsigned num_filters = prev_layer->layer_config.depth; // .num_filters maybe?
+        unsigned stride = prev_layer->layer_config.filter_configs[filter].stride;
 
-        m_input_weights = (neuron_connection ***)malloc(sizeof(neuron_connection *) * prev_layer->layer_config.width);
-        for (unsigned input_x = 0; input_x < prev_layer->layer_config.width; ++input_x) {
-            m_input_weights[input_x] = (neuron_connection **)malloc(sizeof(neuron_connection *) * prev_layer->layer_config.height);
-            for (unsigned input_y = 0; input_y < prev_layer->layer_config.height; ++input_y) {
-                m_input_weights[input_x][input_y] = (neuron_connection *)malloc(sizeof(neuron_connection *) * prev_layer->layer_config.height);
-                for (unsigned input_z = 0; input_z < prev_layer->layer_config.depth; ++input_z) {
-                    init_connection(m_input_weights[input_x][input_y][input_z], prev_layer->layer_config, x, y, filter);
+        // TODO: Don't allocate space for padding neurons
+        m_input_weights = (neuron_connection ***)malloc(sizeof(neuron_connection *) * prev_layer->layer_config.filter_configs[filter].width);
+
+        for (unsigned input_x = 0; input_x < prev_layer->layer_config.filter_configs[filter].width; input_x) {
+            m_input_weights[input_x] = (neuron_connection **)malloc(sizeof(neuron_connection *) * prev_layer->layer_config.filter_configs[filter].height);
+
+            for (unsigned input_y = 0; input_y < prev_layer->layer_config.filter_configs[filter].height; ++input_y) {
+                m_input_weights[input_x][input_y] = (neuron_connection *)malloc(sizeof(neuron_connection *) * prev_layer->layer_config.filter_configs[filter].depth);
+
+                for (unsigned input_z = 0; input_z < prev_layer->layer_config.filter_configs[filter].depth; ++input_z) {
+                    // init_connection(m_input_weights[input_x][input_y][input_z], prev_layer->layer_config, x, y, filter);
+                    // Set shared weight for connection
+                    m_input_weights[input_x][input_y][input_z].weights = lc.filter_configs[filter].filter->filter_weight[x][y][filter].weights;
+
+                    // unsigned padding = lc.filter_configs[filter].padding;
+
+                    // Set specific connected neuron in previous layer
+                    // calculation might be wrong - test
+                    m_input_weights[input_x][input_y][input_z].edge = &prev_layer->neurons[x * stride + input_x][y * stride + input_y][input_z];
+
+                    // if (x - padding < 0 && y - padding < 0) {
+                    //     if (input_x - padding >= 0 && input_y - padding >= 0) {
+                    //         m_input_weights[input_x - padding][input_y - padding][input_z] = &prev_layer->neurons[]
+                    //     }
+
+                    // } else if (x - padding < 0) {
+                    //     m_input_weights[input_x][input_y][input_z].edge = &prev_layer->neurons[input_x - padding][input_y - padding][input_z];
+
+                    // } else if (y - lc.padding < 0) {
+                    // }
                 }
             }
         }
-
         break;
     }
     // case CONVOLUTION: {
@@ -175,7 +198,17 @@ float neuron::random_weight() {
     return rand() / float(RAND_MAX);
 }
 
-void neuron::init_connection(neuron_connection &conn, layer_config &lc, unsigned x, unsigned y, unsigned filter) {
+/**
+ * @brief Sets up a connection between the current neuron and a neuron in the previous layer 
+ * based on the filter parameters
+ * 
+ * @param conn "pointer" to neuron in previous layer
+ * @param lc layer config to describe the connectivity with the neuron in the previous layer.
+ * @param x neuron position
+ * @param y neuron position
+ * @param filter neuron position (z)
+ */
+void neuron::init_connection(neuron_connection &conn, layer_config &lc, unsigned &x, unsigned &y, unsigned &filter) {
 
     switch (lc.layer_type) {
     case CONVOLUTION:
@@ -184,7 +217,14 @@ void neuron::init_connection(neuron_connection &conn, layer_config &lc, unsigned
 
         // lc.filter_configs[filter].filter->filter_weight[x][y][filter].weights->weight = random_weight();
 
+        // Set shared weight for connection
         conn.weights = lc.filter_configs[filter].filter->filter_weight[x][y][filter].weights;
+
+        // Set specific connected neuron in previous layer
+        if (lc.filter_configs[filter].padding > 0) {
+
+            conn.edge =
+        }
         break;
     case FULLY:
         conn.weights->weight = random_weight();
@@ -192,7 +232,6 @@ void neuron::init_connection(neuron_connection &conn, layer_config &lc, unsigned
         break;
     }
 }
-
 neuron *neuron::get_edge(unsigned index, neuron *edge) {
     return 0;
 }
