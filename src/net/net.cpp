@@ -109,11 +109,11 @@ void net::add_layer(layer_config &config, enum type type) {
             for (unsigned z = 0; z < config.depth; ++z) {
                 // Init neuron
                 config.layer_this->neurons[x][y][z] = neuron(config, x, y, z);
-                if (type == CONVOLUTION) {
-                    config.layer_this->neurons[x][y][z].set_input_weights(config.layer_prev->layer_config.filter_configs[z]);
-                } else {
-					config.layer_this->neurons[x][y][z].set_input_weights(config.layer_prev->layer_config);
-				}
+                // if (type == CONVOLUTION) {
+                //     config.layer_this->neurons[x][y][z].set_input_weights(config.layer_prev->layer_config.filter_configs[z]);
+                // } else {
+				// 	config.layer_this->neurons[x][y][z].set_input_weights(config.layer_prev->layer_config);
+				// }
             }
         }
     }
