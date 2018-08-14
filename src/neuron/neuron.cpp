@@ -25,20 +25,7 @@ neuron::neuron(layer_config &lc, unsigned x, unsigned y, unsigned filter) {
 
     switch (lc.layer_type) {
     case INPUT: {
-        // layer *next_layer = lc.layer_next;
-        // unsigned num_filters = next_layer->layer_config.num_filters; // Determines how many neurons each neuron should connect to in next layer.
-
-        // // Allocate space for all output edges and initialize these with correct weights
-        // m_output_axon = (neuron_connection ***)malloc(sizeof(neuron_connection *) * next_layer->layer_config.width);
-        // for (unsigned x = 0; x < next_layer->layer_config.width; ++x) {
-        //     m_output_axon[x] = (neuron_connection **)malloc(sizeof(neuron_connection *) * next_layer->layer_config.height);
-        //     for (unsigned y = 0; y < next_layer->layer_config.height; ++y) {
-        //         m_output_axon[x][y] = (neuron_connection *)malloc(sizeof(neuron_connection *) * next_layer->layer_config.num_filters);
-        //         for (unsigned filter = 0; filter < num_filters; ++filter) {
-        //             init_connection(m_output_axon[x][y][filter], next_layer->layer_config, x, y, filter);
-        //         }
-        //     }
-        // }
+        // There are no input weights
         break;
     }
 
@@ -63,17 +50,18 @@ neuron::neuron(layer_config &lc, unsigned x, unsigned y, unsigned filter) {
 
                     // Set specific connected neuron in previous layer
                     // calculation might be wrong - please test
-                    if (x - padding >= 0 && x + padding < prev_layer->layer_config.width) {
+                    if (input_x + x - padding >= 0 && input_x + x + padding < prev_layer->layer_config.width) {
 
-                        if (y - padding >= 0 && y + padding < prev_layer->layer_config.width) {
-                            m_input_weights[input_x][input_y][input_z].edge = &prev_layer->neurons[x * stride + input_x][y * stride + input_y][input_z];
-                        }
-                    } else if (x - padding < 0 || x - padding > prev_layer->layer_config.width) {
-                        
-                        if (y - padding < 0 || y - padding > prev_layer->layer_config.width) {
+                        if (input_y + y - padding >= 0 && input_y + y + padding < prev_layer->layer_config.height) {
                             m_input_weights[input_x][input_y][input_z].edge = &prev_layer->neurons[x * stride + input_x][y * stride + input_y][input_z];
                         }
                     }
+                    // else if (x - padding < 0 || x - padding > prev_layer->layer_config.width) {
+
+                    //     if (y - padding < 0 || y - padding > prev_layer->layer_config.height) {
+                    //         m_input_weights[input_x][input_y][input_z].edge = &prev_layer->neurons[x * stride + input_x][y * stride + input_y][input_z];
+                    //     }
+                    // }
                 }
             }
         }
@@ -84,9 +72,55 @@ neuron::neuron(layer_config &lc, unsigned x, unsigned y, unsigned filter) {
          * so that all neurons from previous layer are connected to each neuron in the current
          * layer
          */
+        layer *prev_layer = lc.layer_prev;
+        unsigned num_filters = prev_layer->layer_config.depth;
+
+        // TODO: Don't allocate space for padding neurons
+        m_input_weights = (neuron_connection ***)malloc(sizeof(neuron_connection *) * prev_layer->layer_config.filter_configs[filter].width);
+
+        for (unsigned input_x = 0; input_x < prev_layer->layer_config.filter_configs[filter].width; input_x) {
+            m_input_weights[input_x] = (neuron_connection **)malloc(sizeof(neuron_connection *) * prev_layer->layer_config.filter_configs[filter].height);
+
+            for (unsigned input_y = 0; input_y < prev_layer->layer_config.filter_configs[filter].height; ++input_y) {
+                m_input_weights[input_x][input_y] = (neuron_connection *)malloc(sizeof(neuron_connection *) * prev_layer->layer_config.filter_configs[filter].depth);
+
+                for (unsigned input_z = 0; input_z < prev_layer->layer_config.filter_configs[filter].depth; ++input_z) {
+
+                    // Set individual weight for connection
+                    neuron_weight *nw = (neuron_weight *)malloc(sizeof(neuron_weight));
+                    nw->weight = random_weight();
+                    nw->delta_weight = 0;
+                    m_input_weights[input_x][input_y][input_z].weights = nw;
+                }
+            }
+        }
         break;
     case MAXPOOL:
+        /*
+        *  Operates independently on each depth slice, hence it does not take a 3D input.
+        * 
+        */
         // Similar in structure to CONVOLUTION, however, padding is often not used.
+        layer *prev_layer = lc.layer_prev;
+        unsigned num_filters = prev_layer->layer_config.depth; // .num_filters maybe?
+        unsigned stride = prev_layer->layer_config.filter_configs[filter].stride;
+        unsigned padding = prev_layer->layer_config.filter_configs[filter].padding; // Often not used
+
+        // TODO: Don't allocate space for padding neurons
+        m_input_weights = (neuron_connection ***)malloc(sizeof(neuron_connection *) * prev_layer->layer_config.filter_configs[filter].width);
+
+        for (unsigned input_x = 0; input_x < prev_layer->layer_config.filter_configs[filter].width; input_x) {
+            m_input_weights[input_x] = (neuron_connection **)malloc(sizeof(neuron_connection *) * prev_layer->layer_config.filter_configs[filter].height);
+
+            for (unsigned input_y = 0; input_y < prev_layer->layer_config.filter_configs[filter].height; ++input_y) {
+
+                unsigned input_z = filter;
+
+                // Set shared weight for connection
+                // TODO: Check if possible to have both 2D and 3D array in struct of same variable.
+                m_input_weights[input_x][input_y][input_z].weights = lc.filter_configs[input_z].filter->filter_weight[x][y][input_z].weights;
+            }
+        }
         break;
     case OUTPUT:
     }
