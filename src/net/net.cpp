@@ -47,6 +47,10 @@ net::net(net_config nc) {
     }
 }
 
+void net::feed_forward() {
+    
+}
+
 // void net::feed_forward(std::vector<std::vector<std::vector<float>>> &input) {
 //     if (&m_net_config != NULL) {
 
