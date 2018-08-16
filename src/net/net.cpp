@@ -27,32 +27,28 @@ net::net(net_config nc) {
 
         switch (this_layer->layer_config.layer_type) {
         case INPUT:
-
             add_layer(this_layer->layer_config, INPUT);
             break;
         case MAXPOOL:
-
             add_layer(this_layer->layer_config, MAXPOOL);
-            // Create filters
-            // for (unsigned i = 0; i < this_layer->layer_config.num_filters; i++) {
-            //     add_filter(this_layer->layer_config.filter_configs[i]);
-            // }
             break;
         case CONVOLUTION:
-
             add_layer(this_layer->layer_config, CONVOLUTION);
-            // Create filters
-            // for (unsigned i = 0; i < this_layer->layer_config.num_filters; i++) {
-            //     add_filter(this_layer->layer_config.filter_configs[i]);
-            // }
-
-            // Connect neurons
-
+            break;
+        case FULLY:
+            add_layer(this_layer->layer_config, FULLY);
+            break;
+        case OUTPUT:
+            add_layer(this_layer->layer_config, OUTPUT);
             break;
         }
 
         // Connect neurons to neurons in previous layer amd vice versa.
     }
+}
+
+void net::feed_forward() {
+    
 }
 
 // void net::feed_forward(std::vector<std::vector<std::vector<float>>> &input) {
