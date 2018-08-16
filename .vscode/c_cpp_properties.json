@@ -35,6 +35,9 @@
                 "/usr/include/x86_64-linux-gnu",
                 "/usr/include",
                 "/usr/include/CL/",
+				"${workspaceRoot}/Newral/include",
+                "${workspaceRoot}/Newral/src/modules/data/include",
+                "${workspaceRoot}/Newral/src/modules/text/include",
                 "${workspaceRoot}/include",
                 "${workspaceRoot}/src/modules/data/include",
                 "${workspaceRoot}/src/modules/text/include"
@@ -82,5 +85,5 @@
             }
         }
     ],
-    "version": 3
+    "version": 4
 }
