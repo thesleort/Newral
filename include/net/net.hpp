@@ -11,8 +11,11 @@
 
 #include <vector>
 
-#include "neuron/neuron.hpp"
+// #include "neuron/neuron.hpp"
 
+typedef struct neuron_filter;
+typedef struct filter;
+typedef struct layer_config;
 
 enum type { CONVOLUTION,
             MAXPOOL,
@@ -35,9 +38,9 @@ typedef struct filter_config {
     unsigned height;
     unsigned depth;     // Same as layer depth.
 
-    filter *filter;
+    filter *m_filter;
     // For neuron
-    layer_config *layer_config;
+    layer_config *m_layer_config;
 
     // Has all weights been initialized for this filter
     bool initialized = false;
@@ -65,16 +68,16 @@ typedef struct net_config {
     unsigned input_depth; // Typically color for images
     unsigned num_layers;
     layer *layer_num; // The topology consists of n layers
-    std::vector<layer_config> layer_config;
+    std::vector<layer_config> m_layer_config;
 } net_config;
 
 typedef struct filter {
-    filter_config *filter_config;
+    filter_config *m_filter_config;
     neuron_filter ***filter_weight; // To make NxNxDepth feature map
 } filter;
 
 typedef struct layer {
-    layer_config layer_config;
+    layer_config m_layer_config;
     neuron ***neurons;    // "Dot" product of all filters. PSEUDO data, can be freed from memory after layer is done
 } layer;
 

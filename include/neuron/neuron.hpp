@@ -15,17 +15,13 @@
 #include "net/net.hpp"
 
 class neuron; 
-typedef struct feature_map_config;
+// struct feature_map_config;
 typedef struct layer;
 
 enum neuron_type {
 	NEURON,
 	FILTER
 };
-
-typedef struct neuron_filter {
-	neuron_weight *weights;
-} neuron_filter;
 
 typedef struct neuron_weight {
 	float weight;
@@ -37,6 +33,10 @@ typedef struct neuron_connection {
 							// ELSE: Pointer to weight.
 	neuron *edge;			// The connected neuron from previous layer.
 } neuron_connection;
+
+typedef struct neuron_filter {
+	neuron_weight *weights;
+} neuron_filter;
 
 class neuron {
 public:

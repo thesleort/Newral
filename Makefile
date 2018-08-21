@@ -44,7 +44,7 @@ CFLAGS += -std=c++11 -Wall -Wextra -pedantic -g	# some warnings about bad code
 # -L is a linker flag
 LDFLAGS += -Llib
 # Left empty if no libs are needed
-LDLIBS += -lm
+LDLIBS += -lm -lOpenCL
 
 all: $(EXE)
 

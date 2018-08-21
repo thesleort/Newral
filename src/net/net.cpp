@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <cmath>
+#include <thread>
 
 #include "config.h"
 #include "net/net.hpp"
@@ -16,30 +17,30 @@
 net::net(net_config nc) {
     m_net_config = nc;
 
-    m_net_config.layer_num = (layer *)malloc(sizeof(layer) * m_net_config.layer_config.size());
-    m_net_config.num_layers = m_net_config.layer_config.size();
+    m_net_config.layer_num = (layer *)malloc(sizeof(layer) * m_net_config.m_layer_config.size());
+    m_net_config.num_layers = m_net_config.m_layer_config.size();
 
     for (unsigned layer_num = 0; layer_num < m_net_config.num_layers; ++layer_num) {
         layer *this_layer = &m_net_config.layer_num[layer_num];
-        this_layer->layer_config = m_net_config.layer_config[layer_num];
+        this_layer->m_layer_config = m_net_config.m_layer_config[layer_num];
 
         //Allocate input data structure
 
-        switch (this_layer->layer_config.layer_type) {
+        switch (this_layer->m_layer_config.layer_type) {
         case INPUT:
-            add_layer(this_layer->layer_config, INPUT);
+            add_layer(this_layer->m_layer_config, INPUT);
             break;
         case MAXPOOL:
-            add_layer(this_layer->layer_config, MAXPOOL);
+            add_layer(this_layer->m_layer_config, MAXPOOL);
             break;
         case CONVOLUTION:
-            add_layer(this_layer->layer_config, CONVOLUTION);
+            add_layer(this_layer->m_layer_config, CONVOLUTION);
             break;
         case FULLY:
-            add_layer(this_layer->layer_config, FULLY);
+            add_layer(this_layer->m_layer_config, FULLY);
             break;
         case OUTPUT:
-            add_layer(this_layer->layer_config, OUTPUT);
+            add_layer(this_layer->m_layer_config, OUTPUT);
             break;
         }
 
@@ -47,8 +48,33 @@ net::net(net_config nc) {
     }
 }
 
-void net::feed_forward() {
-    
+void net::feed_forward(std::vector<std::vector<std::vector<float>>> &input) {
+    for (unsigned layer_num = 0; layer_num < m_net_config.num_layers; ++layer_num) {
+		layer *this_layer = &m_net_config.layer_num[layer_num];
+        this_layer->m_layer_config = m_net_config.m_layer_config[layer_num];
+
+		/**
+		 * @brief TODO:
+		 * * Load filter(s)
+		 * 
+		 * * Load layer
+		 * 
+		 * * Read output layer
+		 * 
+		 */
+		switch (this_layer->m_layer_config.layer_type) {
+			case INPUT:
+				break;
+			case MAXPOOL:
+				break;
+			case CONVOLUTION:
+				break;
+			case FULLY:
+				break;
+			case OUTPUT:
+				break;
+		}
+	}
 }
 
 // void net::feed_forward(std::vector<std::vector<std::vector<float>>> &input) {
