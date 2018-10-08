@@ -137,7 +137,7 @@ unsigned filter_size_calc(unsigned &length, unsigned &filter, int &padding, unsi
     return (length - filter + 2 * padding) / stride + 1;
 }
 
-unsigned filter_size(unsigned &length, feature_map_config *fmc) {
+unsigned filter_size(unsigned &length, filter_config *fmc) {
     return filter_size_calc(length, fmc->filters, fmc->padding, fmc->stride);
 }
 
