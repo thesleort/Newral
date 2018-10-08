@@ -29,6 +29,7 @@ class load_cfg {
 	private:
 		std::ifstream m_cfg_file;
 		net_config m_net_config;
+		void allocator();
 };
 
 int options(int argc, const char * argv[]);

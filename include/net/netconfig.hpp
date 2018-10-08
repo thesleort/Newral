@@ -31,11 +31,11 @@ typedef struct filter_config {
 
     filter *m_filter;
     // For neuron
-    layer_config *m_layer_config;
+    layer *m_layer;
 
     // Has all weights been initialized for this filter
     bool initialized = false;
-} feature_map_config;
+} filter_config;
 
 typedef struct layer_config {
     // type layer_type;
@@ -72,6 +72,7 @@ typedef struct filter {
 } filter;
 
 typedef struct layer {
+	net_config *m_net_config;
     type layer_type;
     unsigned width;
     unsigned height;
