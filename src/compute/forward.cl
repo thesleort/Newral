@@ -2,17 +2,17 @@
 
 __kernel void convolution(
 		__global float *input_layer, 
-		int layer_height,
-		int layer_width,
-		int layer_depth,
+		__constant int layer_height,
+		__constant int layer_width,
+		__constant int layer_depth,
 		__constant float *filter, 
-		int filter_width,
-		int filter_height,
-		int filter_depth,
+		__constant int filter_width,
+		__constant int filter_height,
+		__constant int filter_depth,
 		__global float *output_layer,
-		int filter_padding,
-		int filter_stride,
-		int filter_num) {
+		__constant int filter_padding,
+		__constant int filter_stride,
+		__constant int filter_num) {
 	int column = get_global_id(0);
 	int row = get_global_id(1);
 	int depth = get_global_id(2);

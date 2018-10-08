@@ -12,91 +12,12 @@
 #include <vector>
 #include <CL/cl.hpp>
 #include "compute/cl_prepare.hpp"
+#include "compute/cl_compute.hpp"
+#include "netconfig.hpp"
 
 // #include "neuron/neuron.hpp"
 
-typedef struct neuron_filter;
-typedef struct filter;
-typedef struct layer_config;
 
-enum type { CONVOLUTION,
-            MAXPOOL,
-            FULLY,
-            INPUT,
-			OUTPUT };
-
-typedef struct layer;
-typedef struct Topology;
-class neuron;
-
-typedef struct filter_config {
-
-    unsigned filters = 1;
-    unsigned stride = 1;
-    int padding;
-
-    // Filter size;
-    unsigned width;
-    unsigned height;
-    unsigned depth;     // Same as layer depth.
-
-    filter *m_filter;
-    // For neuron
-    layer_config *m_layer_config;
-
-    // Has all weights been initialized for this filter
-    bool initialized = false;
-} feature_map_config;
-
-typedef struct layer_config {
-    type layer_type;
-    unsigned width;
-    unsigned height;
-    unsigned depth;     // Based on amount of filters in previous layer.
-
-    // For neuron
-    layer *layer_this;
-    layer *layer_prev;
-    layer *layer_next;
-
-    // Filters
-    unsigned num_filters;
-    filter_config *filter_configs;
-} layer_config;
-
-typedef struct net_config {
-    unsigned input_width;
-    unsigned input_height;
-    unsigned input_depth; // Typically color for images
-    unsigned num_layers;
-    layer *layer_num; // The topology consists of n layers
-    std::vector<layer_config> m_layer_config;
-} net_config;
-
-typedef struct filter {
-    filter_config *m_filter_config;
-    float *filter_weight; // To make NxNxDepth feature map
-	float *filter_delta_weight;
-} filter;
-
-typedef struct layer {
-	layer *layer_prev;
-	layer *layer_next;
-    layer_config m_layer_config;
-    float *neurons;    // "Dot" product of all filters. PSEUDO data, can be freed from memory after layer is done
-	filter *filters;
-} layer;
-
-// typedef struct Topology {
-// } Topology;
-
-typedef struct class_object {
-    double object; // Class of object defines as a number
-    double x;      // top left coordinates of object on image
-    double y;
-    double width; // height and width of object
-    double height;
-} class_object;
 
 /**
  * @brief 
@@ -104,7 +25,7 @@ typedef struct class_object {
  */
 class net {
 public:
-    net(net_config nc, compute &ocl);
+    net(net_config nc, cl_setup &ocl);
     layer get_layer(unsigned index);
     void feed_forward(std::vector<std::vector<std::vector<float>>> &input);
     void backpropagate(std::vector<class_object> objects); // TODO: Rewrite to use pointer instead at some point
@@ -112,13 +33,15 @@ public:
 private:
 	void compute_maxpool();
 	void compute_convolution(layer &this_layer, cl::Program &program);
+	void output(layer &this_layer, cl::Program &program);
 	void compute_fully_connected();
-    void add_layer(layer_config &config, enum type type);
+    void add_layer(layer &config, enum type type);
     void add_filter(filter_config &config);
-    void connect_neurons(layer_config &lc, filter_config &fc);
+    void connect_neurons(layer &lc, filter_config &fc);
 	int get_3d_index(unsigned x, unsigned y, unsigned z, unsigned width, unsigned depth);
 	float random_weight();
-	compute m_ocl;
+	cl_setup m_ocl;
+	cl_compute m_ocl_compute;
     net_config m_net_config;
 };
 

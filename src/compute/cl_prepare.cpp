@@ -13,7 +13,7 @@
 #include "error.h"
 #include "compute/cl_prepare.hpp"
 
-compute::compute() {
+cl_setup::cl_setup() {
 
 }
 
@@ -23,7 +23,7 @@ compute::compute() {
  * @param DEVICE_TYPE 
  * @return int 
  */
-int compute::setup(int DEVICE_TYPE) {
+int cl_setup::setup(int DEVICE_TYPE) {
 
     m_device_type = DEVICE_TYPE;
 
@@ -72,7 +72,7 @@ int compute::setup(int DEVICE_TYPE) {
  * @param file 
  * @param VERSION 
  */
-void compute::build(const std::string &file, const char *version) {
+void cl_setup::build(const std::string &file, const char *version) {
 	if(m_setup != true) {
 		std::cerr << "OpenCL has not been setup yet" << std::endl;
 		exit(0);
@@ -107,7 +107,7 @@ void compute::build(const std::string &file, const char *version) {
  * 
  * @return std::vector<cl::Program>* 
  */
-std::vector<cl::Program> *compute::get_programs() {
+std::vector<cl::Program> *cl_setup::get_programs() {
     return &m_programs;
 }
 
@@ -118,7 +118,7 @@ std::vector<cl::Program> *compute::get_programs() {
  * returned.
  * @return std::vector<cl::Device>* 
  */
-std::vector<cl::Device> *compute::get_devices(const int DEVICE_TYPE) {
+std::vector<cl::Device> *cl_setup::get_devices(const int DEVICE_TYPE) {
     return &m_devices;
 }
 
@@ -128,7 +128,7 @@ std::vector<cl::Device> *compute::get_devices(const int DEVICE_TYPE) {
  * @param DEVICE_TYPE if not specified, then the first device will be returned.
  * @return cl::Device* 
  */
-cl::Device *compute::get_device(const int DEVICE_TYPE = CL_DEVICE_TYPE_ALL) {
+cl::Device *cl_setup::get_device(const int DEVICE_TYPE = CL_DEVICE_TYPE_ALL) {
     switch (DEVICE_TYPE) {
     case CL_DEVICE_TYPE_ALL:
         return &m_devices.front();

@@ -7,14 +7,15 @@
  */
 
 #ifndef __CL_PREPARE
-#define __CL
+#define __CL_PREPARE
 
 #include <CL/cl.hpp>
+// #include 
 
 
-class compute {
+class cl_setup {
 	public:
-		compute();
+		cl_setup();
 		int setup(int DEVICE_TYPE);
 		void build(const std::string &file, const char* version);
 		std::vector<cl::Program> *get_programs();

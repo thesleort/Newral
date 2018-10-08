@@ -41,10 +41,11 @@ CC = g++
 CPPFLAGS += $(INC)								# -I is a preprocessor flag, not a compiler flag
 CFLAGS += -std=c++11 -Wall -Wextra -pedantic -g	# some warnings about bad code
 
+BOOST = -lboost_regex
 # -L is a linker flag
 LDFLAGS += -Llib
 # Left empty if no libs are needed
-LDLIBS += -lm -lOpenCL
+LDLIBS += -lm -lOpenCL 
 
 all: $(EXE)
 
@@ -52,7 +53,7 @@ all: $(EXE)
 ## Compiler compilation
 ###
 $(EXE): $(OBJ)
-	$(CC) $(LIB) $(INC) $^ $(LDLIBS) -o $@
+	$(CC) $(LIB) $(INC) $^ $(LDLIBS) -o $@ $(BOOST)
 
 ###
 ## Module and object building
