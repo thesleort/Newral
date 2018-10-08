@@ -38,9 +38,14 @@
                 "/usr/include/x86_64-linux-gnu",
                 "/usr/include",
                 "/usr/include/CL/",
+				"${workspaceRoot}/Newral/include",
+                "${workspaceRoot}/Newral/src/modules/data/include",
+                "${workspaceRoot}/Newral/src/modules/text/include",
                 "${workspaceRoot}/include",
                 "${workspaceRoot}/src/modules/data/include",
-                "${workspaceRoot}/src/modules/text/include"
+				"${workspaceRoot}/src/modules/text/include",
+				"/usr/include/glib-2.0",
+				"/usr/lib/x86_64-linux-gnu/glib-2.0/include/"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",

@@ -10,66 +10,14 @@
 #define __NET_HPP
 
 #include <vector>
+#include <CL/cl.hpp>
+#include "compute/cl_prepare.hpp"
+#include "compute/cl_compute.hpp"
+#include "netconfig.hpp"
 
-#include "neuron/neuron.hpp"
+// #include "neuron/neuron.hpp"
 
 
-enum type { CONVOLUTION,
-            MAXPOOL,
-            FULLY,
-            INPUT,
-			OUTPUT };
-
-typedef struct layer;
-class neuron;
-
-typedef struct feature_map_config {
-    type layer_type;
-    unsigned filters = 1;
-    unsigned stride = 1;
-    unsigned size;
-    int padding;
-
-    // For neuron
-    layer *layer_prev;
-    layer *layer_next;
-} feature_map_config;
-
-typedef struct net_config {
-    unsigned width;
-    unsigned height;
-    unsigned filters; // Typically color for images
-    std::vector<feature_map_config> layer_feature_map;
-} net_config;
-
-typedef struct class_object {
-    double object; // Class of object defines as a number
-    double x;      // top left coordinates of object on image
-    double y;
-    double width; // height and width of object
-    double height;
-} class_object;
-
-typedef struct feature_map { // Filter / feature map
-    neuron **map;             // To make NxN feature map
-    type map_type;
-} feature_map;
-
-typedef struct filter {
-    unsigned width;
-    unsigned height;
-    neuron **neurons; // To make NxN feature map
-} filter;
-
-typedef struct layer {
-    feature_map_config *fmc;
-    filter *filters; // Every layer contains n feature maps
-} layer;
-
-typedef struct Topology {
-    unsigned num_layers;
-    layer *layers; // The topology constists of m layers
-} Topology;
 
 /**
  * @brief 
@@ -77,14 +25,23 @@ typedef struct Topology {
  */
 class net {
 public:
-    net(net_config nc);
-    void add_layer(feature_map_config config);
+    net(net_config nc, cl_setup &ocl);
     layer get_layer(unsigned index);
-    void feed_forward(std::vector<std::vector<std::vector<double>>> &input);
+    void feed_forward(std::vector<std::vector<std::vector<float>>> &input);
     void backpropagate(std::vector<class_object> objects); // TODO: Rewrite to use pointer instead at some point
 
 private:
-    Topology m_topology;
+	void compute_maxpool();
+	void compute_convolution(layer &this_layer, cl::Program &program);
+	void output(layer &this_layer, cl::Program &program);
+	void compute_fully_connected();
+    void add_layer(layer &config, enum type type);
+    void add_filter(filter_config &config);
+    void connect_neurons(layer &lc, filter_config &fc);
+	int get_3d_index(unsigned x, unsigned y, unsigned z, unsigned width, unsigned depth);
+	float random_weight();
+	cl_setup m_ocl;
+	cl_compute m_ocl_compute;
     net_config m_net_config;
 };
 
