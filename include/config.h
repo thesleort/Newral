@@ -10,7 +10,7 @@
 #define __NEWRAL_CONFIG_H
 
 
-#define VERSION 0.2
+#define VERSION 0.3
 
 #define ETA 0.15
 #define ALPHA 0.5

@@ -10,6 +10,8 @@
 #define __NET_HPP
 
 #include <vector>
+#include <CL/cl.hpp>
+#include "compute/cl_prepare.hpp"
 
 // #include "neuron/neuron.hpp"
 
@@ -73,12 +75,16 @@ typedef struct net_config {
 
 typedef struct filter {
     filter_config *m_filter_config;
-    neuron_filter ***filter_weight; // To make NxNxDepth feature map
+    float *filter_weight; // To make NxNxDepth feature map
+	float *filter_delta_weight;
 } filter;
 
 typedef struct layer {
+	layer *layer_prev;
+	layer *layer_next;
     layer_config m_layer_config;
-    neuron ***neurons;    // "Dot" product of all filters. PSEUDO data, can be freed from memory after layer is done
+    float *neurons;    // "Dot" product of all filters. PSEUDO data, can be freed from memory after layer is done
+	filter *filters;
 } layer;
 
 // typedef struct Topology {
@@ -98,16 +104,21 @@ typedef struct class_object {
  */
 class net {
 public:
-    net(net_config nc);
+    net(net_config nc, compute &ocl);
     layer get_layer(unsigned index);
     void feed_forward(std::vector<std::vector<std::vector<float>>> &input);
     void backpropagate(std::vector<class_object> objects); // TODO: Rewrite to use pointer instead at some point
 
 private:
+	void compute_maxpool();
+	void compute_convolution(layer &this_layer, cl::Program &program);
+	void compute_fully_connected();
     void add_layer(layer_config &config, enum type type);
     void add_filter(filter_config &config);
     void connect_neurons(layer_config &lc, filter_config &fc);
-    //Topology m_topology;
+	int get_3d_index(unsigned x, unsigned y, unsigned z, unsigned width, unsigned depth);
+	float random_weight();
+	compute m_ocl;
     net_config m_net_config;
 };
 

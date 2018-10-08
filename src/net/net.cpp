@@ -12,9 +12,10 @@
 
 #include "config.h"
 #include "net/net.hpp"
-#include "neuron/neuron.hpp"
+// #include "neuron/neuron.hpp"
 
-net::net(net_config nc) {
+net::net(net_config nc, compute &ocl) {
+    m_ocl = ocl;
     m_net_config = nc;
 
     m_net_config.layer_num = (layer *)malloc(sizeof(layer) * m_net_config.m_layer_config.size());
@@ -50,10 +51,13 @@ net::net(net_config nc) {
 
 void net::feed_forward(std::vector<std::vector<std::vector<float>>> &input) {
     for (unsigned layer_num = 0; layer_num < m_net_config.num_layers; ++layer_num) {
-		layer *this_layer = &m_net_config.layer_num[layer_num];
+        layer *this_layer = &m_net_config.layer_num[layer_num];
         this_layer->m_layer_config = m_net_config.m_layer_config[layer_num];
 
-		/**
+        m_ocl.build("src/compute/forward.cl", OPEN_CL_1_2);
+
+        cl::Program program = m_ocl.get_programs()->at(0);
+        /**
 		 * @brief TODO:
 		 * * Load filter(s)
 		 * 
@@ -62,19 +66,99 @@ void net::feed_forward(std::vector<std::vector<std::vector<float>>> &input) {
 		 * * Read output layer
 		 * 
 		 */
-		switch (this_layer->m_layer_config.layer_type) {
-			case INPUT:
-				break;
-			case MAXPOOL:
-				break;
-			case CONVOLUTION:
-				break;
-			case FULLY:
-				break;
-			case OUTPUT:
-				break;
-		}
-	}
+        switch (this_layer->m_layer_config.layer_type) {
+        case INPUT:
+            for (unsigned x = 0; x < input.size(); ++x) {
+                for (unsigned y = 0; y < input[x].size(); ++y) {
+                    for (unsigned z = 0; z < input[x][y].size(); ++z) {
+                        this_layer->neurons[x * this_layer->m_layer_config.height * this_layer->m_layer_config.depth + y * this_layer->m_layer_config.depth + z] = input[x][y][z];
+                    }
+                }
+            }
+            break;
+        case MAXPOOL:
+            // m_ocl.build("src/compute/forward.cl", "-cl-std=CL1.2");
+
+            // cl::Program program = m_ocl.get_programs()->at(0);
+
+            // auto context = program.getInfo<CL_PROGRAM_CONTEXT>();
+            // auto devices = context.getInfo<CL_CONTEXT_DEVICES>();
+            // auto &device = devices.front();
+
+            // int filter_height = this_layer
+
+            break;
+        case CONVOLUTION:
+            compute_convolution(*this_layer, program);
+            break;
+        case FULLY:
+            break;
+        case OUTPUT:
+            break;
+        }
+    }
+}
+
+void net::compute_convolution(layer &this_layer, cl::Program &program) {
+
+    auto context = program.getInfo<CL_PROGRAM_CONTEXT>();
+    auto devices = context.getInfo<CL_CONTEXT_DEVICES>();
+    auto &device = devices.front();
+
+    int num_filters = this_layer.m_layer_config.num_filters;
+
+    int layer_prev_height = this_layer.layer_prev->m_layer_config.height;
+    int layer_prev_width = this_layer.layer_prev->m_layer_config.width;
+    int layer_prev_depth = this_layer.layer_prev->m_layer_config.depth;
+
+    int layer_height = this_layer.m_layer_config.height;
+    int layer_width = this_layer.m_layer_config.width;
+    int layer_depth = this_layer.m_layer_config.depth;
+
+    int filter_height;
+    int filter_width;
+    int filter_depth;
+    int filter_padding;
+    int filter_stride;
+
+    cl::CommandQueue queue = cl::CommandQueue(context, device);
+
+    std::vector<cl::Buffer> filter_buffers;
+    cl::Buffer input_neurons;
+    cl::Buffer output_neurons;
+
+    cl::Buffer input_neurons = cl::Buffer(context, CL_MEM_READ_ONLY, layer_prev_height * layer_prev_width * layer_prev_depth * sizeof(float), this_layer.layer_prev->neurons);
+    cl::Buffer output_neurons = cl::Buffer(context, CL_MEM_READ_WRITE, layer_height * layer_width * layer_depth * sizeof(float), this_layer.neurons);
+
+    for (unsigned filter_num = 0; filter_num < this_layer.layer_prev->m_layer_config.num_filters; ++filter_num) {
+
+        filter_height = this_layer.m_layer_config.filter_configs[filter_num].height;
+        filter_width = this_layer.m_layer_config.filter_configs[filter_num].width;
+        filter_depth = this_layer.m_layer_config.filter_configs[filter_num].depth;
+
+        filter_padding = this_layer.m_layer_config.filter_configs[filter_num].padding;
+        filter_stride = this_layer.m_layer_config.filter_configs[filter_num].stride;
+
+        filter_buffers.push_back(cl::Buffer(context, CL_MEM_READ_ONLY, filter_height * filter_width * filter_depth * sizeof(float), this_layer.filters[filter_num].filter_weight));
+        cl::Kernel kernel(program, "convolution");
+
+        kernel.setArg(0, input_neurons);
+        kernel.setArg(1, layer_height);
+        kernel.setArg(2, layer_width);
+        kernel.setArg(3, layer_depth);
+        kernel.setArg(4, filter_buffers.at(filter_num));
+        kernel.setArg(5, filter_height);
+        kernel.setArg(6, filter_width);
+        kernel.setArg(7, filter_depth);
+        kernel.setArg(8, output_neurons);
+        kernel.setArg(9, filter_padding);
+        kernel.setArg(10, filter_stride);
+        kernel.setArg(11, filter_num);
+
+        queue.enqueueNDRangeKernel(kernel, cl::NullRange, )
+    }
+
+    // queue.enqueueWriteBuffer()
 }
 
 // void net::feed_forward(std::vector<std::vector<std::vector<float>>> &input) {
@@ -120,50 +204,27 @@ unsigned filter_size(unsigned &length, feature_map_config *fmc) {
  * @param config 
  */
 void net::add_layer(layer_config &config, enum type type) {
-    config.layer_this->neurons = (neuron ***)malloc(sizeof(neuron **) * config.width);
+    config.layer_this->neurons = (float *)malloc(config.width * config.height * config.depth * sizeof(float));
+    config.layer_this->filters = (filter *)malloc(config.num_filters * sizeof(filter));
 
-    for (unsigned x = 0; x < config.width; ++x) {
-        config.layer_this->neurons[x] = (neuron **)malloc(sizeof(neuron *) * config.height);
+    for (unsigned neuron = 0; neuron < sizeof(config.layer_this->neurons); ++neuron) {
+        config.layer_this->neurons[neuron] = 0;
+    }
 
-        for (unsigned y = 0; y < config.height; ++y) {
-            config.layer_this->neurons[x][y] = (neuron *)malloc(sizeof(neuron) * config.depth);
-
-            for (unsigned z = 0; z < config.depth; ++z) {
-                // Init neuron
-                config.layer_this->neurons[x][y][z] = neuron(config, x, y, z);
-                // if (type == CONVOLUTION) {
-                //     config.layer_this->neurons[x][y][z].set_input_weights(config.layer_prev->layer_config.filter_configs[z]);
-                // } else {
-				// 	config.layer_this->neurons[x][y][z].set_input_weights(config.layer_prev->layer_config);
-				// }
-            }
-        }
+    for (unsigned filter = 0; filter < config.layer_this->m_layer_config.num_filters; ++filter) {
+        add_filter(config.filter_configs[filter]);
     }
 }
 
-/**
- * @brief To add the filters that will be applied. These filters are stored 
- * separately to allow for easier parameter/weight sharing.
- * 
- * @param config 
- */
-// void net::add_filter(filter_config &config) {
-//     config.filter->neurons = (neuron ***)malloc(sizeof(neuron **) * config.width);
+void net::add_filter(filter_config &config) {
+    config.m_filter->filter_weight = (float *)malloc(config.height * config.width * config.depth * sizeof(float));
+    config.m_filter->filter_delta_weight = (float *)malloc(config.height * config.width * config.depth * sizeof(float));
 
-//     for (unsigned x = 0; x < config.width; ++x) {
-//         config.filter->neurons[x] = (neuron **)malloc(sizeof(neuron *) * config.height);
-
-//         for (unsigned y = 0; y < config.height; ++y) {
-//             config.filter->neurons[x][y] = (neuron *)malloc(sizeof(neuron) * config.depth);
-
-//             for (unsigned z = 0; z < config.depth; ++z) {
-//                 // Init filter neuron
-//                 config.filter->neurons[x][y][z] = neuron(*config.layer_config, x, y, z, FILTER);
-//                 config.filter->neurons[x][y][z].set_input_weights(config, config.layer_config->layer_prev->layer_config);
-//             }
-//         }
-//     }
-// }
+    for (unsigned filter_weight = 0; filter_weight < sizeof(config.m_filter->filter_weight); ++filter_weight) {
+        config.m_filter->filter_weight[filter_weight] = random_weight();
+        config.m_filter->filter_delta_weight[filter_weight] = 0;
+    }
+}
 
 /**
  * @brief Connects the neurons in the current layer with the respective 
@@ -180,4 +241,12 @@ void net::connect_neurons(layer_config &lc, filter_config &fc) {
             }
         }
     }
+}
+
+float net::random_weight() {
+    return rand() / float(RAND_MAX);
+}
+
+int net::get_3d_index(unsigned x, unsigned y, unsigned z, unsigned width, unsigned depth) {
+    return (x + width * (y + depth * z));
 }

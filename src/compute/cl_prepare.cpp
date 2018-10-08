@@ -13,9 +13,9 @@
 #include "error.h"
 #include "compute/cl_prepare.hpp"
 
-// compute::compute() {
+compute::compute() {
 
-// }
+}
 
 /**
  * @brief 
@@ -63,6 +63,7 @@ int compute::setup(int DEVICE_TYPE) {
 
     // Alpha version currently only supports one device
     device = m_devices.at(0);
+	m_setup = true;
 }
 
 /**
@@ -71,7 +72,11 @@ int compute::setup(int DEVICE_TYPE) {
  * @param file 
  * @param VERSION 
  */
-void compute::build(const std::string &file, const char *VERSION) {
+void compute::build(const std::string &file, const char *version) {
+	if(m_setup != true) {
+		std::cerr << "OpenCL has not been setup yet" << std::endl;
+		exit(0);
+	}
     cl_int err;
 
     std::ifstream cl_file(file);
@@ -83,7 +88,7 @@ void compute::build(const std::string &file, const char *VERSION) {
         cl::Context context(m_devices.at(0));
         cl::Program program(context, sources);
 
-        err = program.build(VERSION);
+        err = program.build(version);
         cl::Device device = m_devices.at(device_num);
         cl_build_status status = program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(device);
         if (status == CL_BUILD_ERROR) {
@@ -93,6 +98,7 @@ void compute::build(const std::string &file, const char *VERSION) {
             std::cerr << "Build log for " << name << ":" << std::endl
                       << buildlog << std::endl;
         }
+		m_programs.push_back(program);
     }
 }
 
