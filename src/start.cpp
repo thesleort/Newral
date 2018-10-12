@@ -8,7 +8,6 @@
 
 #include "start.hpp"
 
-using json = nlohmann::json;
 
 // #include "config.h"
 // #include "start.hpp"
@@ -147,20 +146,35 @@ void load_cfg::allocator() {
 load_weights::load_weights(std::string &weights_file_name, net_config &net_config) {
     m_net_config = &net_config;
 
+	unsigned layer_num = 0;
+    unsigned filter_num = 0;
+
+    std::string line;
+    layer *current_layer;
+	enum type layer_type;
+
     // std::ifstream weights_file(weights_file_name, std::ifstream::binary);
-    std::ifstream weights_file(weights_file_name);
+    m_weights_file.open(weights_file_name);
 
-    json j = json::parse(weights_file);
-    
+	while(getline(m_weights_file, line)) {
+        std::vector<std::string> fields;
 
-    for(unsigned layer_num = 0; layer_num < m_net_config->num_layers; ++layer_num) {
-        switch(m_net_config->m_layers[layer_num].layer_type) {
-        case INPUT:
-            break;
-        case CONVOLUTION:
-            for(unsigned filter_num = 0; filter_num < m_net_config->m_layers[layer_num].num_filters; ++filter_num) {
-                m_net_config->m_layers[layer_num].filters[filter_num].filter_weight = j["layers"][filter_num]
-            }
-        }
-    }
+		boost::split_regex(fields, line, boost::regex("=\\s"));
+
+		if(fields.at(0).compare("layer")) {
+			
+			// layer_type = 
+		}
+
+	}
+    // for(unsigned layer_num = 0; layer_num < m_net_config->num_layers; ++layer_num) {
+    //     switch(m_net_config->m_layers[layer_num].layer_type) {
+    //     case INPUT:
+    //         break;
+    //     case CONVOLUTION:
+    //         for(unsigned filter_num = 0; filter_num < m_net_config->m_layers[layer_num].num_filters; ++filter_num) {
+    //             m_net_config->m_layers[layer_num].filters[filter_num].filter_weight = j["layers"][filter_num]
+    //         }
+    //     }
+    // }
 }
