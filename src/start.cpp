@@ -8,6 +8,8 @@
 
 #include "start.hpp"
 
+using json = nlohmann::json;
+
 // #include "config.h"
 // #include "start.hpp"
 // #include "net/net.hpp"
@@ -101,6 +103,8 @@ load_cfg::load_cfg(std::string &cfg_file) {
             m_net_config.num_layers = num_layers;
         }
     }
+
+    allocator();
 }
 // current_layer->neurons = (float *)malloc(sizeof(float) * current_layer->width * current_layer->height * current_layer->depth);
 void load_cfg::allocator() {
@@ -135,6 +139,28 @@ void load_cfg::allocator() {
                 current_layer.filters[filter_num].m_filter_config = current_layer.filter_configs;
             }
             break;
+        }
+    }
+}
+
+
+load_weights::load_weights(std::string &weights_file_name, net_config &net_config) {
+    m_net_config = &net_config;
+
+    // std::ifstream weights_file(weights_file_name, std::ifstream::binary);
+    std::ifstream weights_file(weights_file_name);
+
+    json j = json::parse(weights_file);
+    
+
+    for(unsigned layer_num = 0; layer_num < m_net_config->num_layers; ++layer_num) {
+        switch(m_net_config->m_layers[layer_num].layer_type) {
+        case INPUT:
+            break;
+        case CONVOLUTION:
+            for(unsigned filter_num = 0; filter_num < m_net_config->m_layers[layer_num].num_filters; ++filter_num) {
+                m_net_config->m_layers[layer_num].filters[filter_num].filter_weight = j["layers"][filter_num]
+            }
         }
     }
 }
