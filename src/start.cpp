@@ -28,7 +28,6 @@ setup::setup() {
 void setup::load_cfg(std::string &cfg_file) {
 
     std::string line;
-    std::string previous_subject;
 
     m_cfg_file.open(cfg_file);
 
@@ -46,13 +45,11 @@ void setup::load_cfg(std::string &cfg_file) {
         if (fields.at(0).compare("[net]") == 0) {
             layer_type = INPUT;
             current_layer = (layer *)malloc(sizeof(layer));
-            previous_subject = fields.at(0);
         } else if (fields.at(0).compare("[convolution]") == 0) {
             layer_type = CONVOLUTION;
             m_net_config.m_layers.push_back(*current_layer);
             current_layer = (layer *)malloc(sizeof(layer));
             current_layer->filter_configs = (filter_config *)malloc(sizeof(filter_config));
-            previous_subject = fields.at(0);
             ++num_layers;
         }
 
@@ -225,8 +222,22 @@ void setup::load_weights(std::string &weights_file_name) {
     // }
 }
 
-void setup::load_input(std::string &input_file, bool is_image) {
+std::vector<std::vector<std::vector<float>>> setup::load_input(std::string &input_file, bool is_image) {
+    int input_size = m_net_config.input_width * m_net_config.input_height * m_net_config.input_depth;
+    float input[input_size];
+
     if (!is_image) {
+        std::string line;
+        m_input_file.open(input_file);
+        unsigned line_num = 0;
+        while(getline(m_input_file ,line)) {
+            std::vector<std::string> fields;
+            boost::split_regex(fields, line, boost::regex(","));
+            for(unsigned i = 0; i < m_net_config.input_width * m_net_config.; ++width) {
+                
+            }
+        }
+        return input;
     }
 }
 

@@ -16,6 +16,8 @@ int main(int argc, const char * argv[]) {
 	std::string weights_file(argv[2]);
 	std::string input_file(argv[3]);
 
+	// std::vector<std::vector<std::vector<float>>> *input;
+
 	std::cout << "Preparing setup...\n";
 	setup network_setup;
 	
@@ -31,11 +33,12 @@ int main(int argc, const char * argv[]) {
 	network_setup.load_weights(weights_file);
 	std::cout << "Done.\n";
 
-	std::cout << "Loading input...\n";
-	network_setup.load_input(input_file, false);
-	std::cout << "Done.\n";
+	// std::cout << "Loading input...\n";
+	// network_setup.load_input(input_file, false);
+	// std::cout << "Done.\n";
 
 	net network(network_setup.get_cfg(), compute);
 	// network
+	network.feed_forward(network_setup.load_input(input_file, false));
 
 }
