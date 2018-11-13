@@ -5,7 +5,6 @@
 
 typedef struct neuron_filter;
 typedef struct filter;
-typedef struct layer_config;
 class cl_compute;
 
 enum type { CONVOLUTION,
@@ -15,8 +14,7 @@ enum type { CONVOLUTION,
 			OUTPUT };
 
 typedef struct layer;
-typedef struct Topology;
-class neuron;
+// class neuron;
 
 typedef struct filter_config {
 
@@ -37,26 +35,7 @@ typedef struct filter_config {
     bool initialized = false;
 } filter_config;
 
-typedef struct layer_config {
-    // type layer_type;
-    // unsigned width;
-    // unsigned height;
-    // unsigned depth;     // Based on amount of filters in previous layer.
-
-    // // For neuron
-    // layer *layer_this;
-    // layer *layer_prev;
-    // layer *layer_next;
-
-    // float *neurons;    // "Dot" product of all filters. PSEUDO data, can be freed from memory after layer is done
-	// filter *filters;
-
-    // // Filters
-    // unsigned num_filters;
-    // filter_config *filter_configs;
-} layer_config;
-
-typedef struct net_config {
+typedef struct _net_config {
     unsigned input_width;
     unsigned input_height;
     unsigned input_depth; // Typically color for images

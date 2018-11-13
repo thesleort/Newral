@@ -10,7 +10,7 @@
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/newral.out",
-			"args": ["-t",""],
+			"args": ["cfg/conv_test.cfg","cfg/conv_test.json","cfg/conv_test.input"],
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}",
 			"environment": [],

@@ -15,9 +15,7 @@
 // #include "model/model.hpp"
 // #include "text.hpp"
 
-
 setup::setup() {
-
 }
 
 /**
@@ -45,70 +43,72 @@ void setup::load_cfg(std::string &cfg_file) {
         //boost
         boost::split_regex(fields, line, boost::regex("="));
 
-        if (fields.at(0).compare("[net]") == 0 || layer_type == INPUT) {
-            if (fields.at(0).compare(previous_subject) != 0) {
-                current_layer = (layer *)malloc(sizeof(layer));
-                previous_subject = fields.at(0);
-            }
+        if (fields.at(0).compare("[net]") == 0) {
+            layer_type = INPUT;
+            current_layer = (layer *)malloc(sizeof(layer));
+            previous_subject = fields.at(0);
+        } else if (fields.at(0).compare("[convolution]") == 0) {
+            layer_type = CONVOLUTION;
+            m_net_config.m_layers.push_back(*current_layer);
+            current_layer = (layer *)malloc(sizeof(layer));
+            current_layer->filter_configs = (filter_config *)malloc(sizeof(filter_config));
+            previous_subject = fields.at(0);
+            ++num_layers;
+        }
+
+        if (layer_type == INPUT) {
+
             // Input
             layer_type = INPUT;
             current_layer->layer_type = INPUT;
 
-            if (fields.at(0).compare("width")) {
+            if (fields.at(0).compare("width") == 0) {
                 int width = stoi(fields.at(1));
                 m_net_config.input_width = width;
                 current_layer->width = width;
 
-            } else if (fields.at(0).compare("height")) {
+            } else if (fields.at(0).compare("height") == 0) {
                 int height = stoi(fields.at(1));
                 m_net_config.input_height = height;
                 current_layer->height = height;
 
-            } else if (fields.at(0).compare("depth")) {
+            } else if (fields.at(0).compare("depth") == 0) {
                 int depth = stoi(fields.at(1));
                 m_net_config.input_depth = depth;
                 current_layer->depth = depth;
             }
 
-        } else if (fields.at(0).compare("[convolution]") || layer_type == CONVOLUTION) {
-
-            if (fields.at(0).compare(previous_subject) != 0) {
-                m_net_config.m_layers.push_back(*current_layer);
-                current_layer = (layer *)malloc(sizeof(layer));
-                current_layer->filter_configs = (filter_config *)malloc(sizeof(filter_config));
-                previous_subject = fields.at(0);
-                ++num_layers;
-            }
+        } else if (layer_type == CONVOLUTION) {
 
             layer_type = CONVOLUTION;
             current_layer->layer_type = CONVOLUTION;
 
-            if (fields.at(0).compare("filters")) {
+            if (fields.at(0).compare("filters") == 0) {
                 int filters = stoi(fields.at(1));
                 current_layer->filter_configs->filters = filters;
 
-            } else if (fields.at(0).compare("width")) {
+            } else if (fields.at(0).compare("width") == 0) {
                 int width = stoi(fields.at(1));
                 current_layer->filter_configs->width = width;
 
-            } else if (fields.at(0).compare("height")) {
+            } else if (fields.at(0).compare("height") == 0) {
                 int height = stoi(fields.at(1));
                 current_layer->filter_configs->height = height;
 
-            } else if (fields.at(0).compare("depth")) {
+            } else if (fields.at(0).compare("depth") == 0) {
                 int depth = stoi(fields.at(1));
                 current_layer->filter_configs->depth = depth;
 
-            } else if (fields.at(0).compare("stride")) {
+            } else if (fields.at(0).compare("stride") == 0) {
                 int stride = stoi(fields.at(1));
                 current_layer->filter_configs->stride = stride;
 
-            } else if (fields.at(0).compare("padding")) {
+            } else if (fields.at(0).compare("padding") == 0) {
                 int padding = stoi(fields.at(1));
                 current_layer->filter_configs->padding = padding;
             }
 
-        } else if (fields.at(0).compare("[end]")) {
+        } else if (fields.at(0).compare("[end]") == 0) {
             m_net_config.m_layers.push_back(*current_layer);
             ++num_layers;
             m_net_config.num_layers = num_layers;
@@ -124,6 +124,7 @@ void setup::load_cfg(std::string &cfg_file) {
  * 
  */
 void setup::allocator() {
+    std::cout << "Allocating memory\n";
     for (unsigned layer_num = 0; layer_num < m_net_config.m_layers.size(); ++layer_num) {
 
         layer &next_layer = (layer_num + 1 >= m_net_config.m_layers.size()) ? m_net_config.m_layers[layer_num + 1] : m_net_config.m_layers[layer_num];
@@ -224,6 +225,11 @@ void setup::load_weights(std::string &weights_file_name) {
     // }
 }
 
-void setup::load_input(std::string &input_file) {
-    
+void setup::load_input(std::string &input_file, bool is_image) {
+    if (!is_image) {
+    }
+}
+
+net_config setup::get_cfg() {
+    return m_net_config;
 }
