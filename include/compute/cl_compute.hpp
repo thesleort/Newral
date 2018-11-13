@@ -12,6 +12,7 @@ class cl_compute {
 		cl_compute();
 		void load(cl::Program &program);
 		void compute_convolution(layer &this_layer);
+		void compute_maxpool(layer &this_layer);
 		void output(layer &this_layer);
 	protected:
 	private:

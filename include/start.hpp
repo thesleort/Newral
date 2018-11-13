@@ -27,25 +27,38 @@ enum MODE { CLASSIFY,
             TRAIN };
 
 
-class load_cfg {
+class setup {
 	public:
-		load_cfg(std::string &cfg_file);
+		setup();
+		void load_cfg(std::string &cfg_file);
+		void load_weights(std::string &weights_file);
+		void load_input(std::string &input_file);
 		net_config get_cfg();
 	private:
 		std::ifstream m_cfg_file;
+		std::ifstream m_weights_file;
+		std::ifstream m_input_file;
 		net_config m_net_config;
 		void allocator();
 };
 
-class load_weights {
-	public:
-		load_weights(std::string &weights_file, net_config &net_config);
-
-	private:
-		std::ifstream m_weights_file;
-		net_config *m_net_config;
+// class load_weights {
+// 	public:
 		
-};
+
+// 	private:
+// 		net_config *m_net_config;
+		
+// };
+
+// class load_input {
+// 	public:
+// 		load_input(std::string &input_file, net_config &net_config);
+		
+// 	private:
+// 		std::ifstream m_input_file;
+// 		net_config *m_net_config;
+// };
 
 int options(int argc, const char * argv[]);
 

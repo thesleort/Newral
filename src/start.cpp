@@ -7,7 +7,7 @@
  */
 
 #include "start.hpp"
-
+#include <json.hpp>
 
 // #include "config.h"
 // #include "start.hpp"
@@ -15,7 +15,19 @@
 // #include "model/model.hpp"
 // #include "text.hpp"
 
-load_cfg::load_cfg(std::string &cfg_file) {
+
+setup::setup() {
+
+}
+
+/**
+ * @brief Construct a new load cfg::load cfg object.
+ * This loads the config, that defines the structure 
+ * of the neural network.
+ * 
+ * @param cfg_file 
+ */
+void setup::load_cfg(std::string &cfg_file) {
 
     std::string line;
     std::string previous_subject;
@@ -74,7 +86,7 @@ load_cfg::load_cfg(std::string &cfg_file) {
             if (fields.at(0).compare("filters")) {
                 int filters = stoi(fields.at(1));
                 current_layer->filter_configs->filters = filters;
-                // current_layer
+
             } else if (fields.at(0).compare("width")) {
                 int width = stoi(fields.at(1));
                 current_layer->filter_configs->width = width;
@@ -106,13 +118,18 @@ load_cfg::load_cfg(std::string &cfg_file) {
     allocator();
 }
 // current_layer->neurons = (float *)malloc(sizeof(float) * current_layer->width * current_layer->height * current_layer->depth);
-void load_cfg::allocator() {
+/**
+ * @brief Allocates space on the CPU for 
+ * the layers and filters.
+ * 
+ */
+void setup::allocator() {
     for (unsigned layer_num = 0; layer_num < m_net_config.m_layers.size(); ++layer_num) {
 
         layer &next_layer = (layer_num + 1 >= m_net_config.m_layers.size()) ? m_net_config.m_layers[layer_num + 1] : m_net_config.m_layers[layer_num];
         layer &previous_layer = (layer_num - 1 < 0) ? m_net_config.m_layers[layer_num] : m_net_config.m_layers[layer_num - 1];
         layer &current_layer = m_net_config.m_layers[layer_num];
-        int height, width, depth;
+        int height = 0, width = 0, depth = 0;
         switch (current_layer.layer_type) {
         case INPUT:
             current_layer.neurons = (float *)malloc(sizeof(float) * current_layer.width * current_layer.height * current_layer.depth);
@@ -142,31 +159,59 @@ void load_cfg::allocator() {
     }
 }
 
+void setup::load_weights(std::string &weights_file_name) {
+    // m_net_config = &net_config;
 
-load_weights::load_weights(std::string &weights_file_name, net_config &net_config) {
-    m_net_config = &net_config;
-
-	unsigned layer_num = 0;
+    unsigned layer_num = 0;
     unsigned filter_num = 0;
+    unsigned weight_num = 0;
 
-    std::string line;
-    layer *current_layer;
-	enum type layer_type;
+    // std::string line;
+    // layer *current_layer;
+    // enum type layer_type;
 
     // std::ifstream weights_file(weights_file_name, std::ifstream::binary);
     m_weights_file.open(weights_file_name);
 
-	while(getline(m_weights_file, line)) {
-        std::vector<std::string> fields;
+    nlohmann::json j_weights = nlohmann::json::parse(m_weights_file);
 
-		boost::split_regex(fields, line, boost::regex("=\\s"));
+    unsigned filter_length;
 
-		if(fields.at(0).compare("layer")) {
-			
-			// layer_type = 
-		}
+    for (layer_num = 0; layer_num < j_weights["layers"].size(); ++layer_num) {
+        switch (m_net_config.m_layers[layer_num].layer_type) {
+        case INPUT:
+            break;
+        case CONVOLUTION:
+            for (filter_num = 0; filter_num < j_weights["layers"]["filters"].size(); ++filter_num) {
+                filter_length = m_net_config.m_layers[layer_num].filter_configs[filter_num].width *
+                                m_net_config.m_layers[layer_num].filter_configs[filter_num].height *
+                                m_net_config.m_layers[layer_num].filter_configs[filter_num].depth;
 
-	}
+                for (weight_num = 0; weight_num < filter_length; ++weight_num) {
+                    m_net_config.m_layers[layer_num].filters[filter_num].filter_weight[weight_num] = j_weights["layers"]["filters"][filter_num].get<float>();
+                }
+            }
+            break;
+        case MAXPOOL:
+            break;
+        case FULLY:
+            break;
+        case OUTPUT:
+            break;
+        }
+    }
+    // j_weights["layers"][0]
+    // while(getline(m_weights_file, line)) {
+    //     std::vector<std::string> fields;
+
+    // 	boost::split_regex(fields, line, boost::regex("=\\s"));
+
+    // 	if(fields.at(0).compare("layer")) {
+
+    // 		// layer_type =
+    // 	}
+
+    // }
     // for(unsigned layer_num = 0; layer_num < m_net_config->num_layers; ++layer_num) {
     //     switch(m_net_config->m_layers[layer_num].layer_type) {
     //     case INPUT:
@@ -177,4 +222,8 @@ load_weights::load_weights(std::string &weights_file_name, net_config &net_confi
     //         }
     //     }
     // }
+}
+
+void setup::load_input(std::string &input_file) {
+    
 }

@@ -65,9 +65,24 @@ void cl_compute::compute_convolution(layer &this_layer) {
 		// m_device.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>;
 
         m_queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(filter_height, filter_width, filter_depth));
+
+        // m_queue.enqueueWriteBuffer(filter_buffers[filter_num], CL_FALSE, 0, 0, )
     }
 
+    // m_queue.enqueueWriteBuffer(filter_buffers, )
     // queue.enqueueWriteBuffer()
+}
+
+void cl_compute::compute_maxpool(layer &this_layer) {
+    int layer_prev_height = this_layer.layer_prev->height;
+    int layer_prev_width = this_layer.layer_prev->width;
+    int layer_prev_depth = this_layer.layer_prev->depth;
+
+    int layer_height = this_layer.height;
+    int layer_width = this_layer.width;
+    int layer_depth = this_layer.depth;
+
+    
 }
 
 void cl_compute::output(layer &this_layer) {
