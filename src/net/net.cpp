@@ -14,7 +14,7 @@
 #include "net/net.hpp"
 // #include "neuron/neuron.hpp"
 
-net::net(net_config nc, cl_setup &ocl) {
+net::net(net_config &nc, cl_setup &ocl) {
     m_ocl = ocl;
     m_net_config = nc;
 
@@ -49,7 +49,7 @@ net::net(net_config nc, cl_setup &ocl) {
     }
 }
 
-void net::feed_forward(std::vector<std::vector<std::vector<float>>> &input) {
+void net::feed_forward(float *input) {
     for (unsigned layer_num = 0; layer_num < m_net_config.num_layers; ++layer_num) {
         layer &this_layer = m_net_config.layer_num[layer_num];
         // this_layer = &m_net_config.m_layers[layer_num];
@@ -69,14 +69,17 @@ void net::feed_forward(std::vector<std::vector<std::vector<float>>> &input) {
         switch (this_layer.layer_type) {
         case INPUT:
 			m_ocl_compute.load(program);
-
-            for (unsigned x = 0; x < input.size(); ++x) {
-                for (unsigned y = 0; y < input[x].size(); ++y) {
-                    for (unsigned z = 0; z < input[x][y].size(); ++z) {
-                        this_layer.neurons[x * this_layer.height * this_layer.depth + y * this_layer.depth + z] = input[x][y][z];
-                    }
-                }
-            }
+            this_layer.neurons = input;
+            // for(unsigned i = 0; i < m_net_config.input_width * m_net_config.input_height * m_net_config.input_depth; ++i) {
+                // this_layer.neurons[i] = 
+            // }
+            // for (unsigned x = 0; x < m_net_config.input_width; ++x) {
+            //     for (unsigned y = 0; y < m_net_config.input_height; ++y) {
+            //         for (unsigned z = 0; z < m_net_config.input_depth; ++z) {
+            //             this_layer.neurons[x * this_layer.height * this_layer.depth + y * this_layer.depth + z] = input[x * this_layer.height * this_layer.depth + y * this_layer.depth + z];
+            //         }
+            //     }
+            // }
             break;
         case MAXPOOL:
             // m_ocl.build("src/compute/forward.cl", "-cl-std=CL1.2");

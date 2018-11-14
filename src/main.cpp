@@ -23,6 +23,7 @@ int main(int argc, const char * argv[]) {
 	
 	std::cout << "Preparing OpenCL...\n";
 	cl_setup compute;
+	compute.setup(CL_DEVICE_TYPE_GPU);
 	
 	// m_setup = new setup::setup();
 	std::cout << "Loading config...\n";
@@ -37,8 +38,12 @@ int main(int argc, const char * argv[]) {
 	// network_setup.load_input(input_file, false);
 	// std::cout << "Done.\n";
 
-	net network(network_setup.get_cfg(), compute);
-	// network
-	network.feed_forward(network_setup.load_input(input_file, false));
+	std::cout << "Setting up network...\n";
+	net network(*network_setup.get_cfg(), compute);
+	std::cout << "Done.\n";
+	// network	
 
+	std::cout << "Classifying...\n";
+	network.feed_forward(network_setup.load_input(input_file, false));
+	std::cout << "Done.\n";
 }

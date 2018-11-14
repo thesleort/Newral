@@ -25,9 +25,9 @@
  */
 class net {
 public:
-    net(net_config nc, cl_setup &ocl);
+    net(net_config &nc, cl_setup &ocl);
     layer get_layer(unsigned index);
-    void feed_forward(std::vector<std::vector<std::vector<float>>> &input);
+    void feed_forward(float *input);
     void backpropagate(std::vector<class_object> objects); // TODO: Rewrite to use pointer instead at some point
 
 private:

@@ -222,25 +222,32 @@ void setup::load_weights(std::string &weights_file_name) {
     // }
 }
 
-std::vector<std::vector<std::vector<float>>> setup::load_input(std::string &input_file, bool is_image) {
+float* setup::load_input(std::string &input_file, bool is_image) {
     int input_size = m_net_config.input_width * m_net_config.input_height * m_net_config.input_depth;
-    float input[input_size];
+    int slice = m_net_config.input_width * m_net_config.input_height;
+    float *input = (float *)malloc(sizeof(float) * input_size);
 
     if (!is_image) {
         std::string line;
         m_input_file.open(input_file);
         unsigned line_num = 0;
-        while(getline(m_input_file ,line)) {
+        while (getline(m_input_file, line)) {
             std::vector<std::string> fields;
+            
             boost::split_regex(fields, line, boost::regex(","));
-            for(unsigned i = 0; i < m_net_config.input_width * m_net_config.; ++width) {
-                
+            // TODO: Turn into SIMD instruction later
+            for (unsigned i = 0; i < m_net_config.input_width * m_net_config.input_height; ++i) {
+
+                // TODO: Normalize data
+                // float normalize = line[i] 
+                input[slice * line_num + i] = std::stof(fields[i]);
             }
+            ++line_num;
         }
         return input;
     }
 }
 
-net_config setup::get_cfg() {
-    return m_net_config;
+net_config* setup::get_cfg() {
+    return &m_net_config;
 }

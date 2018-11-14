@@ -94,4 +94,5 @@ void cl_compute::output(layer &this_layer) {
 		std::cout << output_array[i] << " ";
 	}
 	std::cout << "\n";
+    cl::finish();
 }

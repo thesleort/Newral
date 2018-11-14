@@ -32,8 +32,8 @@ class setup {
 		setup();
 		void load_cfg(std::string &cfg_file);
 		void load_weights(std::string &weights_file);
-		std::vector<std::vector<std::vector<float>>> load_input(std::string &input_file, bool is_image);
-		net_config get_cfg();
+		float* load_input(std::string &input_file, bool is_image);
+		net_config* get_cfg();
 	private:
 		std::ifstream m_cfg_file;
 		std::ifstream m_weights_file;
