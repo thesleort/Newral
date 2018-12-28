@@ -49,18 +49,18 @@ void cl_compute::compute_convolution(layer &this_layer) {
         filter_buffers.push_back(cl::Buffer(m_context, CL_MEM_READ_ONLY, filter_height * filter_width * filter_depth * sizeof(float), this_layer.filters[filter_num].filter_weight));
         cl::Kernel kernel(m_program, "convolution");
 
-        kernel.setArg(0, m_input_neurons);
-        kernel.setArg(1, layer_height);
-        kernel.setArg(2, layer_width);
-        kernel.setArg(3, layer_depth);
-        kernel.setArg(4, filter_buffers.at(filter_num));
-        kernel.setArg(5, filter_height);
-        kernel.setArg(6, filter_width);
-        kernel.setArg(7, filter_depth);
-        kernel.setArg(8, m_output_neurons);
-        kernel.setArg(9, filter_padding);
-        kernel.setArg(10, filter_stride);
-        kernel.setArg(11, filter_num);
+        kernel.setArg(0, m_input_neurons);					// input layer
+        kernel.setArg(1, layer_height);						// layer height
+        kernel.setArg(2, layer_width);						// layer width
+        kernel.setArg(3, layer_depth);						// layer depth
+        kernel.setArg(4, filter_buffers.at(filter_num));	// filter
+        kernel.setArg(5, filter_height);					// filter width
+        kernel.setArg(6, filter_width);						// filter height
+        kernel.setArg(7, filter_depth);						// filter depth
+        kernel.setArg(8, m_output_neurons);					// output layer
+        kernel.setArg(9, filter_padding);					// filter padding
+        kernel.setArg(10, filter_stride);					// filter stride
+        kernel.setArg(11, filter_num);						// filter num
 
 		// m_device.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>;
 
