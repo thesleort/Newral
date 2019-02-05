@@ -49,7 +49,7 @@ int cl_setup::setup(int DEVICE_TYPE) {
         for (unsigned platform_num = 0; platform_num < tmp_platforms.size(); ++platform_num) {
             std::cout << "(" << platform_num << "): " << tmp_platforms.at(platform_num).getInfo<CL_PLATFORM_NAME>() << "\n";
         }
-        std::cout << "Please chouse a platform: ";
+        std::cout << "Please choose a platform: ";
         std::cin >> pref;
         if (pref > tmp_platforms.size() - 1 || pref < 0) {
             std::cout << "This platform does not exist.\n";
