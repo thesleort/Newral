@@ -34,31 +34,39 @@ void setup::load_cfg(std::string &cfg_file) {
     unsigned num_layers = 0;
     enum type layer_type = INPUT;
     enum type previous_layer_type = INPUT;
-    layer *current_layer;
 
     while (getline(m_cfg_file, line)) {
         std::vector<std::string> fields;
 
+    layer *current_layer;
         //boost
         boost::split_regex(fields, line, boost::regex("="));
 
         if (fields.at(0).compare("[net]") == 0) {
             layer_type = INPUT;
-            current_layer = (layer *)malloc(sizeof(layer));
+            // current_layer = (layer *)malloc(sizeof(layer));
+			current_layer = new layer;
         } else if (fields.at(0).compare("[convolution]") == 0) {
             layer_type = CONVOLUTION;
             m_net_config.m_layers.push_back(*current_layer);
-            current_layer = (layer *)malloc(sizeof(layer));
+            // current_layer = (layer *)malloc(sizeof(layer));
+			current_layer = new layer;
             current_layer->filter_configs = (filter_config *)malloc(sizeof(filter_config));
             ++num_layers;
-        }
+        } else if (fields.at(0).compare("[end]") == 0) {
+			layer_type = OUTPUT;
+			m_net_config.m_layers.push_back(*current_layer);
+			// current_layer = (layer *)malloc(sizeof(layer));
+			// current_layer->filter_configs = (filter_config *)malloc(sizeof(filter_config));
+			++num_layers;
+		}
 
         if (layer_type == INPUT) {
 
             // Input
             layer_type = INPUT;
             current_layer->layer_type = INPUT;
-
+	
             if (fields.at(0).compare("width") == 0) {
                 int width = stoi(fields.at(1));
                 m_net_config.input_width = width;
@@ -73,6 +81,7 @@ void setup::load_cfg(std::string &cfg_file) {
                 int depth = stoi(fields.at(1));
                 m_net_config.input_depth = depth;
                 current_layer->depth = depth;
+				current_layer->num_filters = depth;
             }
 
         } else if (layer_type == CONVOLUTION) {
@@ -82,7 +91,9 @@ void setup::load_cfg(std::string &cfg_file) {
 
             if (fields.at(0).compare("filters") == 0) {
                 int filters = stoi(fields.at(1));
+				std::cout << "conv filters :" << filters << "\n";
                 current_layer->filter_configs->filters = filters;
+				std::cout << "layer conv filters :" << current_layer->filter_configs->filters << "\n";
 
             } else if (fields.at(0).compare("width") == 0) {
                 int width = stoi(fields.at(1));
@@ -104,12 +115,16 @@ void setup::load_cfg(std::string &cfg_file) {
                 int padding = stoi(fields.at(1));
                 current_layer->filter_configs->padding = padding;
             }
-
-        } else if (fields.at(0).compare("[end]") == 0) {
-            m_net_config.m_layers.push_back(*current_layer);
-            ++num_layers;
-            m_net_config.num_layers = num_layers;
-        }
+		} else if(layer_type == OUTPUT) {
+			layer_type = OUTPUT;
+			current_layer->layer_type = OUTPUT;
+			m_net_config.num_layers = num_layers;
+		}
+        // } else if (fields.at(0).compare("[end]") == 0) {
+        //     m_net_config.m_layers.push_back(*current_layer);
+        //     ++num_layers;
+        //     m_net_config.num_layers = num_layers;
+        // }
     }
 
     allocator();
@@ -122,6 +137,7 @@ void setup::load_cfg(std::string &cfg_file) {
  */
 void setup::allocator() {
     std::cout << "Allocating memory\n";
+		std::cout << "Num filters: " << m_net_config.m_layers[1].num_filters << "\n";
     for (unsigned layer_num = 0; layer_num < m_net_config.m_layers.size(); ++layer_num) {
 
         layer &next_layer = (layer_num + 1 >= m_net_config.m_layers.size()) ? m_net_config.m_layers[layer_num + 1] : m_net_config.m_layers[layer_num];
@@ -130,10 +146,12 @@ void setup::allocator() {
         int height = 0, width = 0, depth = 0;
         switch (current_layer.layer_type) {
         case INPUT:
+			std::cout << "Allocating: Input\n";			
             current_layer.neurons = (float *)malloc(sizeof(float) * current_layer.width * current_layer.height * current_layer.depth);
             break;
         case CONVOLUTION:
             // Allocate neurons on next layer
+			std::cout << "Allocating: Convolution\n";
             height = (current_layer.height - current_layer.filter_configs->height + 2 * current_layer.filter_configs->padding) / current_layer.filter_configs->stride + 1;
             width = (current_layer.width - current_layer.filter_configs->width + 2 * current_layer.filter_configs->padding) / current_layer.filter_configs->stride + 1;
             height = current_layer.num_filters;
@@ -145,14 +163,20 @@ void setup::allocator() {
             current_layer.layer_this = &current_layer;
 
             // Allocate filters
+
             current_layer.filters = (filter *)malloc(sizeof(filter) * current_layer.num_filters);
             current_layer.filter_configs->m_layer = &current_layer;
+			std::cout << "Allocating: Filters, (" << current_layer.num_filters << ")\n";
             for (unsigned filter_num = 0; filter_num < current_layer.num_filters; ++filter_num) {
+				 std::cout << "Allocating: Filter (" << filter_num << ")\n";
                 current_layer.filters[filter_num].filter_weight = (float *)malloc(sizeof(float) * current_layer.filter_configs->width * current_layer.filter_configs->height * current_layer.filter_configs->depth);
                 current_layer.filters[filter_num].filter_delta_weight = (float *)malloc(sizeof(float) * current_layer.filter_configs->width * current_layer.filter_configs->height * current_layer.filter_configs->depth);
                 current_layer.filters[filter_num].m_filter_config = current_layer.filter_configs;
             }
             break;
+		case OUTPUT:
+			std::cout << "Allocating: Output (none)\n";
+			break;
         }
     }
 }

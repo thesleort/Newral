@@ -18,11 +18,12 @@ net::net(net_config &nc, cl_setup &ocl) {
     m_ocl = ocl;
     m_net_config = nc;
 
-    m_net_config.layer_num = (layer *)malloc(sizeof(layer) * m_net_config.m_layers.size());
+    // m_net_config.layer_num = (layer *)malloc(sizeof(layer) * m_net_config.m_layers.size());
     m_net_config.num_layers = m_net_config.m_layers.size();
 
     for (unsigned layer_num = 0; layer_num < m_net_config.num_layers; ++layer_num) {
-        layer &this_layer = m_net_config.layer_num[layer_num];
+        // layer &this_layer = m_net_config.layer_num[layer_num];
+		layer &this_layer = m_net_config.m_layers.at(layer_num);
         // this_layer = &m_net_config.m_layers[layer_num];
 
         //Allocate input data structure
@@ -51,11 +52,13 @@ net::net(net_config &nc, cl_setup &ocl) {
 
 void net::feed_forward(float *input) {
     for (unsigned layer_num = 0; layer_num < m_net_config.num_layers; ++layer_num) {
-        layer &this_layer = m_net_config.layer_num[layer_num];
+        // layer &this_layer = m_net_config.layer_num[layer_num];
+		layer &this_layer = m_net_config.m_layers.at(layer_num);
         // this_layer = &m_net_config.m_layers[layer_num];
 
+		std::cout << "Building OpenCL kernels...\n";
         m_ocl.build("src/compute/forward.cl", OPEN_CL_1_2);
-
+		std::cout << "Done\n";
         cl::Program program = m_ocl.get_programs()->at(0);
         /**
 		 * @brief TODO:
@@ -68,6 +71,7 @@ void net::feed_forward(float *input) {
 		 */
         switch (this_layer.layer_type) {
         case INPUT:
+			std::cout << "Computation started...\n";
 			m_ocl_compute.load(program);
             this_layer.neurons = input;
             // for(unsigned i = 0; i < m_net_config.input_width * m_net_config.input_height * m_net_config.input_depth; ++i) {
@@ -94,12 +98,14 @@ void net::feed_forward(float *input) {
 
             break;
         case CONVOLUTION:
+			std::cout << "Computing convolution, layer:" << layer_num  << "\n";
             m_ocl_compute.compute_convolution(this_layer);
             break;
         case FULLY:
             break;
         case OUTPUT:
-			m_ocl_compute.output(this_layer);
+			std::cout << "Result\n";
+			m_ocl_compute.output(m_net_config.m_layers.at(layer_num - 1));
             break;
         }
     }

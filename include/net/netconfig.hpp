@@ -40,7 +40,7 @@ typedef struct _net_config {
     unsigned input_height;
     unsigned input_depth; // Typically color for images
     unsigned num_layers;
-    layer *layer_num; // The topology consists of n layers
+    // layer *layer_num; // The topology consists of n layers
     std::vector<layer> m_layers;
 } net_config;
 
