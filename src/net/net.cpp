@@ -14,16 +14,16 @@
 #include "net/net.hpp"
 // #include "neuron/neuron.hpp"
 
-net::net(net_config &nc, cl_setup &ocl) {
+net::net(NetConfig &nc, cl_setup &ocl) {
     m_ocl = ocl;
     m_net_config = nc;
 
     // m_net_config.layer_num = (layer *)malloc(sizeof(layer) * m_net_config.m_layers.size());
-    m_net_config.num_layers = m_net_config.m_layers.size();
+    m_net_config.num_layers = m_net_config.layers.size();
 
     for (unsigned layer_num = 0; layer_num < m_net_config.num_layers; ++layer_num) {
         // layer &this_layer = m_net_config.layer_num[layer_num];
-		layer &this_layer = m_net_config.m_layers.at(layer_num);
+		Layer &this_layer = m_net_config.layers.at(layer_num);
         // this_layer = &m_net_config.m_layers[layer_num];
 
         //Allocate input data structure
@@ -53,7 +53,7 @@ net::net(net_config &nc, cl_setup &ocl) {
 void net::feed_forward(float *input) {
     for (unsigned layer_num = 0; layer_num < m_net_config.num_layers; ++layer_num) {
         // layer &this_layer = m_net_config.layer_num[layer_num];
-		layer &this_layer = m_net_config.m_layers.at(layer_num);
+		Layer &this_layer = m_net_config.layers.at(layer_num);
         // this_layer = &m_net_config.m_layers[layer_num];
 
 		std::cout << "Building OpenCL kernels...\n";
@@ -105,7 +105,7 @@ void net::feed_forward(float *input) {
             break;
         case OUTPUT:
 			std::cout << "Result\n";
-			m_ocl_compute.output(m_net_config.m_layers.at(layer_num - 1));
+			m_ocl_compute.output(m_net_config.layers.at(layer_num - 1));
             break;
         }
     }
@@ -146,7 +146,7 @@ unsigned filter_size_calc(unsigned &length, unsigned &filter, int &padding, unsi
     return (length - filter + 2 * padding) / stride + 1;
 }
 
-unsigned filter_size(unsigned &length, filter_config *fmc) {
+unsigned filter_size(unsigned &length, FilterConfig *fmc) {
     return filter_size_calc(length, fmc->filters, fmc->padding, fmc->stride);
 }
 
@@ -155,26 +155,35 @@ unsigned filter_size(unsigned &length, filter_config *fmc) {
  * 
  * @param config 
  */
-void net::add_layer(layer &config, enum type type) {
-    config.layer_this->neurons = (float *)malloc(config.width * config.height * config.depth * sizeof(float));
-    config.layer_this->filters = (filter *)malloc(config.num_filters * sizeof(filter));
+void net::add_layer(Layer &config, enum type type) {
+    // config.layer_this->neurons = (float *)malloc(config.width * config.height * config.depth * sizeof(float));
+	int layersize = config.width * config.height * config.depth; 
+	config.neurons = new float[layersize];
 
-    for (unsigned neuron = 0; neuron < sizeof(config.layer_this->neurons); ++neuron) {
-        config.layer_this->neurons[neuron] = 0;
+	float *array = NULL;
+
+	float array2[layersize];
+
+	array = new float[layersize];
+
+    // config.filters = (Filter *)malloc(config.num_filters * sizeof(Filter));
+	config.filters = new Filter[config.num_filters];
+    for (unsigned neuron = 0; neuron < layersize; ++neuron) {
+        config.neurons[neuron] = neuron;
     }
 
-    for (unsigned filter = 0; filter < config.layer_this->num_filters; ++filter) {
+    for (unsigned filter = 0; filter < config.num_filters; ++filter) {
         add_filter(config.filter_configs[filter]);
     }
 }
 
-void net::add_filter(filter_config &config) {
-    config.m_filter->filter_weight = (float *)malloc(config.height * config.width * config.depth * sizeof(float));
-    config.m_filter->filter_delta_weight = (float *)malloc(config.height * config.width * config.depth * sizeof(float));
+void net::add_filter(FilterConfig &config) {
+    config.filter->filter_weights = (float *)malloc(config.height * config.width * config.depth * sizeof(float));
+    config.filter->filter_delta_weights = (float *)malloc(config.height * config.width * config.depth * sizeof(float));
 
-    for (unsigned filter_weight = 0; filter_weight < sizeof(config.m_filter->filter_weight); ++filter_weight) {
-        config.m_filter->filter_weight[filter_weight] = random_weight();
-        config.m_filter->filter_delta_weight[filter_weight] = 0;
+    for (unsigned filter_weight = 0; filter_weight < sizeof(config.filter->filter_weights); ++filter_weight) {
+        config.filter->filter_weights[filter_weight] = random_weight();
+        config.filter->filter_delta_weights[filter_weight] = 0;
     }
 }
 
@@ -186,7 +195,7 @@ void net::add_filter(filter_config &config) {
  * @param fc 
  */
 // TODO: Remove, since unnecessary ?
-void net::connect_neurons(layer &lc, filter_config &fc) {
+void net::connect_neurons(Layer &lc, FilterConfig &fc) {
     for (unsigned x = 0; x < lc.width; ++x) {
         for (unsigned y = 0; y < lc.height; ++y) {
             for (unsigned filter_z = 0; filter_z < lc.depth; ++filter_z) {

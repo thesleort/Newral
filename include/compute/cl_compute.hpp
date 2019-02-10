@@ -11,9 +11,9 @@ class cl_compute {
 	public:
 		cl_compute();
 		void load(cl::Program &program);
-		void compute_convolution(layer &this_layer);
-		void compute_maxpool(layer &this_layer);
-		void output(layer &this_layer);
+		void compute_convolution(Layer &this_layer);
+		void compute_maxpool(Layer &this_layer);
+		void output(Layer &this_layer);
 	protected:
 	private:
 		cl::Program m_program;

@@ -14,7 +14,7 @@ void cl_compute::load(cl::Program &program) {
 	m_queue = cl::CommandQueue(m_context, m_device);
 }
 
-void cl_compute::compute_convolution(layer &this_layer) {
+void cl_compute::compute_convolution(Layer &this_layer) {
 
     int num_filters = this_layer.num_filters;
 
@@ -46,7 +46,7 @@ void cl_compute::compute_convolution(layer &this_layer) {
         filter_padding = this_layer.filter_configs[filter_num].padding;
         filter_stride = this_layer.filter_configs[filter_num].stride;
 
-        filter_buffers.push_back(cl::Buffer(m_context, CL_MEM_READ_ONLY, filter_height * filter_width * filter_depth * sizeof(float), this_layer.filters[filter_num].filter_weight));
+        filter_buffers.push_back(cl::Buffer(m_context, CL_MEM_READ_ONLY, filter_height * filter_width * filter_depth * sizeof(float), this_layer.filters[filter_num].filter_weights));
         cl::Kernel kernel(m_program, "convolution");
 
         kernel.setArg(0, m_input_neurons);					// input layer
@@ -73,7 +73,7 @@ void cl_compute::compute_convolution(layer &this_layer) {
     // queue.enqueueWriteBuffer()
 }
 
-void cl_compute::compute_maxpool(layer &this_layer) {
+void cl_compute::compute_maxpool(Layer &this_layer) {
     int layer_prev_height = this_layer.layer_prev->height;
     int layer_prev_width = this_layer.layer_prev->width;
     int layer_prev_depth = this_layer.layer_prev->depth;
@@ -85,7 +85,7 @@ void cl_compute::compute_maxpool(layer &this_layer) {
     
 }
 
-void cl_compute::output(layer &this_layer) {
+void cl_compute::output(Layer &this_layer) {
 	int total_length = this_layer.width * this_layer.height *this_layer.depth;
 	float output_array[total_length];
 

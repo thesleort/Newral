@@ -3,8 +3,10 @@
 
 #include <vector>
 
-typedef struct neuron_filter;
-typedef struct filter;
+typedef struct NeuronFilter;
+typedef struct Filter;
+typedef struct Layer;
+
 class cl_compute;
 
 enum type { CONVOLUTION,
@@ -13,10 +15,9 @@ enum type { CONVOLUTION,
             INPUT,
 			OUTPUT };
 
-typedef struct layer;
 // class neuron;
 
-typedef struct filter_config {
+typedef struct FilterConfig {
 
     unsigned filters = 1;
     unsigned stride = 1;
@@ -27,53 +28,52 @@ typedef struct filter_config {
     unsigned height;
     unsigned depth;     // Same as layer depth.
 
-    filter *m_filter;
+    Filter *filter;
     // For neuron
-    layer *m_layer;
+    Layer *layer;
 
     // Has all weights been initialized for this filter
     bool initialized = false;
-} filter_config;
+};
 
-typedef struct _net_config {
+typedef struct NetConfig {
     unsigned input_width;
     unsigned input_height;
     unsigned input_depth; // Typically color for images
     unsigned num_layers;
     // layer *layer_num; // The topology consists of n layers
-    std::vector<layer> m_layers;
-} net_config;
+    std::vector<Layer> layers;
+};
 
-typedef struct filter {
-    filter_config *m_filter_config;
-    float *filter_weight; // To make NxNxDepth feature map
-	float *filter_delta_weight;
-} filter;
+typedef struct Filter {
+    FilterConfig *filter_config;
+    float *filter_weights; // To make NxNxDepth feature map
+	float *filter_delta_weights;
+};
 
-typedef struct layer {
-	net_config *m_net_config;
+typedef struct Layer {
+	NetConfig *net_config;
     type layer_type;
     unsigned width;
     unsigned height;
     unsigned depth;     // Based on amount of filters in previous layer.
 
     // For neuron
-    layer *layer_this;
-    layer *layer_prev;
-    layer *layer_next;
+    Layer *layer_prev;
+    Layer *layer_next;
 
     float *neurons;    // "Dot" product of all filters. PSEUDO data, can be freed from memory after layer is done
-	filter *filters;
+	Filter *filters;
 
     // Filters
     unsigned num_filters;
-    filter_config *filter_configs;
-} layer;
+    FilterConfig *filter_configs;
+};
 
 // typedef struct Topology {
 // } Topology;
 
-typedef struct class_object {
+typedef struct _class_object {
     double object; // Class of object defines as a number
     double x;      // top left coordinates of object on image
     double y;
