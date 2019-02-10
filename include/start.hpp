@@ -33,12 +33,12 @@ class setup {
 		void load_cfg(std::string &cfg_file);
 		void load_weights(std::string &weights_file);
 		float* load_input(std::string &input_file, bool is_image);
-		net_config* get_cfg();
+		NetConfig* get_cfg();
 	private:
 		std::ifstream m_cfg_file;
 		std::ifstream m_weights_file;
 		std::ifstream m_input_file;
-		net_config m_net_config;
+		NetConfig m_net_config;
 		void allocator();
 };
 
