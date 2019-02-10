@@ -67,7 +67,7 @@ typedef struct Layer {
 
     // Filters
     unsigned num_filters;
-    FilterConfig *filter_configs;
+    FilterConfig *filters_config;
 };
 
 // typedef struct Topology {

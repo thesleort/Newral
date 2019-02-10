@@ -39,12 +39,12 @@ void cl_compute::compute_convolution(Layer &this_layer) {
 
     for (unsigned filter_num = 0; filter_num < this_layer.layer_prev->num_filters; ++filter_num) {
 
-        filter_height = this_layer.filter_configs[filter_num].height;
-        filter_width = this_layer.filter_configs[filter_num].width;
-        filter_depth = this_layer.filter_configs[filter_num].depth;
+        filter_height = this_layer.filters_config->height;
+        filter_width = this_layer.filters_config->width;
+        filter_depth = this_layer.filters_config->depth;
 
-        filter_padding = this_layer.filter_configs[filter_num].padding;
-        filter_stride = this_layer.filter_configs[filter_num].stride;
+        filter_padding = this_layer.filters_config->padding;
+        filter_stride = this_layer.filters_config->stride;
 
         filter_buffers.push_back(cl::Buffer(m_context, CL_MEM_READ_ONLY, filter_height * filter_width * filter_depth * sizeof(float), this_layer.filters[filter_num].filter_weights));
         cl::Kernel kernel(m_program, "convolution");

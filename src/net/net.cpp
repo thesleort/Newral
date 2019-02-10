@@ -23,7 +23,7 @@ net::net(NetConfig &nc, cl_setup &ocl) {
 
     for (unsigned layer_num = 1; layer_num < m_net_config.num_layers; ++layer_num) {
         // layer &this_layer = m_net_config.layer_num[layer_num];
-		Layer &this_layer = m_net_config.layers.at(layer_num);
+        Layer &this_layer = m_net_config.layers.at(layer_num);
         // this_layer = &m_net_config.m_layers[layer_num];
 
         //Allocate input data structure
@@ -53,12 +53,12 @@ net::net(NetConfig &nc, cl_setup &ocl) {
 void net::feed_forward(float *input) {
     for (unsigned layer_num = 0; layer_num < m_net_config.num_layers; ++layer_num) {
         // layer &this_layer = m_net_config.layer_num[layer_num];
-		Layer &this_layer = m_net_config.layers.at(layer_num);
+        Layer &this_layer = m_net_config.layers.at(layer_num);
         // this_layer = &m_net_config.m_layers[layer_num];
 
-		std::cout << "Building OpenCL kernels...\n";
+        std::cout << "Building OpenCL kernels...\n";
         m_ocl.build("src/compute/forward.cl", OPEN_CL_1_2);
-		std::cout << "Done\n";
+        std::cout << "Done.\n";
         cl::Program program = m_ocl.get_programs()->at(0);
         /**
 		 * @brief TODO:
@@ -71,11 +71,11 @@ void net::feed_forward(float *input) {
 		 */
         switch (this_layer.layer_type) {
         case INPUT:
-			std::cout << "Computation started...\n";
-			m_ocl_compute.load(program);
+            std::cout << "Computation started...\n";
+            m_ocl_compute.load(program);
             this_layer.neurons = input;
             // for(unsigned i = 0; i < m_net_config.input_width * m_net_config.input_height * m_net_config.input_depth; ++i) {
-                // this_layer.neurons[i] = 
+            // this_layer.neurons[i] =
             // }
             // for (unsigned x = 0; x < m_net_config.input_width; ++x) {
             //     for (unsigned y = 0; y < m_net_config.input_height; ++y) {
@@ -98,20 +98,18 @@ void net::feed_forward(float *input) {
 
             break;
         case CONVOLUTION:
-			std::cout << "Computing convolution, layer:" << layer_num  << "\n";
+            std::cout << "Computing convolution, layer:" << layer_num << "\n";
             m_ocl_compute.compute_convolution(this_layer);
             break;
         case FULLY:
             break;
         case OUTPUT:
-			std::cout << "Result\n";
-			m_ocl_compute.output(m_net_config.layers.at(layer_num - 1));
+            std::cout << "Result\n";
+            m_ocl_compute.output(m_net_config.layers.at(layer_num - 1));
             break;
         }
     }
 }
-
-
 
 // void net::feed_forward(std::vector<std::vector<std::vector<float>>> &input) {
 //     if (&m_net_config != NULL) {
@@ -155,28 +153,27 @@ unsigned filter_size(unsigned &length, FilterConfig *fmc) {
  * 
  * @param config 
  */
-void net::add_layer(Layer &config, enum type type) {
+void net::add_layer(Layer &layer, enum type type) {
     // config.layer_this->neurons = (float *)malloc(config.width * config.height * config.depth * sizeof(float));
-	int layersize = config.width * config.height * config.depth; 
-	config.neurons = new float[layersize];
+    int layersize = layer.width * layer.height * layer.depth;
+    layer.neurons = new float[layersize];
 
     // config.filters = (Filter *)malloc(config.num_filters * sizeof(Filter));
-	config.filters = new Filter[config.num_filters];
-    for (unsigned neuron = 0; neuron < layersize; ++neuron) {
-        config.neurons[neuron] = neuron;
-    }
+    layer.filters = new Filter[layer.num_filters];
 
-    for (unsigned filter = 0; filter < config.num_filters; ++filter) {
-        add_filter(*config.filter_configs);
+    if (type != OUTPUT) {
+        for (unsigned filter = 0; filter < layer.num_filters; ++filter) {
+            add_filter(*layer.filters_config);
+        }
     }
 }
 
 void net::add_filter(FilterConfig &config) {
     // config.filter->filter_weights = (float *)malloc(config.height * config.width * config.depth * sizeof(float));
-	int filter_size = config.height * config.width * config.depth;
-	config.filter->filter_weights = new float[filter_size];
+    int filter_size = config.height * config.width * config.depth;
+    config.filter->filter_weights = new float[filter_size];
 
-	config.filter->filter_delta_weights = new float[filter_size];
+    config.filter->filter_delta_weights = new float[filter_size];
     // config.filter->filter_delta_weights = (float *)malloc(config.height * config.width * config.depth * sizeof(float));
 
     for (unsigned filter_weight = 0; filter_weight < sizeof(config.filter->filter_weights); ++filter_weight) {

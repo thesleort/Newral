@@ -33,7 +33,7 @@ void setup::load_cfg(std::string &cfg_file) {
 
     unsigned num_layers = 0;
     enum type layer_type = INPUT;
-    enum type previous_layer_type = INPUT;
+    // enum type previous_layer_type = INPUT;
 
 	Layer *current_layer;
     while (getline(m_cfg_file, line)) {
@@ -51,16 +51,17 @@ void setup::load_cfg(std::string &cfg_file) {
             layer_type = CONVOLUTION;
             m_net_config.layers.push_back(*current_layer);
             // current_layer = (Layer *)malloc(sizeof(Layer));
-            // current_layer->filter_configs = (FilterConfig *)malloc(sizeof(FilterConfig));
+            // current_layer->filters_config = (FilterConfig *)malloc(sizeof(FilterConfig));
             current_layer = new Layer;
-			current_layer->filter_configs = new FilterConfig;
+			current_layer->filters_config = new FilterConfig;
             current_layer->net_config = &m_net_config;
             ++num_layers;
         } else if (fields.at(0).compare("[end]") == 0) {
             layer_type = OUTPUT;
             m_net_config.layers.push_back(*current_layer);
-            // current_layer = (layer *)malloc(sizeof(layer));
-            // current_layer->filter_configs = (filter_config *)malloc(sizeof(filter_config));
+
+			current_layer = new Layer;
+            current_layer->net_config = &m_net_config;;
             ++num_layers;
         }
 
@@ -95,45 +96,40 @@ void setup::load_cfg(std::string &cfg_file) {
             if (fields.at(0).compare("filters") == 0) {
                 int filters = stoi(fields.at(1));
                 std::cout << "conv filters: " << filters << "\n";
-                current_layer->filter_configs->filters = filters;
+                current_layer->filters_config->filters = filters;
 				current_layer->num_filters = filters;
-                std::cout << "layer conv filters: " << current_layer->filter_configs->filters << "\n";
+                std::cout << "layer conv filters: " << current_layer->filters_config->filters << "\n";
 
             } else if (fields.at(0).compare("width") == 0) {
                 int width = stoi(fields.at(1));
-                current_layer->filter_configs->width = width;
+                current_layer->filters_config->width = width;
 
             } else if (fields.at(0).compare("height") == 0) {
                 int height = stoi(fields.at(1));
-                current_layer->filter_configs->height = height;
+                current_layer->filters_config->height = height;
 
             } else if (fields.at(0).compare("depth") == 0) {
                 int depth = stoi(fields.at(1));
-                current_layer->filter_configs->depth = depth;
+                current_layer->filters_config->depth = depth;
 
             } else if (fields.at(0).compare("stride") == 0) {
                 int stride = stoi(fields.at(1));
-                current_layer->filter_configs->stride = stride;
+                current_layer->filters_config->stride = stride;
 
             } else if (fields.at(0).compare("padding") == 0) {
                 int padding = stoi(fields.at(1));
-                current_layer->filter_configs->padding = padding;
+                current_layer->filters_config->padding = padding;
             }
         } else if (layer_type == OUTPUT) {
+			++num_layers;
             layer_type = OUTPUT;
             current_layer->layer_type = OUTPUT;
-            m_net_config.num_layers = num_layers;
+			m_net_config.layers.push_back(*current_layer);
+			m_net_config.num_layers = num_layers;
         }
-        // } else if (fields.at(0).compare("[end]") == 0) {
-        //     m_net_config.m_layers.push_back(*current_layer);
-        //     ++num_layers;
-        //     m_net_config.num_layers = num_layers;
-        // }
     }
-
     allocator();
 }
-// current_layer->neurons = (float *)malloc(sizeof(float) * current_layer->width * current_layer->height * current_layer->depth);
 /**
  * @brief Allocates space on the CPU for 
  * the layers and filters.
@@ -156,8 +152,8 @@ void setup::allocator() {
         case CONVOLUTION:
             // Allocate neurons on next layer
             std::cout << "Allocating: Convolution\n";
-            height = (previous_layer.height - current_layer.filter_configs->height + 2 * current_layer.filter_configs->padding) / current_layer.filter_configs->stride + 1;
-            width = (previous_layer.width - current_layer.filter_configs->width + 2 * current_layer.filter_configs->padding) / current_layer.filter_configs->stride + 1;
+            height = (previous_layer.height - current_layer.filters_config->height + 2 * current_layer.filters_config->padding) / current_layer.filters_config->stride + 1;
+            width = (previous_layer.width - current_layer.filters_config->width + 2 * current_layer.filters_config->padding) / current_layer.filters_config->stride + 1;
             depth = previous_layer.num_filters;
             // current_layer.neurons = (float *)malloc(sizeof(float) * width * height * depth);
 
@@ -173,17 +169,22 @@ void setup::allocator() {
 
             // Allocate filters
 
-            current_layer.filters = (Filter *)malloc(sizeof(Filter) * current_layer.filter_configs->filters);
-            current_layer.filter_configs->layer = &current_layer;
-            // std::cout << "Allocating: Filters (" << current_layer.filter_configs->filters << ")\n";
-            // for (unsigned filter_num = 0; filter_num < current_layer.filter_configs->filters; ++filter_num) {
+            // current_layer.filters = (Filter *)malloc(sizeof(Filter) * current_layer.filters_config->filters);
+            current_layer.filters_config->layer = &current_layer;
+            // std::cout << "Allocating: Filters (" << current_layer.filters_config->filters << ")\n";
+            // for (unsigned filter_num = 0; filter_num < current_layer.filters_config->filters; ++filter_num) {
             //     std::cout << "Allocating: Filter (" << filter_num << ")\n";
-            //     current_layer.filters[filter_num].filter_weights = (float *)malloc(sizeof(float) * current_layer.filter_configs->width * current_layer.filter_configs->height * current_layer.filter_configs->depth);
-            //     current_layer.filters[filter_num].filter_delta_weights = (float *)malloc(sizeof(float) * current_layer.filter_configs->width * current_layer.filter_configs->height * current_layer.filter_configs->depth);
-            //     current_layer.filters[filter_num].filter_config = current_layer.filter_configs;
+            //     current_layer.filters[filter_num].filter_weights = (float *)malloc(sizeof(float) * current_layer.filters_config->width * current_layer.filters_config->height * current_layer.filters_config->depth);
+            //     current_layer.filters[filter_num].filter_delta_weights = (float *)malloc(sizeof(float) * current_layer.filters_config->width * current_layer.filters_config->height * current_layer.filters_config->depth);
+            //     current_layer.filters[filter_num].filter_config = current_layer.filters_config;
             // }
             break;
         case OUTPUT:
+			current_layer.layer_prev = &previous_layer;
+
+			current_layer.width = current_layer.layer_prev->width;
+			current_layer.height = current_layer.layer_prev->height;
+			current_layer.depth = current_layer.layer_prev->depth;
             std::cout << "Allocating: Output (none)\n";
             break;
         }
@@ -215,9 +216,9 @@ void setup::load_weights(std::string &weights_file_name) {
             break;
         case CONVOLUTION:
             for (filter_num = 0; filter_num < j_weights["layers"]["filters"].size(); ++filter_num) {
-                filter_length = m_net_config.layers[layer_num].filter_configs[filter_num].width *
-                                m_net_config.layers[layer_num].filter_configs[filter_num].height *
-                                m_net_config.layers[layer_num].filter_configs[filter_num].depth;
+                filter_length = m_net_config.layers[layer_num].filters_config->width *
+                                m_net_config.layers[layer_num].filters_config->height *
+                                m_net_config.layers[layer_num].filters_config->depth;
 
                 for (weight_num = 0; weight_num < filter_length; ++weight_num) {
                     m_net_config.layers[layer_num].filters[filter_num].filter_weights[weight_num] = j_weights["layers"]["filters"][filter_num].get<float>();
