@@ -46,7 +46,7 @@ void cl_compute::compute_convolution(Layer &this_layer) {
         filter_padding = this_layer.filter_configs[filter_num].padding;
         filter_stride = this_layer.filter_configs[filter_num].stride;
 
-        filter_buffers.push_back(cl::Buffer(m_context, CL_MEM_READ_ONLY, filter_height * filter_width * filter_depth * sizeof(float), this_layer.filters[filter_num].filter_weight));
+        filter_buffers.push_back(cl::Buffer(m_context, CL_MEM_READ_ONLY, filter_height * filter_width * filter_depth * sizeof(float), this_layer.filters[filter_num].filter_weights));
         cl::Kernel kernel(m_program, "convolution");
 
         kernel.setArg(0, m_input_neurons);					// input layer

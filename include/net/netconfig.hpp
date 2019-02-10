@@ -47,8 +47,8 @@ typedef struct NetConfig {
 
 typedef struct Filter {
     FilterConfig *filter_config;
-    float *filter_weight; // To make NxNxDepth feature map
-	float *filter_delta_weight;
+    float *filter_weights; // To make NxNxDepth feature map
+	float *filter_delta_weights;
 };
 
 typedef struct Layer {
@@ -59,7 +59,6 @@ typedef struct Layer {
     unsigned depth;     // Based on amount of filters in previous layer.
 
     // For neuron
-    Layer *layer_this;
     Layer *layer_prev;
     Layer *layer_next;
 
