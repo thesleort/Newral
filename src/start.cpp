@@ -96,6 +96,7 @@ void setup::load_cfg(std::string &cfg_file) {
                 int filters = stoi(fields.at(1));
                 std::cout << "conv filters: " << filters << "\n";
                 current_layer->filter_configs->filters = filters;
+				current_layer->num_filters = filters;
                 std::cout << "layer conv filters: " << current_layer->filter_configs->filters << "\n";
 
             } else if (fields.at(0).compare("width") == 0) {

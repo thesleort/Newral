@@ -21,7 +21,7 @@ net::net(NetConfig &nc, cl_setup &ocl) {
     // m_net_config.layer_num = (layer *)malloc(sizeof(layer) * m_net_config.m_layers.size());
     m_net_config.num_layers = m_net_config.layers.size();
 
-    for (unsigned layer_num = 0; layer_num < m_net_config.num_layers; ++layer_num) {
+    for (unsigned layer_num = 1; layer_num < m_net_config.num_layers; ++layer_num) {
         // layer &this_layer = m_net_config.layer_num[layer_num];
 		Layer &this_layer = m_net_config.layers.at(layer_num);
         // this_layer = &m_net_config.m_layers[layer_num];
@@ -160,12 +160,6 @@ void net::add_layer(Layer &config, enum type type) {
 	int layersize = config.width * config.height * config.depth; 
 	config.neurons = new float[layersize];
 
-	float *array = NULL;
-
-	float array2[layersize];
-
-	array = new float[layersize];
-
     // config.filters = (Filter *)malloc(config.num_filters * sizeof(Filter));
 	config.filters = new Filter[config.num_filters];
     for (unsigned neuron = 0; neuron < layersize; ++neuron) {
@@ -173,13 +167,17 @@ void net::add_layer(Layer &config, enum type type) {
     }
 
     for (unsigned filter = 0; filter < config.num_filters; ++filter) {
-        add_filter(config.filter_configs[filter]);
+        add_filter(*config.filter_configs);
     }
 }
 
 void net::add_filter(FilterConfig &config) {
-    config.filter->filter_weights = (float *)malloc(config.height * config.width * config.depth * sizeof(float));
-    config.filter->filter_delta_weights = (float *)malloc(config.height * config.width * config.depth * sizeof(float));
+    // config.filter->filter_weights = (float *)malloc(config.height * config.width * config.depth * sizeof(float));
+	int filter_size = config.height * config.width * config.depth;
+	config.filter->filter_weights = new float[filter_size];
+
+	config.filter->filter_delta_weights = new float[filter_size];
+    // config.filter->filter_delta_weights = (float *)malloc(config.height * config.width * config.depth * sizeof(float));
 
     for (unsigned filter_weight = 0; filter_weight < sizeof(config.filter->filter_weights); ++filter_weight) {
         config.filter->filter_weights[filter_weight] = random_weight();

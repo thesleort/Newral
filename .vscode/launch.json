@@ -20,7 +20,7 @@
 				{
 					"description": "Enable pretty-printing for gdb",
 					"text": "-enable-pretty-printing",
-					"ignoreFailures": false
+					"ignoreFailures": true
 				}
 			]
 		}
