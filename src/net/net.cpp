@@ -154,31 +154,31 @@ unsigned filter_size(unsigned &length, FilterConfig *fmc) {
  * @param config 
  */
 void net::add_layer(Layer &layer, enum type type) {
-    // config.layer_this->neurons = (float *)malloc(config.width * config.height * config.depth * sizeof(float));
     int layersize = layer.width * layer.height * layer.depth;
     layer.neurons = new float[layersize];
 
-    // config.filters = (Filter *)malloc(config.num_filters * sizeof(Filter));
     layer.filters = new Filter[layer.num_filters];
 
     if (type != OUTPUT) {
+        layer.filters_config->filter = layer.filters;
+
         for (unsigned filter = 0; filter < layer.num_filters; ++filter) {
-            add_filter(*layer.filters_config);
+            add_filter(*layer.filters_config, filter);
         }
     }
 }
 
-void net::add_filter(FilterConfig &config) {
+void net::add_filter(FilterConfig &config, int filter_num) {
     // config.filter->filter_weights = (float *)malloc(config.height * config.width * config.depth * sizeof(float));
     int filter_size = config.height * config.width * config.depth;
-    config.filter->filter_weights = new float[filter_size];
+    config.filter[filter_num].filter_weights = new float[filter_size];
 
-    config.filter->filter_delta_weights = new float[filter_size];
+    config.filter[filter_num].filter_delta_weights = new float[filter_size];
     // config.filter->filter_delta_weights = (float *)malloc(config.height * config.width * config.depth * sizeof(float));
 
-    for (unsigned filter_weight = 0; filter_weight < sizeof(config.filter->filter_weights); ++filter_weight) {
-        config.filter->filter_weights[filter_weight] = random_weight();
-        config.filter->filter_delta_weights[filter_weight] = 0;
+    for (unsigned filter_weight = 0; filter_weight < filter_size; ++filter_weight) {
+        config.filter[filter_num].filter_weights[filter_weight] = random_weight();
+        config.filter[filter_num].filter_delta_weights[filter_weight] = 0;
     }
 }
 

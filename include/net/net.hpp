@@ -36,7 +36,7 @@ private:
 	void output(Layer &this_layer, cl::Program &program);
 	void compute_fully_connected();
     void add_layer(Layer &config, enum type type);
-    void add_filter(FilterConfig &config);
+    void add_filter(FilterConfig &config, int filter_num);
     void connect_neurons(Layer &lc, FilterConfig &fc);
 	int get_3d_index(unsigned x, unsigned y, unsigned z, unsigned width, unsigned depth);
 	float random_weight();
