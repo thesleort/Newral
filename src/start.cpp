@@ -269,7 +269,7 @@ float *setup::load_input(std::string &input_file, bool is_image) {
         while (getline(m_input_file, line)) {
             std::vector<std::string> fields;
 
-            boost::split_regex(fields, line, boost::regex(","));
+            boost::split_regex(fields, line, boost::regex(" "));
             // TODO: Turn into SIMD instruction later
             for (unsigned i = 0; i < m_net_config.input_width * m_net_config.input_height; ++i) {
 

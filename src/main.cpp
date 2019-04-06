@@ -46,4 +46,5 @@ int main(int argc, const char * argv[]) {
 	std::cout << "Classifying...\n";
 	network.feed_forward(network_setup.load_input(input_file, false));
 	std::cout << "Done.\n";
+	// return 0;
 }

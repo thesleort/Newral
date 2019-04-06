@@ -57,7 +57,7 @@ void net::feed_forward(float *input) {
         // this_layer = &m_net_config.m_layers[layer_num];
 
         std::cout << "Building OpenCL kernels...\n";
-        m_ocl.build("src/compute/forward.cl", OPEN_CL_1_2);
+        m_ocl.build("src/compute/forward.cl", OPEN_CL_2_0);
         std::cout << "Done.\n";
         cl::Program program = m_ocl.get_programs()->at(0);
         /**

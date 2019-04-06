@@ -86,7 +86,7 @@ void cl_compute::compute_maxpool(Layer &this_layer) {
 }
 
 void cl_compute::output(Layer &this_layer) {
-	int total_length = this_layer.width * this_layer.height *this_layer.depth;
+	int total_length = this_layer.width * this_layer.height * this_layer.depth;
 	float output_array[total_length];
 
 	m_queue.enqueueReadBuffer(m_output_neurons, CL_TRUE, 0, sizeof(float) * total_length, output_array);
@@ -94,5 +94,5 @@ void cl_compute::output(Layer &this_layer) {
 		std::cout << output_array[i] << " ";
 	}
 	std::cout << "\n";
-    cl::finish();
+	m_queue.finish();
 }

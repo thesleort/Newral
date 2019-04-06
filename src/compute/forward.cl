@@ -64,7 +64,7 @@ __kernel void convolution(
 	output_width = (layer_width - filter_width + 2 * filter_padding) / filter_stride + 1;
 	output_height = (layer_height - filter_height + 2 * filter_padding) / filter_stride + 1;
 
-	output_layer[output_column + output_row * output_width + filter_num * output_width * output_height] = sum;
+	output_layer[output_column + output_row * output_width + filter_num * output_width * output_height] = 1;
 }
 
 // __kernel void maxpool(
