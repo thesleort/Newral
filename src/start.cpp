@@ -146,13 +146,15 @@ void setup::allocator() {
         Layer &current_layer = m_net_config.layers[layer_num];
 
         int height = 0, width = 0, depth = 0;
-        
+
         switch (current_layer.layer_type) {
         case INPUT:
             std::cout << "Allocating: Input\n";
             std::cout << "Input Width: " << current_layer.width << "\n";
             std::cout << "Input Height: " << current_layer.height << "\n";
             std::cout << "Input Depth: " << current_layer.depth << "\n";
+
+            current_layer.layer_prev = NULL;
             // current_layer.neurons = (float *)malloc(sizeof(float) * current_layer.width * current_layer.height * current_layer.depth);
             break;
         case CONVOLUTION:
@@ -188,6 +190,7 @@ void setup::allocator() {
         case OUTPUT:
             previous_layer.layer_next = &current_layer;
 			current_layer.layer_prev = &previous_layer;
+            current_layer.layer_next = NULL;
 
 			current_layer.width = current_layer.layer_prev->width;
 			current_layer.height = current_layer.layer_prev->height;

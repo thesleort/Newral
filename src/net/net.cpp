@@ -23,7 +23,7 @@ net::net(NetConfig &nc, cl_setup &ocl) {
 
     for (unsigned layer_num = 0; layer_num < m_net_config.num_layers; ++layer_num) {
         // layer &this_layer = m_net_config.layer_num[layer_num];
-        Layer &this_layer = m_net_config.layers.at(layer_num);
+        Layer this_layer = m_net_config.layers.at(layer_num);
         // this_layer = &m_net_config.m_layers[layer_num];
 
         //Allocate input data structure
@@ -74,6 +74,11 @@ void net::feed_forward(float *input) {
 		 * * Read output layer
 		 * 
 		 */
+
+        int layersize = this_layer.height * this_layer.width * this_layer.depth;
+        for (unsigned i = 0; i < layersize; ++i) {
+            std::cout << this_layer.neurons[i] << ",";
+        }
         switch (this_layer.layer_type) {
         case INPUT:
             std::cout << "Computation started...\n";
@@ -162,18 +167,16 @@ void net::add_layer(Layer &layer, enum type type) {
     int layersize = layer.width * layer.height * layer.depth;
     std::cout << layersize << "\n";
     // layer.neurons = new float[layersize];
-    layer.neurons = (float*)malloc(sizeof(float) * 25);
+    layer.neurons = (float *)malloc(sizeof(float) * layersize);
 
     layer.filters = new Filter[layer.num_filters];
 
-    std::cout << "Layersize: " << layersize << "\n"; 
+    std::cout << "Layersize: " << layersize << "\n";
 
-    for(unsigned i = 0; i < layersize; ++i) {
+    for (unsigned i = 0; i < layersize; ++i) {
         layer.neurons[i] = 1.0f;
-	}
-    for(unsigned i = 0; i < layersize; ++i) {
-		std::cout << layer.neurons[i] << " ";
-	}
+    }
+
     if (type != OUTPUT && type != INPUT) {
         layer.filters_config->filter = layer.filters;
 
