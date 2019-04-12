@@ -15,7 +15,7 @@ void cl_compute::load(cl::Program &program) {
 }
 
 void cl_compute::compute_convolution(Layer &this_layer) {
-
+    std::cout << "COMPUTE CONVOLUTION\n";
     int num_filters = this_layer.num_filters;
 
     int layer_prev_height = this_layer.layer_prev->height;
@@ -32,10 +32,20 @@ void cl_compute::compute_convolution(Layer &this_layer) {
     int filter_padding;
     int filter_stride;
 
-    std::vector<cl::Buffer> filter_buffers;
+    int layersize = (layer_prev_height * layer_prev_width * layer_prev_depth);
 
-    m_input_neurons = cl::Buffer(m_context, CL_MEM_READ_ONLY, layer_prev_height * layer_prev_width * layer_prev_depth * sizeof(float), this_layer.layer_prev->neurons);
-    m_output_neurons = cl::Buffer(m_context, CL_MEM_READ_WRITE, layer_height * layer_width * layer_depth * sizeof(float), this_layer.neurons);
+    std::vector<cl::Buffer> filter_buffers;
+    std::cout << this_layer.layer_prev->neurons[0] << "\n";
+
+    m_input_neurons = cl::Buffer(m_context, CL_MEM_READ_ONLY | CL_MEM_HOST_NO_ACCESS | CL_MEM_COPY_HOST_PTR, layer_prev_height * layer_prev_width * layer_prev_depth * sizeof(float), this_layer.layer_prev->neurons);
+    m_output_neurons = cl::Buffer(m_context, CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY, layer_height * layer_width * layer_depth * sizeof(float), this_layer.neurons);
+
+    std::cout << "This layer\n" << layersize << "\n";
+    for(unsigned i = 0; i < layersize; ++i) {
+        this_layer.layer_prev->neurons[i] = 2;
+		std::cout << this_layer.layer_prev->neurons[i] << " ";
+	}
+	std::cout << "\n";
 
     for (unsigned filter_num = 0; filter_num < this_layer.layer_prev->num_filters; ++filter_num) {
 
@@ -46,7 +56,7 @@ void cl_compute::compute_convolution(Layer &this_layer) {
         filter_padding = this_layer.filters_config->padding;
         filter_stride = this_layer.filters_config->stride;
 
-        filter_buffers.push_back(cl::Buffer(m_context, CL_MEM_READ_ONLY, filter_height * filter_width * filter_depth * sizeof(float), this_layer.filters[filter_num].filter_weights));
+        filter_buffers.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, filter_height * filter_width * filter_depth * sizeof(float), this_layer.filters[filter_num].filter_weights));
         cl::Kernel kernel(m_program, "convolution");
 
         kernel.setArg(0, m_input_neurons);					// input layer
@@ -66,6 +76,7 @@ void cl_compute::compute_convolution(Layer &this_layer) {
 
         m_queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(filter_height, filter_width, filter_depth));
 
+        // m_queue.enqueueTask();
         // m_queue.enqueueWriteBuffer(filter_buffers[filter_num], CL_FALSE, 0, 0, )
     }
 

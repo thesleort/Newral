@@ -17,6 +17,8 @@ __kernel void convolution(
 	int row = get_global_id(1);
 	int depth = get_global_id(2);
 
+	// output_layer = input_layer;
+
 	int sum = 0;
 
 	int filter_id = 0;

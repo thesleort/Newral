@@ -1,5 +1,7 @@
 {
 	"files.associations": {
+		"*.ui": "xml",
+		"*.weights": "properties",
 		"fstream": "cpp",
 		"cstdlib": "cpp",
 		"array": "cpp",
@@ -33,7 +35,24 @@
 		"tuple": "cpp",
 		"type_traits": "cpp",
 		"typeinfo": "cpp",
-		"utility": "cpp"
+		"utility": "cpp",
+		"cstdarg": "cpp",
+		"forward_list": "cpp",
+		"list": "cpp",
+		"unordered_map": "cpp",
+		"vector": "cpp",
+		"memory": "cpp",
+		"numeric": "cpp",
+		"optional": "cpp",
+		"string_view": "cpp",
+		"thread": "cpp",
+		"valarray": "cpp",
+		"bitset": "cpp",
+		"deque": "cpp",
+		"cinttypes": "cpp",
+		"typeindex": "cpp",
+		"variant": "cpp",
+		"algorithm": "cpp"
 	},
 	"clang-format.executable": "${workspaceRoot}/.clang-format"
 }

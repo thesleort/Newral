@@ -21,7 +21,7 @@ net::net(NetConfig &nc, cl_setup &ocl) {
     // m_net_config.layer_num = (layer *)malloc(sizeof(layer) * m_net_config.m_layers.size());
     m_net_config.num_layers = m_net_config.layers.size();
 
-    for (unsigned layer_num = 1; layer_num < m_net_config.num_layers; ++layer_num) {
+    for (unsigned layer_num = 0; layer_num < m_net_config.num_layers; ++layer_num) {
         // layer &this_layer = m_net_config.layer_num[layer_num];
         Layer &this_layer = m_net_config.layers.at(layer_num);
         // this_layer = &m_net_config.m_layers[layer_num];
@@ -30,18 +30,23 @@ net::net(NetConfig &nc, cl_setup &ocl) {
 
         switch (this_layer.layer_type) {
         case INPUT:
+            std::cout << "Adding layer: INPUT\n";
             add_layer(this_layer, INPUT);
             break;
         case MAXPOOL:
+            std::cout << "Adding layer: MAXPOOL\n";
             add_layer(this_layer, MAXPOOL);
             break;
         case CONVOLUTION:
+            std::cout << "Adding layer: CONVOLUTION\n";
             add_layer(this_layer, CONVOLUTION);
             break;
         case FULLY:
+            std::cout << "Adding layer: FULLY CONNECTED\n";
             add_layer(this_layer, FULLY);
             break;
         case OUTPUT:
+            std::cout << "Adding layer: OUTPUT\n";
             add_layer(this_layer, OUTPUT);
             break;
         }
@@ -155,11 +160,21 @@ unsigned filter_size(unsigned &length, FilterConfig *fmc) {
  */
 void net::add_layer(Layer &layer, enum type type) {
     int layersize = layer.width * layer.height * layer.depth;
-    layer.neurons = new float[layersize];
+    std::cout << layersize << "\n";
+    // layer.neurons = new float[layersize];
+    layer.neurons = (float*)malloc(sizeof(float) * 25);
 
     layer.filters = new Filter[layer.num_filters];
 
-    if (type != OUTPUT) {
+    std::cout << "Layersize: " << layersize << "\n"; 
+
+    for(unsigned i = 0; i < layersize; ++i) {
+        layer.neurons[i] = 1.0f;
+	}
+    for(unsigned i = 0; i < layersize; ++i) {
+		std::cout << layer.neurons[i] << " ";
+	}
+    if (type != OUTPUT && type != INPUT) {
         layer.filters_config->filter = layer.filters;
 
         for (unsigned filter = 0; filter < layer.num_filters; ++filter) {
@@ -177,7 +192,8 @@ void net::add_filter(FilterConfig &config, int filter_num) {
     // config.filter->filter_delta_weights = (float *)malloc(config.height * config.width * config.depth * sizeof(float));
 
     for (unsigned filter_weight = 0; filter_weight < filter_size; ++filter_weight) {
-        config.filter[filter_num].filter_weights[filter_weight] = random_weight();
+        // config.filter[filter_num].filter_weights[filter_weight] = random_weight();
+        config.filter[filter_num].filter_weights[filter_weight] = 1;
         config.filter[filter_num].filter_delta_weights[filter_weight] = 0;
     }
 }

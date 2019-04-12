@@ -42,6 +42,7 @@ int cl_setup::setup(int DEVICE_TYPE) {
     }
 
     if (m_platforms.size() < 1) {
+        std::cout << "Couldn't find any CL platforms\n";
         return ERR_CL_NO_PLATFORM;
     } else if (tmp_platforms.size() > 1) {
         std::cout << "Which platform is preferred?\n";
