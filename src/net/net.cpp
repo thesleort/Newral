@@ -16,14 +16,14 @@
 
 net::net(NetConfig &nc, cl_setup &ocl) {
     m_ocl = ocl;
-    m_net_config = nc;
+    m_net_config = &nc;
 
     // m_net_config.layer_num = (layer *)malloc(sizeof(layer) * m_net_config.m_layers.size());
-    m_net_config.num_layers = m_net_config.layers.size();
+    m_net_config->num_layers = m_net_config->layers.size();
 
-    for (unsigned layer_num = 0; layer_num < m_net_config.num_layers; ++layer_num) {
+    for (unsigned layer_num = 0; layer_num < m_net_config->num_layers; ++layer_num) {
         // layer &this_layer = m_net_config.layer_num[layer_num];
-        Layer this_layer = m_net_config.layers.at(layer_num);
+        Layer &this_layer = m_net_config->layers.at(layer_num);
         // this_layer = &m_net_config.m_layers[layer_num];
 
         //Allocate input data structure
@@ -56,9 +56,9 @@ net::net(NetConfig &nc, cl_setup &ocl) {
 }
 
 void net::feed_forward(float *input) {
-    for (unsigned layer_num = 0; layer_num < m_net_config.num_layers; ++layer_num) {
+    for (unsigned layer_num = 0; layer_num < m_net_config->num_layers; ++layer_num) {
         // layer &this_layer = m_net_config.layer_num[layer_num];
-        Layer &this_layer = m_net_config.layers.at(layer_num);
+        Layer &this_layer = m_net_config->layers.at(layer_num);
         // this_layer = &m_net_config.m_layers[layer_num];
 
         std::cout << "Building OpenCL kernels...\n";
@@ -76,9 +76,7 @@ void net::feed_forward(float *input) {
 		 */
 
         int layersize = this_layer.height * this_layer.width * this_layer.depth;
-        for (unsigned i = 0; i < layersize; ++i) {
-            std::cout << this_layer.neurons[i] << ",";
-        }
+
         switch (this_layer.layer_type) {
         case INPUT:
             std::cout << "Computation started...\n";
@@ -115,7 +113,7 @@ void net::feed_forward(float *input) {
             break;
         case OUTPUT:
             std::cout << "Result\n";
-            m_ocl_compute.output(m_net_config.layers.at(layer_num - 1));
+            m_ocl_compute.output(m_net_config->layers.at(layer_num - 1));
             break;
         }
     }
@@ -165,17 +163,10 @@ unsigned filter_size(unsigned &length, FilterConfig *fmc) {
  */
 void net::add_layer(Layer &layer, enum type type) {
     int layersize = layer.width * layer.height * layer.depth;
-    std::cout << layersize << "\n";
-    // layer.neurons = new float[layersize];
-    layer.neurons = (float *)malloc(sizeof(float) * layersize);
+    layer.neurons = new float[layersize];
+    // layer.neurons = (float *)malloc(sizeof(float) * layersize);
 
     layer.filters = new Filter[layer.num_filters];
-
-    std::cout << "Layersize: " << layersize << "\n";
-
-    for (unsigned i = 0; i < layersize; ++i) {
-        layer.neurons[i] = 1.0f;
-    }
 
     if (type != OUTPUT && type != INPUT) {
         layer.filters_config->filter = layer.filters;

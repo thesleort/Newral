@@ -35,17 +35,9 @@ void cl_compute::compute_convolution(Layer &this_layer) {
     int layersize = (layer_prev_height * layer_prev_width * layer_prev_depth);
 
     std::vector<cl::Buffer> filter_buffers;
-    std::cout << this_layer.layer_prev->neurons << "\n";
 
     m_input_neurons = cl::Buffer(m_context, CL_MEM_READ_ONLY | CL_MEM_HOST_NO_ACCESS | CL_MEM_COPY_HOST_PTR, layer_prev_height * layer_prev_width * layer_prev_depth * sizeof(float), this_layer.layer_prev->neurons);
     m_output_neurons = cl::Buffer(m_context, CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY, layer_height * layer_width * layer_depth * sizeof(float), this_layer.neurons);
-
-    std::cout << "This layer\n" << layersize << "\n";
-    for(unsigned i = 0; i < layersize; ++i) {
-        this_layer.layer_prev->neurons[i] = 2;
-		std::cout << this_layer.layer_prev->neurons[i] << " ";
-	}
-	std::cout << "\n";
 
     for (unsigned filter_num = 0; filter_num < this_layer.layer_prev->num_filters; ++filter_num) {
 

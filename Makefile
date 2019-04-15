@@ -39,7 +39,7 @@ TC_SRC = $(filter-out $(wildcard src/main.c) $(wildcard $(SRC_DIR)/scan_parse.c 
 CC = g++
 
 CPPFLAGS += $(INC)								# -I is a preprocessor flag, not a compiler flag
-CFLAGS += -std=c++14 -Wall -Wextra -pedantic -g	# some warnings about bad code
+CFLAGS += -std=c++11 -Wall -Wextra -pedantic -g	# some warnings about bad code
 
 BOOST = -lboost_regex
 # -L is a linker flag

@@ -42,7 +42,7 @@ private:
 	float random_weight();
 	cl_setup m_ocl;
 	cl_compute m_ocl_compute;
-    NetConfig m_net_config;
+    NetConfig *m_net_config;
 };
 
 unsigned filter_size_calc(unsigned *length, unsigned filter, int padding, unsigned stride);
