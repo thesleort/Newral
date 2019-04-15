@@ -12,6 +12,7 @@
 
 #include "error.h"
 #include "compute/cl_prepare.hpp"
+#include "aux.h"
 
 cl_setup::cl_setup() {
 
@@ -41,8 +42,8 @@ int cl_setup::setup(int DEVICE_TYPE) {
         }
     }
 
-    if (m_platforms.size() < 1) {
-        std::cout << "Couldn't find any CL platforms\n";
+    if (m_devices.size() < 1) {
+        std::cout << COLOR_ERROR << "ERROR: Couldn't find any CL platforms!" << COLOR_NORMAL_N;
         return ERR_CL_NO_PLATFORM;
     } else if (tmp_platforms.size() > 1) {
         std::cout << "Which platform is preferred?\n";
@@ -59,6 +60,7 @@ int cl_setup::setup(int DEVICE_TYPE) {
 
         platform = tmp_platforms.at(pref);
     } else {
+        std::cout << "(0): " << tmp_platforms.at(0).getInfo<CL_PLATFORM_NAME>() << "\n";
         platform = m_platforms.front();
     }
 

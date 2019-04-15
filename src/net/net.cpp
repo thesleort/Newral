@@ -56,15 +56,16 @@ net::net(NetConfig &nc, cl_setup &ocl) {
 }
 
 void net::feed_forward(float *input) {
+    std::cout << "Building OpenCL kernels...\n";
+    m_ocl.build("src/compute/forward.cl", OPEN_CL_1_2);
+    std::cout << "Done.\n";
+    cl::Program program = m_ocl.get_programs()->at(0);
+
     for (unsigned layer_num = 0; layer_num < m_net_config->num_layers; ++layer_num) {
         // layer &this_layer = m_net_config.layer_num[layer_num];
         Layer &this_layer = m_net_config->layers.at(layer_num);
         // this_layer = &m_net_config.m_layers[layer_num];
 
-        std::cout << "Building OpenCL kernels...\n";
-        m_ocl.build("src/compute/forward.cl", OPEN_CL_2_0);
-        std::cout << "Done.\n";
-        cl::Program program = m_ocl.get_programs()->at(0);
         /**
 		 * @brief TODO:
 		 * * Load filter(s)
