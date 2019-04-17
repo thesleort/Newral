@@ -24,6 +24,8 @@ class cl_compute {
 
 		cl::Buffer m_input_neurons;
 		cl::Buffer m_output_neurons;
+		cl::Buffer *p_output_neurons;
+
 };
 
 #endif

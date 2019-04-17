@@ -114,7 +114,7 @@ void net::feed_forward(float *input) {
             break;
         case OUTPUT:
             std::cout << "Result\n";
-            m_ocl_compute.output(m_net_config->layers.at(layer_num - 1));
+            m_ocl_compute.output(m_net_config->layers.at(layer_num));
             break;
         }
     }
