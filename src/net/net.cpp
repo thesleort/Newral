@@ -57,7 +57,7 @@ net::net(NetConfig &nc, cl_setup &ocl) {
 
 void net::feed_forward(float *input) {
     std::cout << "Building OpenCL kernels...\n";
-    m_ocl.build("src/compute/forward.cl", OPEN_CL_1_2);
+    m_ocl.build("src/compute/forward.cl", OPEN_CL_2_0);
     std::cout << "Done.\n";
     cl::Program program = m_ocl.get_programs()->at(0);
 

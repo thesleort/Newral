@@ -19,7 +19,7 @@ __kernel void convolution(
 
 	// output_layer = input_layer;
 
-	int sum = 0;
+	float sum = 0;
 
 	int filter_id = 0;
 
@@ -33,7 +33,7 @@ __kernel void convolution(
 	int output_height;
 	int output_width;
 
-	int2 coords; 
+	int3 coords; 
 
 	bool pad; 
 
@@ -42,9 +42,11 @@ __kernel void convolution(
 		for(int y = -half_height; y <= half_height; ++y) {
 			coords.y = y + row;
 			for(int z = 0; z < filter_depth; ++z) {
+				coords.z = z + depth;
 				pad = false;
 				coords.x = (coords.x < 0) ? 0 : coords.x;
 				coords.y = (coords.y < 0) ? 0 : coords.y;
+
 				coords.x = (coords.x >= layer_width) ? layer_width-1 : coords.x;
 				coords.y = (coords.y >= layer_height) ? layer_height-1 : coords.y;
 
@@ -60,7 +62,7 @@ __kernel void convolution(
 	}
 
 	output_column = column - filter_stride;
-	output_row = column - filter_stride;
+	output_row = row - filter_stride;
 	output_depth = filter_num;
 
 	output_width = (layer_width - filter_width + 2 * filter_padding) / filter_stride + 1;
@@ -83,3 +85,47 @@ __kernel void convolution(
 // 	__constant int filter_stride,
 // 	__constant int filter_num
 // )
+
+__kernel void convolution_new(
+		__global float *input_layer, 
+		int layer_height,
+		int layer_width,
+		int layer_depth,
+		__constant float *filter, 
+		int filter_width,
+		int filter_height,
+		int filter_depth,
+		__global float *output_layer,
+		int filter_padding,
+		int filter_stride,
+		int filter_num) {
+	int column = get_global_id(0);
+	int row = get_global_id(1);
+	int depth = get_global_id(2);
+
+	float sum = 0;
+
+	// int output_column;
+	// int output_row;
+	// int output_depth;
+
+	// int output_height;
+	// int output_width;
+
+	// output_column = column - filter_stride;
+	// output_row = row - filter_stride;
+	// output_depth = filter_num;
+
+	// output_width = (layer_width - filter_width + 2 * filter_padding) / filter_stride + 1;
+	// output_height = (layer_height - filter_height + 2 * filter_padding) / filter_stride + 1;
+
+	// output_layer[output_column + output_row * output_width + filter_num * output_width * output_height] = 1;
+	// output_layer[output_column + output_height * (output_row + output_width * output_depth)] = 1;
+	output_layer[0] = 1.0f;
+}
+
+__kernel void simple(
+	__global float *output_layer
+) {
+	output_layer[0] = 1.0f;
+}

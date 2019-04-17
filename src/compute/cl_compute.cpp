@@ -36,9 +36,18 @@ void cl_compute::compute_convolution(Layer &this_layer) {
 
     std::vector<cl::Buffer> filter_buffers;
 
-    m_input_neurons = cl::Buffer(m_context, CL_MEM_READ_ONLY | CL_MEM_HOST_NO_ACCESS | CL_MEM_COPY_HOST_PTR, layer_prev_height * layer_prev_width * layer_prev_depth * sizeof(float), this_layer.layer_prev->neurons);
+    m_input_neurons = cl::Buffer(m_context, CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY, layer_prev_height * layer_prev_width * layer_prev_depth * sizeof(float), this_layer.layer_prev->neurons);
     m_output_neurons = cl::Buffer(m_context, CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY, layer_height * layer_width * layer_depth * sizeof(float), this_layer.neurons);
 
+    for(int i = 0; i < layersize; ++i) {
+        std::cout << this_layer.layer_prev->neurons[i] << ",";
+    }
+    std::cout << "\n";
+
+    // for(int i = 0; i < layersize; ++i) {
+    //     std::cout << this_layer.neurons[i] << " ";
+    // }
+    // std::cout << "\n";
     for (unsigned filter_num = 0; filter_num < this_layer.layer_prev->num_filters; ++filter_num) {
 
         filter_height = this_layer.filters_config->height;
@@ -48,25 +57,35 @@ void cl_compute::compute_convolution(Layer &this_layer) {
         filter_padding = this_layer.filters_config->padding;
         filter_stride = this_layer.filters_config->stride;
 
-        filter_buffers.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, filter_height * filter_width * filter_depth * sizeof(float), this_layer.filters[filter_num].filter_weights));
-        cl::Kernel kernel(m_program, "convolution");
+        filter_buffers.push_back(cl::Buffer(m_context, CL_MEM_READ_ONLY, filter_height * filter_width * filter_depth * sizeof(float), this_layer.filters[filter_num].filter_weights));
+        cl::Kernel kernel(m_program, "simple");
 
-        kernel.setArg(0, m_input_neurons);					// input layer
-        kernel.setArg(1, layer_height);						// layer height
-        kernel.setArg(2, layer_width);						// layer width
-        kernel.setArg(3, layer_depth);						// layer depth
-        kernel.setArg(4, filter_buffers.at(filter_num));	// filter
-        kernel.setArg(5, filter_height);					// filter width
-        kernel.setArg(6, filter_width);						// filter height
-        kernel.setArg(7, filter_depth);						// filter depth
-        kernel.setArg(8, m_output_neurons);					// output layer
-        kernel.setArg(9, filter_padding);					// filter padding
-        kernel.setArg(10, filter_stride);					// filter stride
-        kernel.setArg(11, filter_num);						// filter num
+        for(int i = 0; i < (filter_height * filter_width * filter_depth); ++i) {
+            std::cout << this_layer.filters[filter_num].filter_weights[i] << ",";
+        }
+        std::cout << "\n";
+
+        // kernel.setArg(0, m_input_neurons);					// input layer
+        // kernel.setArg(1, layer_height);						// layer height
+        // kernel.setArg(2, layer_width);						// layer width
+        // kernel.setArg(3, layer_depth);						// layer depth
+        // kernel.setArg(4, filter_buffers.at(filter_num));	// filter
+        // kernel.setArg(5, filter_height);					// filter width
+        // kernel.setArg(6, filter_width);						// filter height
+        // kernel.setArg(7, filter_depth);						// filter depth
+        // kernel.setArg(8, m_output_neurons);					// output layer
+        // kernel.setArg(9, filter_padding);					// filter padding
+        // kernel.setArg(10, filter_stride);					// filter stride
+        // kernel.setArg(11, filter_num);						// filter num
+
+        kernel.setArg(0, m_output_neurons);
 
 		// m_device.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>;
 
-        m_queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(filter_height, filter_width, filter_depth));
+        std::cout << "Layer width/height: " << layer_prev_width << "/" << layer_prev_height << "\n";
+        std::cout << "Filter width/height: " << filter_width << "/" << filter_height << "\n";
+
+        m_queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(layer_prev_height, layer_prev_width, layer_prev_depth));
 
         // m_queue.enqueueTask();
         // m_queue.enqueueWriteBuffer(filter_buffers[filter_num], CL_FALSE, 0, 0, )
@@ -95,6 +114,12 @@ void cl_compute::output(Layer &this_layer) {
 	m_queue.enqueueReadBuffer(m_output_neurons, CL_TRUE, 0, sizeof(float) * total_length, output_array);
 	for(unsigned i = 0; i < total_length; ++i) {
 		std::cout << output_array[i] << " ";
+	}
+	std::cout << "\n";
+
+    m_queue.enqueueReadBuffer(m_output_neurons, CL_TRUE, 0, sizeof(float) * total_length, this_layer.neurons);
+	for(unsigned i = 0; i < total_length; ++i) {
+		std::cout << this_layer.neurons[i] << " ";
 	}
 	std::cout << "\n";
 	m_queue.finish();
