@@ -68,7 +68,7 @@ __kernel void convolution(
 	output_width = (layer_width - filter_width + 2 * filter_padding) / filter_stride + 1;
 	output_height = (layer_height - filter_height + 2 * filter_padding) / filter_stride + 1;
 
-	output_layer[output_column + output_row * output_width + filter_num * output_width * output_height] = 1.0f;
+	output_layer[output_column + output_row * output_width + filter_num * output_width * output_height] = sum;
 }
 
 // __kernel void maxpool(
@@ -99,30 +99,34 @@ __kernel void convolution_new(
 		int filter_padding,
 		int filter_stride,
 		int filter_num) {
-	int column = get_global_id(0);
-	int row = get_global_id(1);
-	int depth = get_global_id(2);
+	// int column = get_global_id(0);
+	// int row = get_global_id(1);
+	// int depth = get_global_id(2);
 
-	float sum = 0;
+	// float sum = 0;
 
-	int output_column;
-	int output_row;
-	int output_depth;
+	// int output_column;
+	// int output_row;
+	// int output_depth;
 
-	int output_height;
-	int output_width;
+	// int output_height;
+	// int output_width;
 
-	output_column = column - filter_stride;
-	output_row = row - filter_stride;
-	output_depth = filter_num;
+	// output_column = column - filter_stride;
+	// output_row = row - filter_stride;
+	// output_depth = filter_num;
 
-	output_width = (layer_width - filter_width + 2 * filter_padding) / filter_stride + 1;
-	output_height = (layer_height - filter_height + 2 * filter_padding) / filter_stride + 1;
+	// output_width = (layer_width - filter_width + 2 * filter_padding) / filter_stride + 1;
+	// output_height = (layer_height - filter_height + 2 * filter_padding) / filter_stride + 1;
 
 	// output_layer[output_column + output_row * output_width + filter_num * output_width * output_height] = 1;
 	// output_layer[output_column + output_height * (output_row + output_width * output_depth)] = 1;
 	// output_layer[0] = 1.0f;
-	output_layer[column + row] = 1;
+	// output_layer[column + row] = 1;
+	// for (int i=0;i>=0;i++){
+    // }
+	output_layer[0 ] = 2.0f;
+
 }
 
 __kernel void simple(

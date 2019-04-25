@@ -142,7 +142,7 @@ void setup::allocator() {
     for (unsigned layer_num = 0; layer_num < m_net_config.layers.size(); ++layer_num) {
 
         Layer &next_layer = (layer_num + 1 >= m_net_config.layers.size()) ? m_net_config.layers.at(layer_num) : m_net_config.layers.at(layer_num + 1);
-        Layer &previous_layer = (layer_num - 1 > 0) ? m_net_config.layers.at(layer_num) : m_net_config.layers.at(layer_num - 1);
+        Layer &previous_layer = (layer_num > 0) ? m_net_config.layers.at(layer_num - 1) : m_net_config.layers.at(layer_num);
         // Layer &previous_layer = m_net_config.layers.at(layer_num);
         Layer &current_layer = m_net_config.layers.at(layer_num);
 

@@ -10,6 +10,8 @@
 #include "operator/functions.hpp"
 #include "start.hpp"
 
+// #pragma OPENCL EXTENSION cl_khr_fp64 : enable
+
 int main(int argc, const char * argv[]) {
 	std::cout << "Starting Newral...\n";
 	std::string cfg_file(argv[1]);
