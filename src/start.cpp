@@ -119,6 +119,8 @@ void setup::load_cfg(std::string &cfg_file) {
             } else if (fields.at(0).compare("padding") == 0) {
                 int padding = stoi(fields.at(1));
                 current_layer->filters_config->padding = padding;
+            } else if (fields.at(0).compare("id") == 0) {
+                current_layer->id = fields.at(1);
             }
         } else if (layer_type == OUTPUT) {
 			++num_layers;
@@ -226,13 +228,15 @@ void setup::load_weights(std::string &weights_file_name) {
         case INPUT:
             break;
         case CONVOLUTION:
-            for (filter_num = 0; filter_num < j_weights["layers"]["filters"].size(); ++filter_num) {
+            for (filter_num = 0; filter_num < m_net_config.layers[layer_num].num_filters; ++filter_num) {
                 filter_length = m_net_config.layers[layer_num].filters_config->width *
                                 m_net_config.layers[layer_num].filters_config->height *
                                 m_net_config.layers[layer_num].filters_config->depth;
 
+            std::cout << "HELP\n";
                 for (weight_num = 0; weight_num < filter_length; ++weight_num) {
-                    m_net_config.layers[layer_num].filters[filter_num].filter_weights[weight_num] = j_weights["layers"]["filters"][filter_num].get<float>();
+                    // m_net_config.layers[layer_num].filters[filter_num].filter_weights[weight_num] = j_weights["layers"]["filters"][filter_num].get<float>();
+                    // std::cout << j_weights["layers"]["filters"].size() << ",";
                 }
             }
             break;

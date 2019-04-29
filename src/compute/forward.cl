@@ -41,11 +41,11 @@ __kernel void convolution(
 		coords.x = x + column;
 		for(int y = -half_height; y <= half_height; ++y) {
 			coords.y = y + row;
-				// coords.z = depth;
+			for(int z = 0; z < layer_depth; ++z) {
+				coords.z = z + depth;
 				pad = false;
 				pad = (coords.x < 0 || coords.x >= layer_width) ? true : false;
 				pad = (coords.y < 0 || coords.y >= layer_height) ? true : false;
-
 				coords.x = (coords.x < 0) ? 0 : coords.x;
 				coords.y = (coords.y < 0) ? 0 : coords.y;
 
@@ -62,23 +62,23 @@ __kernel void convolution(
 					// 		layer_width * 
 					// 		layer_height] *
 						// filter[filter_id++];
-						// sum = input_layer[
-						// 	coords.x + 
-						// 	coords.y * 
-						// 	layer_width + 
-						// 	depth * 
-						// 	layer_width * 
-						// 	layer_height];
+						sum += input_layer[
+							coords.x + 
+							coords.y * 
+							layer_width + 
+							coords.z * 
+							layer_width * 
+							layer_height];
 
-						sum = filter[filter_id++];
 						// sum += filter[filter_id++];
-				
+						// sum += filter[filter_id++];
+				}
 			}
 		}
 	}
 
-	output_column = column - filter_stride;
-	output_row = row - filter_stride;
+	output_column = column;
+	output_row = row;
 	output_depth = filter_num;
 
 	output_width = (layer_width - filter_width + 2 * filter_padding) / filter_stride + 1;

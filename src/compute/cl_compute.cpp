@@ -36,6 +36,14 @@ void cl_compute::compute_convolution(Layer &this_layer) {
 
     std::vector<cl::Buffer> filter_buffers;
 
+    // for (int i = 0; i < layersize; i++) {
+    //     this_layer.layer_prev->neurons[i] = 2;
+    // }
+    for (int i = 0; i < layersize; i++) {
+        std::cout << this_layer.layer_prev->neurons[i] << ",";
+    }
+    std::cout << "\n";
+
     m_input_neurons = cl::Buffer(m_context, CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, layer_prev_height * layer_prev_width * layer_prev_depth * sizeof(float), this_layer.layer_prev->neurons, NULL);
     
     m_output_neurons = cl::Buffer(m_context, CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY, layer_height * layer_width * layer_depth * sizeof(float));
@@ -84,7 +92,7 @@ void cl_compute::compute_convolution(Layer &this_layer) {
         std::cout << "Layer width/height: " << layer_prev_width << "/" << layer_prev_height << "/" << layer_prev_depth << "\n";
         std::cout << "Filter width/height: " << filter_width << "/" << filter_height << "/" << filter_depth <<"\n";
 
-        m_queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(layer_prev_height, layer_prev_width, layer_prev_depth));
+        m_queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(layer_height, layer_width, layer_depth));
 
         int total_length = this_layer.width * this_layer.height * this_layer.depth;
 
@@ -105,7 +113,7 @@ void cl_compute::compute_maxpool(Layer &this_layer) {
 
 void cl_compute::output(Layer &this_layer) {
 	int total_length = this_layer.width * this_layer.height * this_layer.depth;
-    float *output_array = new float[total_length];
+    // float *output_array = new float[total_length];
 
 	std::cout << "\nTotal length: " << total_length;
     std::cout << "\n";

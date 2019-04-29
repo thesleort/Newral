@@ -54,6 +54,7 @@ typedef struct Filter {
 typedef struct Layer {
 	NetConfig *net_config;
     type layer_type;
+    std::string id;
     unsigned width;
     unsigned height;
     unsigned depth;     // Based on amount of filters in previous layer.
