@@ -41,22 +41,38 @@ __kernel void convolution(
 		coords.x = x + column;
 		for(int y = -half_height; y <= half_height; ++y) {
 			coords.y = y + row;
-			for(int z = 0; z < filter_depth; ++z) {
-				coords.z = z + depth;
+				// coords.z = depth;
 				pad = false;
+				pad = (coords.x < 0 || coords.x >= layer_width) ? true : false;
+				pad = (coords.y < 0 || coords.y >= layer_height) ? true : false;
+
 				coords.x = (coords.x < 0) ? 0 : coords.x;
 				coords.y = (coords.y < 0) ? 0 : coords.y;
 
 				coords.x = (coords.x >= layer_width) ? layer_width-1 : coords.x;
 				coords.y = (coords.y >= layer_height) ? layer_height-1 : coords.y;
 
-				pad = (coords.x < 0 || coords.x >= layer_width) ? true : false;
-				pad = (coords.y < 0 || coords.y >= layer_height) ? true : false;
 
 				if(!pad) {
-					sum += input_layer[coords.x + coords.y * layer_width + z * layer_width * layer_height] *
-						filter[filter_id++];
-				}
+					// sum += input_layer[
+					// 		coords.x + 
+					// 		coords.y * 
+					// 		layer_width + 
+					// 		coords.z * 
+					// 		layer_width * 
+					// 		layer_height] *
+						// filter[filter_id++];
+						// sum = input_layer[
+						// 	coords.x + 
+						// 	coords.y * 
+						// 	layer_width + 
+						// 	depth * 
+						// 	layer_width * 
+						// 	layer_height];
+
+						sum = filter[filter_id++];
+						// sum += filter[filter_id++];
+				
 			}
 		}
 	}
