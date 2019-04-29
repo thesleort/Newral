@@ -52,7 +52,8 @@
 		"cinttypes": "cpp",
 		"typeindex": "cpp",
 		"variant": "cpp",
-		"algorithm": "cpp"
+		"algorithm": "cpp",
+		"*.h++": "cpp"
 	},
 	"clang-format.executable": "${workspaceRoot}/.clang-format"
 }

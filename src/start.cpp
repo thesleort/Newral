@@ -8,6 +8,7 @@
 
 #include "start.hpp"
 #include <json.hpp>
+#include <libconfig.h++>
 
 // #include "config.h"
 // #include "start.hpp"
@@ -219,35 +220,41 @@ void setup::load_weights(std::string &weights_file_name) {
     // std::ifstream weights_file(weights_file_name, std::ifstream::binary);
     m_weights_file.open(weights_file_name);
 
-    nlohmann::json j_weights = nlohmann::json::parse(m_weights_file);
+    char cstr[weights_file_name.size() + 1];
+    // strcpy(cstr, weights_file_name.c_str)
+
+    libconfig::Config cfg;
+
+    // cfg.readFile(weights_file_name);
+    cfg.readFile(weights_file_name.c_str);
 
     unsigned filter_length;
 
-    for (layer_num = 0; layer_num < j_weights["layers"].size(); ++layer_num) {
-        switch (m_net_config.layers[layer_num].layer_type) {
-        case INPUT:
-            break;
-        case CONVOLUTION:
-            for (filter_num = 0; filter_num < m_net_config.layers[layer_num].num_filters; ++filter_num) {
-                filter_length = m_net_config.layers[layer_num].filters_config->width *
-                                m_net_config.layers[layer_num].filters_config->height *
-                                m_net_config.layers[layer_num].filters_config->depth;
+    // for (layer_num = 0; layer_num < j_weights["layers"].size(); ++layer_num) {
+    //     switch (m_net_config.layers[layer_num].layer_type) {
+    //     case INPUT:
+    //         break;
+    //     case CONVOLUTION:
+    //         for (filter_num = 0; filter_num < m_net_config.layers[layer_num].num_filters; ++filter_num) {
+    //             filter_length = m_net_config.layers[layer_num].filters_config->width *
+    //                             m_net_config.layers[layer_num].filters_config->height *
+    //                             m_net_config.layers[layer_num].filters_config->depth;
 
-            std::cout << "HELP\n";
-                for (weight_num = 0; weight_num < filter_length; ++weight_num) {
-                    // m_net_config.layers[layer_num].filters[filter_num].filter_weights[weight_num] = j_weights["layers"]["filters"][filter_num].get<float>();
-                    // std::cout << j_weights["layers"]["filters"].size() << ",";
-                }
-            }
-            break;
-        case MAXPOOL:
-            break;
-        case FULLY:
-            break;
-        case OUTPUT:
-            break;
-        }
-    }
+    //         std::cout << "HELP\n";
+    //             for (weight_num = 0; weight_num < filter_length; ++weight_num) {
+    //                 // m_net_config.layers[layer_num].filters[filter_num].filter_weights[weight_num] = j_weights["layers"]["filters"][filter_num].get<float>();
+    //                 // std::cout << j_weights["layers"]["filters"].size() << ",";
+    //             }
+    //         }
+    //         break;
+    //     case MAXPOOL:
+    //         break;
+    //     case FULLY:
+    //         break;
+    //     case OUTPUT:
+    //         break;
+    //     }
+    // }
     // j_weights["layers"][0]
     // while(getline(m_weights_file, line)) {
     //     std::vector<std::string> fields;
