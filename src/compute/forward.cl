@@ -12,7 +12,8 @@ __kernel void convolution(
 		__global float *output_layer,
 		int filter_padding,
 		int filter_stride,
-		int filter_num) {
+		int filter_num,
+		float bias) {
 	int column = get_global_id(0);
 	int row = get_global_id(1);
 	int depth = get_global_id(2);
@@ -73,7 +74,7 @@ __kernel void convolution(
 	output_width = (layer_width - filter_width + 2 * filter_padding) / filter_stride + 1;
 	output_height = (layer_height - filter_height + 2 * filter_padding) / filter_stride + 1;
 
-	output_layer[output_column + output_row * output_width + filter_num * output_width * output_height] = sum;
+	output_layer[output_column + output_row * output_width + filter_num * output_width * output_height] = sum + bias;
 }
 
 // __kernel void maxpool(

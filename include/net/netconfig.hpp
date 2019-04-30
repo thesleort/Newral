@@ -49,6 +49,7 @@ typedef struct Filter {
     FilterConfig *filter_config;
     float *filter_weights; // To make NxNxDepth feature map
 	float *filter_delta_weights;
+    float bias;
 };
 
 typedef struct Layer {

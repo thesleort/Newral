@@ -31,6 +31,7 @@ void cl_compute::compute_convolution(Layer &this_layer) {
     int filter_depth;
     int filter_padding;
     int filter_stride;
+    float filter_bias;
 
     int layersize = (layer_prev_height * layer_prev_width * layer_prev_depth);
 
@@ -60,6 +61,7 @@ void cl_compute::compute_convolution(Layer &this_layer) {
         filter_height = this_layer.filters_config->height;
         filter_width = this_layer.filters_config->width;
         filter_depth = this_layer.filters_config->depth;
+        filter_bias = this_layer.filters[filter_num].bias;
 
         filter_padding = this_layer.filters_config->padding;
         filter_stride = this_layer.filters_config->stride;
@@ -78,9 +80,9 @@ void cl_compute::compute_convolution(Layer &this_layer) {
         // m_queue.enqueueWriteBuffer(filter_buffers.at(filter_num), CL_TRUE, 0, filter_height * filter_width * filter_depth * sizeof(float), this_layer.filters[filter_num].filter_weights);
 
         kernel.setArg(0, m_input_neurons);					// input layer
-        kernel.setArg(1, layer_height);					    // layer height
-        kernel.setArg(2, layer_width);						// layer width
-        kernel.setArg(3, layer_depth);						// layer depth
+        kernel.setArg(1, layer_prev_height);					    // layer height
+        kernel.setArg(2, layer_prev_width);						// layer width
+        kernel.setArg(3, layer_prev_depth);						// layer depth
         kernel.setArg(4, filter_buffers.at(filter_num));	// filter
         kernel.setArg(5, filter_height);					// filter width
         kernel.setArg(6, filter_width);					    // filter height
@@ -89,8 +91,9 @@ void cl_compute::compute_convolution(Layer &this_layer) {
         kernel.setArg(9, filter_padding);					// filter padding
         kernel.setArg(10, filter_stride);					// filter stride
         kernel.setArg(11, filter_num);						// filter num
+        kernel.setArg(12, filter_bias);
 
-        std::cout << "Padding: " << filter_padding << " - Stride: " << filter_stride << "\n";
+        std::cout << "Padding: " << filter_padding << " - Stride: " << filter_stride << " - Bias: " << this_layer.filters[filter_num].bias << "\n";
 
         std::cout << "Layer width/height: " << layer_prev_width << "/" << layer_prev_height << "/" << layer_prev_depth << "\n";
         std::cout << "Filter width/height: " << filter_width << "/" << filter_height << "/" << filter_depth <<"\n";
