@@ -54,29 +54,18 @@ __kernel void convolution(
 
 
 				if(!pad) {
-					// sum += input_layer[
-					// 		coords.x + 
-					// 		coords.y * 
-					// 		layer_width + 
-					// 		coords.z * 
-					// 		layer_width * 
-					// 		layer_height] *
-						// filter[filter_id++];
-						sum += input_layer[
-							coords.x + 
-							coords.y * 
-							layer_width + 
-							coords.z * 
-							layer_width * 
-							layer_height] * filter[filter_id++];
-
-						// sum += filter[filter_id++];
-						// sum += filter[filter_id++];
+					sum += input_layer[
+						coords.x + 
+						coords.y * 
+						layer_width + 
+						coords.z * 
+						layer_width * 
+						layer_height] * filter[filter_id++];
 				}
 			}
 		}
 	}
-
+	barrier(CLK_GLOBAL_MEM_FENCE);
 	output_column = column;
 	output_row = row;
 	output_depth = filter_num;

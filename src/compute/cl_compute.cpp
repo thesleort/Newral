@@ -53,7 +53,9 @@ void cl_compute::compute_convolution(Layer &this_layer) {
     }
     std::cout << "\n";
 
-    for (unsigned filter_num = 0; filter_num < this_layer.layer_prev->num_filters; filter_num++) {
+    std::cout << "Num filters: " << this_layer.num_filters << "\nNum filters prev: " << this_layer.layer_prev->num_filters << "\n";
+
+    for (unsigned filter_num = 0; filter_num < this_layer.num_filters; filter_num++) {
 
         filter_height = this_layer.filters_config->height;
         filter_width = this_layer.filters_config->width;
@@ -71,6 +73,7 @@ void cl_compute::compute_convolution(Layer &this_layer) {
         }
         std::cout << "\n";
 
+        //*(T (*)[N])p = where T is the type, N is the number of elements and p is the pointer.
         // m_queue.enqueueWriteBuffer(m_input_neurons, CL_TRUE, 0, layer_prev_height * layer_prev_width * layer_prev_depth * sizeof(float), this_layer.layer_prev->neurons);
         // m_queue.enqueueWriteBuffer(filter_buffers.at(filter_num), CL_TRUE, 0, filter_height * filter_width * filter_depth * sizeof(float), this_layer.filters[filter_num].filter_weights);
 

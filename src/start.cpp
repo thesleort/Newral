@@ -7,7 +7,6 @@
  */
 
 #include "start.hpp"
-#include <json.hpp>
 #include <libconfig.h++>
 
 // #include "config.h"
