@@ -122,6 +122,7 @@ void setup::load_cfg(std::string &cfg_file) {
                 current_layer->filters_config->padding = padding;
             } else if (fields.at(0).compare("id") == 0) {
                 current_layer->id = fields.at(1);
+                std::cout << "ID: " << current_layer->id << "\n";
             }
         } else if (layer_type == OUTPUT) {
 			++num_layers;
@@ -207,28 +208,67 @@ void setup::allocator() {
 }
 
 void setup::load_weights(std::string &weights_file_name) {
-    // m_net_config = &net_config;
 
     unsigned layer_num = 0;
     unsigned filter_num = 0;
     unsigned weight_num = 0;
 
-    // std::string line;
-    // layer *current_layer;
-    // enum type layer_type;
-
-    // std::ifstream weights_file(weights_file_name, std::ifstream::binary);
     m_weights_file.open(weights_file_name);
 
     char cstr[weights_file_name.size() + 1];
-    // strcpy(cstr, weights_file_name.c_str)
+    strcpy(cstr, weights_file_name.c_str());
 
     libconfig::Config cfg;
 
     // cfg.readFile(weights_file_name);
-    cfg.readFile(weights_file_name.c_str);
+    cfg.readFile(cstr);
+
+
+    const libconfig::Setting &root = cfg.getRoot();
+    const libconfig::Setting &layers = root["layers"];
 
     unsigned filter_length;
+    bool found = true;
+
+    for(layer_num = 0; layer_num < m_net_config.num_layers; layer_num++) {
+        switch (m_net_config.layers[layer_num].layer_type) {
+        case INPUT:
+            break;
+        case CONVOLUTION:
+            {
+                for(int i = 0; i < layers.getLength(); i++) {
+                    std::string id;
+                    layers[i].lookupValue("id", id);
+
+                    if(id.compare(m_net_config.layers[layer_num].id) == 0) {
+                        libconfig::Setting &filters = layers[i]["filters"];
+                        const int filter_size = m_net_config.layers[layer_num].filters_config->width *
+                                            m_net_config.layers[layer_num].filters_config->height *
+                                            m_net_config.layers[layer_num].filters_config->depth;
+                        for(int filter_num = 0; filter_num < m_net_config.layers[layer_num].num_filters; ++filter_num) {
+                            for(int filter_num_idx = 0; filter_num_idx < filter_size; filter_num_idx++) {
+                                m_net_config.layers[layer_num].filters[filter_num].filter_weights[filter_num_idx] = (float) filters[filter_num][filter_num_idx];
+                            }
+                            std::cout << "\n";
+                        }
+                        break;
+                    }
+                }
+            }
+            break;
+        case MAXPOOL:
+            break;
+        case FULLY:
+            break;
+        case OUTPUT:
+            break;
+        }
+
+        if(!found) {
+            std::cout << "Weights file appears to be incorrect. Exiting program\n";
+            exit(EXIT_FAILURE);
+        }
+    }
 
     // for (layer_num = 0; layer_num < j_weights["layers"].size(); ++layer_num) {
     //     switch (m_net_config.layers[layer_num].layer_type) {
@@ -293,7 +333,7 @@ float *setup::load_input(std::string &input_file, bool is_image) {
 
             boost::split_regex(fields, line, boost::regex(" "));
             // TODO: Turn into SIMD instruction later
-            for (unsigned i = 0; i < m_net_config.input_width * m_net_config.input_height; ++i) {
+            for (unsigned i = 0; i < m_net_config.input_width * m_net_config.input_height * m_net_config.input_depth; ++i) {
 
                 // TODO: Normalize data
                 // float normalize = line[i]

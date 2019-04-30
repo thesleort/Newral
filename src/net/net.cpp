@@ -61,6 +61,12 @@ void net::feed_forward(float *input) {
     std::cout << "Done.\n";
     cl::Program program = m_ocl.get_programs()->at(0);
 
+    for(int i = 0; i < (m_net_config->input_depth * m_net_config->input_height *m_net_config->input_width); ++i) {
+        std::cout << input[i] << "-";
+    }
+
+    std::cout << "\n";
+
     for (unsigned layer_num = 0; layer_num < m_net_config->num_layers; ++layer_num) {
         // layer &this_layer = m_net_config.layer_num[layer_num];
         Layer &this_layer = m_net_config->layers.at(layer_num);
@@ -188,7 +194,7 @@ void net::add_filter(FilterConfig &config, int filter_num) {
 
     for (unsigned filter_weight = 0; filter_weight < filter_size; ++filter_weight) {
         // config.filter[filter_num].filter_weights[filter_weight] = random_weight();
-        config.filter[filter_num].filter_weights[filter_weight] = 1;
+        // config.filter[filter_num].filter_weights[filter_weight] = 1;
         config.filter[filter_num].filter_delta_weights[filter_weight] = 0;
     }
 }

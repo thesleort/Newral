@@ -32,6 +32,10 @@ int main(int argc, const char * argv[]) {
 	network_setup.load_cfg(cfg_file);
 	std::cout << "Done.\n";
 
+	std::cout << "Setting up network...\n";
+	net network(*network_setup.get_cfg(), compute);
+	std::cout << "Done.\n";
+	
 	std::cout << "Loading filters...\n";
 	network_setup.load_weights(weights_file);
 	std::cout << "Done.\n";
@@ -40,13 +44,11 @@ int main(int argc, const char * argv[]) {
 	// network_setup.load_input(input_file, false);
 	// std::cout << "Done.\n";
 
-	std::cout << "Setting up network...\n";
-	net network(*network_setup.get_cfg(), compute);
-	std::cout << "Done.\n";
 	// network	
 
 	std::cout << "Classifying...\n";
 	network.feed_forward(network_setup.load_input(input_file, false));
 	std::cout << "Done.\n";
 	// return 0;
+	exit(EXIT_SUCCESS);
 }

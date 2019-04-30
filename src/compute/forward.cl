@@ -68,7 +68,7 @@ __kernel void convolution(
 							layer_width + 
 							coords.z * 
 							layer_width * 
-							layer_height];
+							layer_height] * filter[filter_id++];
 
 						// sum += filter[filter_id++];
 						// sum += filter[filter_id++];
