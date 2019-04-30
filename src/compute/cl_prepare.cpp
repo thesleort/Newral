@@ -53,7 +53,7 @@ int cl_setup::setup(int DEVICE_TYPE) {
         }
         std::cout << "Please choose a platform: ";
         std::cin >> pref;
-        if (pref > tmp_platforms.size() - 1 || pref < 0) {
+        if (pref > tmp_platforms.size() - 1) {
             std::cout << "This platform does not exist.\n";
             return ERR_INVALID_INPUT;
         }
@@ -67,6 +67,7 @@ int cl_setup::setup(int DEVICE_TYPE) {
     // Alpha version currently only supports one device
     device = m_devices.at(0);
 	m_setup = true;
+    return 0;
 }
 
 /**
@@ -80,7 +81,7 @@ void cl_setup::build(const std::string &file, const char *version) {
 		std::cerr << "OpenCL has not been setup yet" << std::endl;
 		exit(0);
 	}
-    cl_int err;
+    // cl_int err;
 
     std::ifstream cl_file(file);
     std::string src(std::istreambuf_iterator<char>(cl_file), (std::istreambuf_iterator<char>()));
@@ -91,7 +92,8 @@ void cl_setup::build(const std::string &file, const char *version) {
         cl::Context context(m_devices.at(0));
         cl::Program program(context, sources);
 
-        err = program.build(version);
+        program.build(version);
+
         cl::Device device = m_devices.at(device_num);
         cl_build_status status = program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(device);
         if (status == CL_BUILD_ERROR) {
@@ -117,11 +119,10 @@ std::vector<cl::Program> *cl_setup::get_programs() {
 /**
  * @brief Returns a pointer to the available devices
  * 
- * @param DEVICE_TYPE if not specified, then all available devices will be 
- * returned.
+ * 
  * @return std::vector<cl::Device>* 
  */
-std::vector<cl::Device> *cl_setup::get_devices(const int DEVICE_TYPE) {
+std::vector<cl::Device> *cl_setup::get_devices() {
     return &m_devices;
 }
 
@@ -138,10 +139,11 @@ cl::Device *cl_setup::get_device(const int DEVICE_TYPE = CL_DEVICE_TYPE_ALL) {
         break;
     default:
         for (unsigned i = 0; i < m_devices.size(); ++i) {
-            if (DEVICE_TYPE == m_devices.at(i).getInfo<CL_DEVICE_TYPE>()) {
+            if (DEVICE_TYPE == (int) m_devices.at(i).getInfo<CL_DEVICE_TYPE>()) {
                 return &m_devices.at(i);
             }
         }
         break;
     }
+    return NULL;
 }

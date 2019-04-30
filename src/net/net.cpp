@@ -61,7 +61,7 @@ void net::feed_forward(float *input) {
     std::cout << "Done.\n";
     cl::Program program = m_ocl.get_programs()->at(0);
 
-    for(int i = 0; i < (m_net_config->input_depth * m_net_config->input_height *m_net_config->input_width); ++i) {
+    for(unsigned i = 0; i < (m_net_config->input_depth * m_net_config->input_height *m_net_config->input_width); ++i) {
         std::cout << input[i] << "-";
     }
 
@@ -82,7 +82,7 @@ void net::feed_forward(float *input) {
 		 * 
 		 */
 
-        int layersize = this_layer.height * this_layer.width * this_layer.depth;
+        // int layersize = this_layer.height * this_layer.width * this_layer.depth;
 
         switch (this_layer.layer_type) {
         case INPUT:
@@ -193,7 +193,7 @@ void net::add_filter(FilterConfig &config, int filter_num) {
     config.filter[filter_num].filter_delta_weights = new float[filter_size];
     // config.filter->filter_delta_weights = (float *)malloc(config.height * config.width * config.depth * sizeof(float));
 
-    for (unsigned filter_weight = 0; filter_weight < filter_size; ++filter_weight) {
+    for (int filter_weight = 0; filter_weight < filter_size; ++filter_weight) {
         // config.filter[filter_num].filter_weights[filter_weight] = random_weight();
         // config.filter[filter_num].filter_weights[filter_weight] = 1;
         config.filter[filter_num].filter_delta_weights[filter_weight] = 0;
@@ -208,14 +208,14 @@ void net::add_filter(FilterConfig &config, int filter_num) {
  * @param fc 
  */
 // TODO: Remove, since unnecessary ?
-void net::connect_neurons(Layer &lc, FilterConfig &fc) {
-    for (unsigned x = 0; x < lc.width; ++x) {
-        for (unsigned y = 0; y < lc.height; ++y) {
-            for (unsigned filter_z = 0; filter_z < lc.depth; ++filter_z) {
-            }
-        }
-    }
-}
+// void net::connect_neurons(Layer &lc, FilterConfig &fc) {
+//     for (unsigned x = 0; x < lc.width; ++x) {
+//         for (unsigned y = 0; y < lc.height; ++y) {
+//             for (unsigned filter_z = 0; filter_z < lc.depth; ++filter_z) {
+//             }
+//         }
+//     }
+// }
 
 float net::random_weight() {
     return rand() / float(RAND_MAX);

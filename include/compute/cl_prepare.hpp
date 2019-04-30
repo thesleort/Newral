@@ -19,7 +19,7 @@ class cl_setup {
 		int setup(int DEVICE_TYPE);
 		void build(const std::string &file, const char* version);
 		std::vector<cl::Program> *get_programs();
-		std::vector<cl::Device> *get_devices(const int DEVICE_TYPE);
+		std::vector<cl::Device> *get_devices();
 		cl::Device *get_device(const int DEVICE_TYPE);
 	private:
 		bool m_setup = false;

@@ -16,7 +16,7 @@ void cl_compute::load(cl::Program &program) {
 
 void cl_compute::compute_convolution(Layer &this_layer) {
     std::cout << "COMPUTE CONVOLUTION\n";
-    int num_filters = this_layer.num_filters;
+    unsigned num_filters = this_layer.num_filters;
 
     int layer_prev_height = this_layer.layer_prev->height;
     int layer_prev_width = this_layer.layer_prev->width;
@@ -56,7 +56,7 @@ void cl_compute::compute_convolution(Layer &this_layer) {
 
     std::cout << "Num filters: " << this_layer.num_filters << "\nNum filters prev: " << this_layer.layer_prev->num_filters << "\n";
 
-    for (unsigned filter_num = 0; filter_num < this_layer.num_filters; filter_num++) {
+    for (unsigned filter_num = 0; filter_num < num_filters; filter_num++) {
 
         filter_height = this_layer.filters_config->height;
         filter_width = this_layer.filters_config->width;
@@ -95,30 +95,28 @@ void cl_compute::compute_convolution(Layer &this_layer) {
 
         std::cout << "Padding: " << filter_padding << " - Stride: " << filter_stride << " - Bias: " << this_layer.filters[filter_num].bias << "\n";
 
-        std::cout << "Layer width/height: " << layer_prev_width << "/" << layer_prev_height << "/" << layer_prev_depth << "\n";
+        std::cout << "Layer prev width/height: " << layer_prev_width << "/" << layer_prev_height << "/" << layer_prev_depth << "\n";
+        std::cout << "Layer width/height: " << layer_width << "/" << layer_height << "/" << layer_depth << "\n";
         std::cout << "Filter width/height: " << filter_width << "/" << filter_height << "/" << filter_depth <<"\n";
 
-        m_queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(layer_height, layer_width, layer_depth));
-
-        int total_length = this_layer.width * this_layer.height * this_layer.depth;
-
+        m_queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(layer_height, layer_width, layer_depth), cl::NDRange(filter_height, filter_width, filter_depth));
     }
 }
 
 void cl_compute::compute_maxpool(Layer &this_layer) {
-    int layer_prev_height = this_layer.layer_prev->height;
-    int layer_prev_width = this_layer.layer_prev->width;
-    int layer_prev_depth = this_layer.layer_prev->depth;
+    // int layer_prev_height = this_layer.layer_prev->height;
+    // int layer_prev_width = this_layer.layer_prev->width;
+    // int layer_prev_depth = this_layer.layer_prev->depth;
 
-    int layer_height = this_layer.height;
-    int layer_width = this_layer.width;
-    int layer_depth = this_layer.depth;
+    // int layer_height = this_layer.height;
+    // int layer_width = this_layer.width;
+    // int layer_depth = this_layer.depth;
 
     
 }
 
 void cl_compute::output(Layer &this_layer) {
-	int total_length = this_layer.width * this_layer.height * this_layer.depth;
+	unsigned total_length = this_layer.width * this_layer.height * this_layer.depth;
     // float *output_array = new float[total_length];
 
 	std::cout << "\nTotal length: " << total_length;

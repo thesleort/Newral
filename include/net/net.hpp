@@ -28,7 +28,7 @@ public:
     net(NetConfig &nc, cl_setup &ocl);
     Layer get_layer(unsigned index);
     void feed_forward(float *input);
-    void backpropagate(std::vector<class_object> objects); // TODO: Rewrite to use pointer instead at some point
+    // void backpropagate(std::vector<class_object> objects); // TODO: Rewrite to use pointer instead at some point
 
 private:
 	void compute_maxpool();

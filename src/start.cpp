@@ -144,7 +144,7 @@ void setup::allocator() {
     std::cout << "Num layers: " << m_net_config.layers.size() << "\n";
     for (unsigned layer_num = 0; layer_num < m_net_config.layers.size(); ++layer_num) {
 
-        Layer &next_layer = (layer_num + 1 >= m_net_config.layers.size()) ? m_net_config.layers.at(layer_num) : m_net_config.layers.at(layer_num + 1);
+        // Layer &next_layer = (layer_num + 1 >= m_net_config.layers.size()) ? m_net_config.layers.at(layer_num) : m_net_config.layers.at(layer_num + 1);
         Layer &previous_layer = (layer_num > 0) ? m_net_config.layers.at(layer_num - 1) : m_net_config.layers.at(layer_num);
         // Layer &previous_layer = m_net_config.layers.at(layer_num);
         Layer &current_layer = m_net_config.layers.at(layer_num);
@@ -170,7 +170,7 @@ void setup::allocator() {
             // current_layer.neurons = (float *)malloc(sizeof(float) * width * height * depth);
 
 			// Set values in struct
-			current_layer.width = height;
+			current_layer.width = width;
 			current_layer.height = height;
 			current_layer.depth = depth;
 
@@ -190,6 +190,10 @@ void setup::allocator() {
             //     current_layer.filters[filter_num].filter_delta_weights = (float *)malloc(sizeof(float) * current_layer.filters_config->width * current_layer.filters_config->height * current_layer.filters_config->depth);
             //     current_layer.filters[filter_num].filter_config = current_layer.filters_config;
             // }
+            break;
+        case MAXPOOL:
+            break;
+        case FULLY:
             break;
         case OUTPUT:
             previous_layer.layer_next = &current_layer;
@@ -214,19 +218,16 @@ void setup::load_weights(std::string &weights_file_name) {
 
     m_weights_file.open(weights_file_name);
 
-    char cstr[weights_file_name.size() + 1];
-    strcpy(cstr, weights_file_name.c_str());
-
     libconfig::Config cfg;
 
     // cfg.readFile(weights_file_name);
-    cfg.readFile(cstr);
+    cfg.readFile(weights_file_name.c_str());
 
 
     const libconfig::Setting &root = cfg.getRoot();
     const libconfig::Setting &layers = root["layers"];
 
-    unsigned filter_length;
+    // unsigned filter_length;
     bool found = true;
 
     for(layer_num = 0; layer_num < m_net_config.num_layers; layer_num++) {
@@ -241,14 +242,14 @@ void setup::load_weights(std::string &weights_file_name) {
 
                     if(id.compare(m_net_config.layers[layer_num].id) == 0) {
                         libconfig::Setting &filters = layers[i]["filters"];
-                        const int filter_size = m_net_config.layers[layer_num].filters_config->width *
+                        const unsigned filter_size = m_net_config.layers[layer_num].filters_config->width *
                                             m_net_config.layers[layer_num].filters_config->height *
                                             m_net_config.layers[layer_num].filters_config->depth;
-                        for(int filter_num = 0; filter_num < m_net_config.layers[layer_num].num_filters; ++filter_num) {
-                            for(int filter_num_idx = 0; filter_num_idx < filter_size; filter_num_idx++) {
-                                m_net_config.layers[layer_num].filters[filter_num].filter_weights[filter_num_idx] = (float) filters[filter_num][filter_num_idx];
-                                m_net_config.layers[layer_num].filters[filter_num].bias = (float) layers[i]["bias"][filter_num];
+                        for(filter_num = 0; filter_num < m_net_config.layers[layer_num].num_filters; ++filter_num) {
+                            for(weight_num = 0; weight_num < filter_size; weight_num++) {
+                                m_net_config.layers[layer_num].filters[filter_num].filter_weights[weight_num] = (float) filters[filter_num][weight_num];
                             }
+                            m_net_config.layers[layer_num].filters[filter_num].bias = (float) layers[i]["bias"][filter_num];
                             std::cout << "\n";
                         }
                         break;
@@ -322,7 +323,8 @@ void setup::load_weights(std::string &weights_file_name) {
 float *setup::load_input(std::string &input_file, bool is_image) {
     int input_size = m_net_config.input_width * m_net_config.input_height * m_net_config.input_depth;
     int slice = m_net_config.input_width * m_net_config.input_height;
-    float *input = (float *)malloc(sizeof(float) * input_size);
+    // float *input = (float *)malloc(sizeof(float) * input_size);
+    float *input = new float[input_size];
 
     if (!is_image) {
         std::string line;
@@ -343,6 +345,7 @@ float *setup::load_input(std::string &input_file, bool is_image) {
         }
         return input;
     }
+    return input;
 }
 
 NetConfig *setup::get_cfg() {

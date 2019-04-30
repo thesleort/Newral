@@ -3,9 +3,9 @@
 
 #include <vector>
 
-typedef struct NeuronFilter;
-typedef struct Filter;
-typedef struct Layer;
+struct NeuronFilter;
+struct Filter;
+struct Layer;
 
 class cl_compute;
 
@@ -17,7 +17,7 @@ enum type { CONVOLUTION,
 
 // class neuron;
 
-typedef struct FilterConfig {
+struct FilterConfig {
 
     unsigned filters = 1;
     unsigned stride = 1;
@@ -36,7 +36,7 @@ typedef struct FilterConfig {
     bool initialized = false;
 };
 
-typedef struct NetConfig {
+struct NetConfig {
     unsigned input_width;
     unsigned input_height;
     unsigned input_depth; // Typically color for images
@@ -45,14 +45,14 @@ typedef struct NetConfig {
     std::vector<Layer> layers;
 };
 
-typedef struct Filter {
+struct Filter {
     FilterConfig *filter_config;
     float *filter_weights; // To make NxNxDepth feature map
 	float *filter_delta_weights;
     float bias;
 };
 
-typedef struct Layer {
+struct Layer {
 	NetConfig *net_config;
     type layer_type;
     std::string id;
@@ -75,12 +75,12 @@ typedef struct Layer {
 // typedef struct Topology {
 // } Topology;
 
-typedef struct _class_object {
+struct class_object {
     double object; // Class of object defines as a number
     double x;      // top left coordinates of object on image
     double y;
     double width; // height and width of object
     double height;
-} class_object;
+};
 
 #endif
