@@ -25,29 +25,29 @@
  */
 class net {
 public:
-    net(net_config nc, cl_setup &ocl);
-    layer get_layer(unsigned index);
-    void feed_forward(std::vector<std::vector<std::vector<float>>> &input);
-    void backpropagate(std::vector<class_object> objects); // TODO: Rewrite to use pointer instead at some point
+    net(NetConfig &nc, cl_setup &ocl);
+    Layer get_layer(unsigned index);
+    void feed_forward(float *input);
+    // void backpropagate(std::vector<class_object> objects); // TODO: Rewrite to use pointer instead at some point
 
 private:
 	void compute_maxpool();
-	void compute_convolution(layer &this_layer, cl::Program &program);
-	void output(layer &this_layer, cl::Program &program);
+	void compute_convolution(Layer &this_layer, cl::Program &program);
+	void output(Layer &this_layer, cl::Program &program);
 	void compute_fully_connected();
-    void add_layer(layer &config, enum type type);
-    void add_filter(filter_config &config);
-    void connect_neurons(layer &lc, filter_config &fc);
+    void add_layer(Layer &config, enum type type);
+    void add_filter(FilterConfig &config, int filter_num);
+    void connect_neurons(Layer &lc, FilterConfig &fc);
 	int get_3d_index(unsigned x, unsigned y, unsigned z, unsigned width, unsigned depth);
 	float random_weight();
 	cl_setup m_ocl;
 	cl_compute m_ocl_compute;
-    net_config m_net_config;
+    NetConfig *m_net_config;
 };
 
 unsigned filter_size_calc(unsigned *length, unsigned filter, int padding, unsigned stride);
 
-unsigned filter_size(unsigned &length, filter_config *fmc);
+unsigned filter_size(unsigned &length, FilterConfig *fmc);
 
 #endif
 

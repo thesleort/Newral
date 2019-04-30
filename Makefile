@@ -12,6 +12,8 @@ INC_ALL = -Iinclude/ $(INC_MOD)
 
 MODULES = $(filter-out $(MOD_DIR)/README.md $(wildcard $(SRC_DIR)/*.cpp), $(wildcard $(MOD_DIR)/* $(SRC_DIR)/*/))
 
+PKG = libconfig++
+
 MAIN_DIR = main
 TEST_DIR = tests
 
@@ -39,13 +41,13 @@ TC_SRC = $(filter-out $(wildcard src/main.c) $(wildcard $(SRC_DIR)/scan_parse.c 
 CC = g++
 
 CPPFLAGS += $(INC)								# -I is a preprocessor flag, not a compiler flag
-CFLAGS += -std=c++11 -Wall -Wextra -pedantic -g	# some warnings about bad code
+CFLAGS += -std=c++14 `pkg-config --cflags $(PKG)` -Wall -Wextra -pedantic -g	# some warnings about bad code
 
 BOOST = -lboost_regex
 # -L is a linker flag
 LDFLAGS += -Llib
 # Left empty if no libs are needed
-LDLIBS += -lm -lOpenCL 
+LDLIBS += -lm -lOpenCL `pkg-config --libs $(PKG)`
 
 all: $(EXE)
 

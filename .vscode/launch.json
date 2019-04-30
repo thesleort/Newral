@@ -10,11 +10,11 @@
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/newral.out",
-			"args": ["cfg/conv_test.cfg","cfg/conv_test.json","cfg/conv_test.input"],
+			"args": ["cfg/conv_test.cfg","cfg/conv_test_new.weights","cfg/conv_test_new.input"],
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}",
 			"environment": [],
-			"externalConsole": true,
+			"externalConsole": false,
 			"MIMode": "gdb",
 			"setupCommands": [
 				{
