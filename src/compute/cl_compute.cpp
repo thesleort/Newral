@@ -70,7 +70,14 @@ void cl_compute::compute_convolution(Layer &this_layer) {
         cl::Kernel kernel(m_program, "convolution");
 
         std::cout << "\nFilter: \n";
-        for(int i = 0; i < (filter_height * filter_width * filter_depth); ++i) {
+        for(int i = 0; i < (filter_height * filter_width * filter_depth); i++) {
+            if(i % filter_width == 0) {
+                std::cout << "\n";
+            }
+
+            if(i % (filter_width * filter_height) == 0) {
+                std::cout << "\n";
+            }
             std::cout << this_layer.filters[filter_num].filter_weights[i] << ",";
         }
         std::cout << "\n";
@@ -122,12 +129,19 @@ void cl_compute::output(Layer &this_layer) {
 	std::cout << "\nTotal length: " << total_length;
     std::cout << "\n";
 
+	m_queue.finish();
     std::cout << "Queue: " << m_queue.enqueueReadBuffer(m_output_neurons, CL_TRUE, 0, sizeof(float) * total_length, this_layer.neurons);
 	std::cout << "\nAfter read:\n";
 
 	for(unsigned i = 0; i < total_length; ++i) {
+         if(i % this_layer.width == 0) {
+                std::cout << "\n";
+            }
+
+            if(i % (this_layer.width * this_layer.height) == 0) {
+                std::cout << "\n";
+            }
 		std::cout << this_layer.neurons[i] << " ";
 	}
 	std::cout << "\n";
-	m_queue.finish();
 }
