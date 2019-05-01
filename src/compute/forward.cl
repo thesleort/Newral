@@ -41,15 +41,15 @@ __kernel void convolution(
 
 	bool pad; 
 
-	// for(int z = 0; z < layer_depth; ++z) {
-	// 	coordZ = z + depth;
+	for(int z = 0; z < layer_depth; ++z) {
+		coordZ = z + depth;
 		for(int y = -half_height; y <= half_height; ++y) {
-			coordY = y + row + filter_stride;
+			coordY = y + row - filter_padding;
 			for(int x = -half_width; x <= half_width; ++x) {
-				coordX = x + column + filter_stride;
+				coordX = x + column - filter_padding;
 				pad = false;
-				// pad = (coordX < 0 || coordX >= layer_width) ? true : false;
-				// pad = (coordY < 0 || coordY >= layer_height) ? true : false;
+				pad = (coordX < 0 || coordX >= layer_width) ? true : false;
+				pad = (coordY < 0 || coordY >= layer_height) ? true : false;
 
 				// coords.x = (coords.x < 0) ? 0 : coords.x;
 				// coords.y = (coords.y < 0) ? 0 : coords.y;
@@ -61,12 +61,12 @@ __kernel void convolution(
 				if(!pad) {
 					sum += 
 					input_layer[
-						coordX + 
-						coordY * 
-						layer_width]* 
-					// 	// depth * 
-					// 	// layer_width * 
-					// 	// layer_height] * 
+						coordX + filter_stride+ 
+						(coordY + filter_stride)* 
+						layer_width + 
+						depth * 
+						layer_width * 
+						layer_height] * 
 					// // // filter_id;
 						filter[filter_id];
 					// input_layer[6] * filter[8];
@@ -76,7 +76,7 @@ __kernel void convolution(
 				}
 						filter_id++;
 			}
-		// }
+		}
 	}
 	// barrier(CLK_GLOBAL_MEM_FENCE);
 	output_column = column;
