@@ -44,9 +44,9 @@ __kernel void convolution(
 	for(int z = 0; z < layer_depth; ++z) {
 		coordZ = z + depth;
 		for(int y = -half_height; y <= half_height; ++y) {
-			coordY = y + row - filter_padding;
+			coordY = y - filter_padding + row;
 			for(int x = -half_width; x <= half_width; ++x) {
-				coordX = x + column - filter_padding;
+				coordX = x - filter_padding + column;
 				pad = false;
 				pad = (coordX < 0 || coordX >= layer_width) ? true : false;
 				pad = (coordY < 0 || coordY >= layer_height) ? true : false;
@@ -61,8 +61,8 @@ __kernel void convolution(
 				if(!pad) {
 					sum += 
 					input_layer[
-						coordX + filter_stride+ 
-						(coordY + filter_stride)* 
+						(coordX * filter_stride)+ 
+						(coordY * filter_stride)* 
 						layer_width + 
 						depth * 
 						layer_width * 
