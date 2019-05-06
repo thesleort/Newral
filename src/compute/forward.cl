@@ -18,8 +18,6 @@ __kernel void convolution(
 	int row = get_local_id(1);
 	int depth = get_local_id(2);
 
-	// output_layer = input_layer;
-
 	float sum = 0;
 
 	int filter_id = 0;
@@ -34,36 +32,34 @@ __kernel void convolution(
 	int output_height;
 	int output_width;
 
-	// int3 coords; 
-	int coordX;
-	int coordY;
-	int coordZ;
+	int3 coord; 
 
 				
 	bool padX;
 	bool padY;
 
 	for(int z = 0; z < layer_depth; ++z) {
+		coord.z = z;
 
 		for(int y = -half_height; y <= half_height; ++y) {
-			coordY = -filter_padding + (row * filter_stride) + y + half_height;
+			coord.y = -filter_padding + (row * filter_stride) + y + half_height;
 
 			for(int x = -half_width; x <= half_width; ++x) {
-				coordX = -filter_padding + (column * filter_stride) + x + half_width;
+				coord.x = -filter_padding + (column * filter_stride) + x + half_width;
 
 				padX = false;
 				padY = false;
 
-				padX = (coordX >= 0 && coordX < layer_width) ? false : true;
-				padY = (coordY >= 0 && coordY < layer_height) ? false : true;
+				padX = (coord.x >= 0 && coord.x < layer_width ) ? false : true;
+				padY = (coord.y >= 0 && coord.y < layer_height) ? false : true;
 
 				if(!padX && !padY) {
 					sum += 
 					input_layer[
-						coordX + 
-						coordY * 
+						coord.x + 
+						coord.y * 
 						layer_width + 
-						z * 
+						coord.z * 
 						layer_width * 
 						layer_height] * 
 						filter[filter_id];
@@ -72,13 +68,9 @@ __kernel void convolution(
 			}
 		}
 	}
-	// barrier(CLK_GLOBAL_MEM_FENCE);
 	output_column = column;
 	output_row = row;
 	output_depth = filter_num;
-
-	// output_column = 1;
-	// output_row = 1;
 
 	output_width = (layer_width - filter_width + 2 * filter_padding) / filter_stride + 1;
 	output_height = (layer_height - filter_height + 2 * filter_padding) / filter_stride + 1;
