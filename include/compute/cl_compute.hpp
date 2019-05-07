@@ -22,8 +22,8 @@ class cl_compute {
 		cl::Device m_device;
 		cl::CommandQueue m_queue;
 
-		cl::Buffer m_input_neurons;
-		cl::Buffer m_output_neurons;
+		cl::Buffer m_neuron_buffer_1; // Originally input buffer
+		cl::Buffer m_neuron_buffer_2; // Originally output buffer
 		cl::Buffer *p_output_neurons;
 
 };
