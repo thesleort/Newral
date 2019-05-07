@@ -35,7 +35,7 @@ void setup::load_cfg(std::string &cfg_file) {
     enum type layer_type = INPUT;
     // enum type previous_layer_type = INPUT;
 
-	Layer *current_layer;
+    Layer *current_layer;
     while (getline(m_cfg_file, line)) {
         std::vector<std::string> fields;
 
@@ -53,15 +53,16 @@ void setup::load_cfg(std::string &cfg_file) {
             // current_layer = (Layer *)malloc(sizeof(Layer));
             // current_layer->filters_config = (FilterConfig *)malloc(sizeof(FilterConfig));
             current_layer = new Layer;
-			current_layer->filters_config = new FilterConfig;
+            current_layer->filters_config = new FilterConfig;
             current_layer->net_config = &m_net_config;
             ++num_layers;
         } else if (fields.at(0).compare("[end]") == 0) {
             layer_type = OUTPUT;
             m_net_config.layers.push_back(*current_layer);
 
-			current_layer = new Layer;
-            current_layer->net_config = &m_net_config;;
+            current_layer = new Layer;
+            current_layer->net_config = &m_net_config;
+            ;
             ++num_layers;
         }
 
@@ -97,7 +98,7 @@ void setup::load_cfg(std::string &cfg_file) {
                 int filters = stoi(fields.at(1));
                 std::cout << "conv filters: " << filters << "\n";
                 current_layer->filters_config->filters = filters;
-				current_layer->num_filters = filters;
+                current_layer->num_filters = filters;
                 std::cout << "layer conv filters: " << current_layer->filters_config->filters << "\n";
 
             } else if (fields.at(0).compare("width") == 0) {
@@ -123,12 +124,34 @@ void setup::load_cfg(std::string &cfg_file) {
                 current_layer->id = fields.at(1);
                 std::cout << "ID: " << current_layer->id << "\n";
             }
-        } else if (layer_type == OUTPUT) {
-			++num_layers;
+        } else if (layer_type == MAXPOOL) {
+            layer_type = MAXPOOL;
+            current_layer->layer_type = CONVOLUTION;
+
+            if (fields.at(0).compare("width") == 0) {
+                int width = stoi(fields.at(1));
+                current_layer->filters_config->width = width;
+
+            } else if (fields.at(0).compare("height") == 0) {
+                int height = stoi(fields.at(1));
+                current_layer->filters_config->height = height;
+
+            } else if (fields.at(0).compare("depth") == 0) {
+                int depth = stoi(fields.at(1));
+                current_layer->filters_config->depth = depth;
+
+            } else if (fields.at(0).compare("stride") == 0) {
+                int stride = stoi(fields.at(1));
+                current_layer->filters_config->stride = stride;
+            }
+        }
+
+        else if (layer_type == OUTPUT) {
+            ++num_layers;
             layer_type = OUTPUT;
             current_layer->layer_type = OUTPUT;
-			m_net_config.layers.push_back(*current_layer);
-			m_net_config.num_layers = num_layers;
+            m_net_config.layers.push_back(*current_layer);
+            m_net_config.num_layers = num_layers;
         }
     }
     allocator();
@@ -162,17 +185,17 @@ void setup::allocator() {
             // current_layer.neurons = (float *)malloc(sizeof(float) * current_layer.width * current_layer.height * current_layer.depth);
             break;
         case CONVOLUTION:
-            // Allocate neurons on next layer
+            // Calculate size of layer
             std::cout << "Allocating: Convolution\n";
-            height = (previous_layer.height - current_layer.filters_config->height + 2 * current_layer.filters_config->padding) / current_layer.filters_config->stride + 1;
             width = (previous_layer.width - current_layer.filters_config->width + 2 * current_layer.filters_config->padding) / current_layer.filters_config->stride + 1;
+            height = (previous_layer.height - current_layer.filters_config->height + 2 * current_layer.filters_config->padding) / current_layer.filters_config->stride + 1;
             depth = previous_layer.num_filters;
             // current_layer.neurons = (float *)malloc(sizeof(float) * width * height * depth);
 
-			// Set values in struct
-			current_layer.width = width;
-			current_layer.height = height;
-			current_layer.depth = depth;
+            // Set values in struct
+            current_layer.width = width;
+            current_layer.height = height;
+            current_layer.depth = depth;
 
             // Set pointers between layers
             previous_layer.layer_next = &current_layer;
@@ -192,22 +215,40 @@ void setup::allocator() {
             // }
             break;
         case MAXPOOL:
+            std::cout << "Allocation: MAXPOOL\n";
+            // Calculate size of layer
+            width = (previous_layer.width - current_layer.filters_config->width) / current_layer.filters_config->stride + 1;
+            height = (previous_layer.height - current_layer.filters_config->height) / current_layer.filters_config->stride + 1;
+            depth = previous_layer.depth;
+
+            // Set values in struct
+            current_layer.width = width;
+            current_layer.height = height;
+            current_layer.depth = depth;
+            current_layer.filters = 0;
+
+            // Set pointers between layers
+            previous_layer.layer_next = &current_layer;
+            current_layer.layer_prev = &previous_layer;
+
+            current_layer.filters_config->layer = &current_layer;
+
             break;
         case FULLY:
             break;
         case OUTPUT:
             previous_layer.layer_next = &current_layer;
-			current_layer.layer_prev = &previous_layer;
+            current_layer.layer_prev = &previous_layer;
             current_layer.layer_next = NULL;
 
-			current_layer.width = current_layer.layer_prev->width;
-			current_layer.height = current_layer.layer_prev->height;
-			current_layer.depth = current_layer.layer_prev->depth;
+            current_layer.width = current_layer.layer_prev->width;
+            current_layer.height = current_layer.layer_prev->height;
+            current_layer.depth = current_layer.layer_prev->depth;
             std::cout << "Allocating: Output (none)\n";
             break;
         }
     }
-	return;
+    return;
 }
 
 void setup::load_weights(std::string &weights_file_name) {
@@ -223,41 +264,39 @@ void setup::load_weights(std::string &weights_file_name) {
     // cfg.readFile(weights_file_name);
     cfg.readFile(weights_file_name.c_str());
 
-
     const libconfig::Setting &root = cfg.getRoot();
     const libconfig::Setting &layers = root["layers"];
 
     // unsigned filter_length;
     bool found = true;
 
-    for(layer_num = 0; layer_num < m_net_config.num_layers; layer_num++) {
+    for (layer_num = 0; layer_num < m_net_config.num_layers; layer_num++) {
         switch (m_net_config.layers[layer_num].layer_type) {
         case INPUT:
             break;
-        case CONVOLUTION:
-            {
-                for(int i = 0; i < layers.getLength(); i++) {
-                    std::string id;
-                    layers[i].lookupValue("id", id);
+        case CONVOLUTION: {
+            for (int i = 0; i < layers.getLength(); i++) {
+                std::string id;
+                layers[i].lookupValue("id", id);
 
-                    if(id.compare(m_net_config.layers[layer_num].id) == 0) {
-                        libconfig::Setting &filters = layers[i]["filters"];
-                        const unsigned filter_size = m_net_config.layers[layer_num].filters_config->width *
-                                            m_net_config.layers[layer_num].filters_config->height *
-                                            m_net_config.layers[layer_num].filters_config->depth;
-                        for(filter_num = 0; filter_num < m_net_config.layers[layer_num].num_filters; ++filter_num) {
-                            for(weight_num = 0; weight_num < filter_size; weight_num++) {
-                                m_net_config.layers[layer_num].filters[filter_num].filter_weights[weight_num] = (float) filters[filter_num][weight_num];
-                            }
-                            m_net_config.layers[layer_num].filters[filter_num].bias = (float) layers[i]["bias"][filter_num];
-                            std::cout << "\n";
+                if (id.compare(m_net_config.layers[layer_num].id) == 0) {
+                    libconfig::Setting &filters = layers[i]["filters"];
+                    const unsigned filter_size = m_net_config.layers[layer_num].filters_config->width *
+                                                 m_net_config.layers[layer_num].filters_config->height *
+                                                 m_net_config.layers[layer_num].filters_config->depth;
+                    for (filter_num = 0; filter_num < m_net_config.layers[layer_num].num_filters; ++filter_num) {
+                        for (weight_num = 0; weight_num < filter_size; weight_num++) {
+                            m_net_config.layers[layer_num].filters[filter_num].filter_weights[weight_num] = (float)filters[filter_num][weight_num];
                         }
-                        break;
+                        m_net_config.layers[layer_num].filters[filter_num].bias = (float)layers[i]["bias"][filter_num];
+                        std::cout << "\n";
                     }
+                    break;
                 }
             }
-            break;
-        case MAXPOOL:
+        } break;
+        case MAXPOOL: 
+            // Maxpool does not contain any weights
             break;
         case FULLY:
             break;
@@ -265,7 +304,7 @@ void setup::load_weights(std::string &weights_file_name) {
             break;
         }
 
-        if(!found) {
+        if (!found) {
             std::cout << "Weights file appears to be incorrect. Exiting program\n";
             exit(EXIT_FAILURE);
         }

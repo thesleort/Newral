@@ -2,8 +2,8 @@
 // TODO: Change floats to vectors for hardware optimization
 __kernel void convolution(
 		__global float *input_layer, 
-		int layer_height,
 		int layer_width,
+		int layer_height,
 		int layer_depth,
 		__constant float *filter, 
 		int filter_width,
@@ -78,20 +78,20 @@ __kernel void convolution(
 	output_layer[output_column + output_row * output_width + filter_num * output_width * output_height] = sum + bias;
 }
 
-// __kernel void maxpool(
-// 	__global float *input_layer, 
-// 	__constant int layer_height,
-// 	__constant int layer_width,
-// 	__constant int layer_depth,
-// 	__constant float *filter, 
-// 	__constant int filter_width,
-// 	__constant int filter_height,
-// 	__constant int filter_depth,
-// 	__global float *output_layer,
-// 	__constant int filter_padding,
-// 	__constant int filter_stride,
-// 	__constant int filter_num
-// )
+__kernel void maxpool(
+	__global float *input_layer, 
+	int layer_width,
+	int layer_height,
+	int layer_depth,
+	__global float *output_layer,
+	int pool_width,
+	int pool_height,
+	int pool_slice,
+	int pool_stride,
+	int pool_padding
+) {
+
+}
 
 
 __kernel void simple(
