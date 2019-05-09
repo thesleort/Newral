@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "compute/cl_compute.hpp"
-
+#include <math.h>
 cl_compute::cl_compute() {
 	
 }
@@ -108,7 +108,7 @@ void cl_compute::compute_convolution(Layer &this_layer) {
         std::cout << "Layer width/height: " << layer_width << "/" << layer_height << "/" << layer_depth << "\n";
         std::cout << "Filter width/height: " << filter_width << "/" << filter_height << "/" << filter_depth <<"\n";
 
-        m_queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(layer_height, layer_width, layer_depth), cl::NDRange(filter_height, filter_width, filter_depth));
+        m_queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(layer_width, layer_height, layer_depth), cl::NDRange(filter_width, filter_height, filter_depth));
     }
 
 
@@ -124,32 +124,47 @@ void cl_compute::compute_maxpool(Layer &this_layer) {
     int layer_height = this_layer.height;
     int layer_depth = this_layer.depth;
 
-    int pool_width;
-    int pool_height;
-    int pool_stride;
+    int pool_width = this_layer.filters_config->width;
+    int pool_height = this_layer.filters_config->height;
+    int pool_stride = this_layer.filters_config->stride;
 
     int layersize = layer_width * layer_height * layer_depth;
 
+    std::cout << "Width: " << layer_width << " " << "| Height: " << layer_height << "| Depth: " << layer_depth << "| Stride: " << pool_width <<"\n";
     
     // m_output_neurons = cl::Buffer(m_context, CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY, layersize * sizeof(float));
+    m_neuron_buffer_1 = cl::Buffer(m_context, CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, layer_prev_height * layer_prev_width * layer_prev_depth * sizeof(float), this_layer.layer_prev->neurons, NULL);
+
+    m_neuron_buffer_2 = cl::Buffer(m_context, CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY, layer_height * layer_width * layer_depth * sizeof(float));
+
 
     cl::Kernel kernel(m_program, "maxpool");
 
-    if(this_layer.layer_prev->layer_type != INPUT) {
-        kernel.setArg(0, m_neuron_buffer_2);
-    } else {
-        m_neuron_buffer_1 = cl::Buffer(m_context, CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, layer_prev_height * layer_prev_width * layer_prev_depth * sizeof(float), this_layer.layer_prev->neurons, NULL);
-        kernel.setArg(0, m_neuron_buffer_1);
-    }
+    // if(this_layer.layer_prev->layer_type != INPUT) {
+    //     kernel.setArg(0, m_neuron_buffer_2);
+    // } else {
+    //     m_neuron_buffer_1 = cl::Buffer(m_context, CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, layer_prev_height * layer_prev_width * layer_prev_depth * sizeof(float), this_layer.layer_prev->neurons, NULL);
+    //     m_neuron_buffer_2 = cl::Buffer(m_context, CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, layer_height * layer_width * layer_depth * sizeof(float));
+    //     kernel.setArg(0, m_neuron_buffer_1);
+    // }
 
-    kernel.setArg(1, layer_width);
-    kernel.setArg(2, layer_height);
-    kernel.setArg(3, layer_depth);
+    kernel.setArg(0, m_neuron_buffer_1);
+    kernel.setArg(1, layer_prev_width);
+    kernel.setArg(2, layer_prev_height);
+    kernel.setArg(3, layer_prev_depth);
     kernel.setArg(4, m_neuron_buffer_2);
+    kernel.setArg(5, pool_width);
+    kernel.setArg(6, pool_height);
+    kernel.setArg(7, pool_stride);
+    // kernel.setArg(8, )
     // kernel.setArg(5, )
+
+    m_queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(layer_width, layer_height, layer_depth), cl::NDRange(layer_width, layer_height, layer_depth));
+
 }
 
 void cl_compute::output(Layer &this_layer) {
+    std::cout << "Width: " << this_layer.width << " " << "| Height: " << this_layer.height << "| Depth: " << this_layer.depth << "\n";
 	unsigned total_length = this_layer.width * this_layer.height * this_layer.depth;
     // float *output_array = new float[total_length];
 
@@ -170,5 +185,5 @@ void cl_compute::output(Layer &this_layer) {
             }
 		std::cout << this_layer.neurons[i] << " ";
 	}
-	std::cout << "\n";
+	std::cout << "\n" << ceil(1.1) << "\n";
 }

@@ -8,6 +8,7 @@
 
 #include "start.hpp"
 #include <libconfig.h++>
+#include <math.h>
 
 // #include "config.h"
 // #include "start.hpp"
@@ -56,13 +57,20 @@ void setup::load_cfg(std::string &cfg_file) {
             current_layer->filters_config = new FilterConfig;
             current_layer->net_config = &m_net_config;
             ++num_layers;
+        } else if (fields.at(0).compare("[maxpool]") == 0) {
+            layer_type = MAXPOOL;
+            m_net_config.layers.push_back(*current_layer);
+
+            current_layer = new Layer;
+            current_layer->filters_config = new FilterConfig;
+            current_layer->net_config = &m_net_config;
+            ++num_layers;
         } else if (fields.at(0).compare("[end]") == 0) {
             layer_type = OUTPUT;
             m_net_config.layers.push_back(*current_layer);
 
             current_layer = new Layer;
             current_layer->net_config = &m_net_config;
-            ;
             ++num_layers;
         }
 
@@ -126,7 +134,7 @@ void setup::load_cfg(std::string &cfg_file) {
             }
         } else if (layer_type == MAXPOOL) {
             layer_type = MAXPOOL;
-            current_layer->layer_type = CONVOLUTION;
+            current_layer->layer_type = MAXPOOL;
 
             if (fields.at(0).compare("width") == 0) {
                 int width = stoi(fields.at(1));
@@ -135,10 +143,6 @@ void setup::load_cfg(std::string &cfg_file) {
             } else if (fields.at(0).compare("height") == 0) {
                 int height = stoi(fields.at(1));
                 current_layer->filters_config->height = height;
-
-            } else if (fields.at(0).compare("depth") == 0) {
-                int depth = stoi(fields.at(1));
-                current_layer->filters_config->depth = depth;
 
             } else if (fields.at(0).compare("stride") == 0) {
                 int stride = stoi(fields.at(1));
@@ -163,7 +167,7 @@ void setup::load_cfg(std::string &cfg_file) {
  */
 void setup::allocator() {
     std::cout << "Allocating memory\n";
-    std::cout << "Num filters: " << m_net_config.layers[0].num_filters << "\n";
+    std::cout << "Num channels: " << m_net_config.layers[0].num_filters << "\n";
     std::cout << "Num layers: " << m_net_config.layers.size() << "\n";
     for (unsigned layer_num = 0; layer_num < m_net_config.layers.size(); ++layer_num) {
 
@@ -172,7 +176,7 @@ void setup::allocator() {
         // Layer &previous_layer = m_net_config.layers.at(layer_num);
         Layer &current_layer = m_net_config.layers.at(layer_num);
 
-        int height = 0, width = 0, depth = 0;
+        float height = 0, width = 0, depth = 0;
 
         switch (current_layer.layer_type) {
         case INPUT:
@@ -225,7 +229,9 @@ void setup::allocator() {
             current_layer.width = width;
             current_layer.height = height;
             current_layer.depth = depth;
-            current_layer.filters = 0;
+            current_layer.num_filters = depth;
+
+            std::cout << "Width: " << depth << "\n";
 
             // Set pointers between layers
             previous_layer.layer_next = &current_layer;
@@ -237,13 +243,18 @@ void setup::allocator() {
         case FULLY:
             break;
         case OUTPUT:
+            std::cout << "Allocation: OUTPUT\n";
             previous_layer.layer_next = &current_layer;
             current_layer.layer_prev = &previous_layer;
             current_layer.layer_next = NULL;
 
             current_layer.width = current_layer.layer_prev->width;
             current_layer.height = current_layer.layer_prev->height;
+            std::cout << "Depthhhh: " << current_layer.depth << "\n";
+
             current_layer.depth = current_layer.layer_prev->depth;
+            std::cout << "Depthhhh: " << current_layer.depth << "\n";
+
             std::cout << "Allocating: Output (none)\n";
             break;
         }
@@ -295,7 +306,7 @@ void setup::load_weights(std::string &weights_file_name) {
                 }
             }
         } break;
-        case MAXPOOL: 
+        case MAXPOOL:
             // Maxpool does not contain any weights
             break;
         case FULLY:

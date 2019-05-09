@@ -61,7 +61,7 @@ void net::feed_forward(float *input) {
     std::cout << "Done.\n";
     cl::Program program = m_ocl.get_programs()->at(0);
 
-    for(unsigned i = 0; i < (m_net_config->input_depth * m_net_config->input_height *m_net_config->input_width); ++i) {
+    for (unsigned i = 0; i < (m_net_config->input_depth * m_net_config->input_height * m_net_config->input_width); ++i) {
         std::cout << input[i] << "-";
     }
 
@@ -101,6 +101,8 @@ void net::feed_forward(float *input) {
             // }
             break;
         case MAXPOOL:
+            std::cout << "Computing maxpool, layer:" << layer_num << "\n";
+            m_ocl_compute.compute_maxpool(this_layer);
             // m_ocl.build("src/compute/forward.cl", "-cl-std=CL1.2");
 
             // cl::Program program = m_ocl.get_programs()->at(0);
@@ -172,11 +174,13 @@ unsigned filter_size(unsigned &length, FilterConfig *fmc) {
 void net::add_layer(Layer &layer, enum type type) {
     int layersize = layer.width * layer.height * layer.depth;
     layer.neurons = new float[layersize];
+    std::cout << "Layersize: " << layersize << "\n";
     // layer.neurons = (float *)malloc(sizeof(float) * layersize);
+    if (type == CONVOLUTION) {
+        layer.filters = new Filter[layer.num_filters];
+    }
 
-    layer.filters = new Filter[layer.num_filters];
-
-    if (type != OUTPUT && type != INPUT) {
+    if (type != OUTPUT && type != INPUT && type != MAXPOOL) {
         layer.filters_config->filter = layer.filters;
 
         for (unsigned filter = 0; filter < layer.num_filters; ++filter) {

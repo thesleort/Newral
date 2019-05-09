@@ -6,11 +6,30 @@
 	"configurations": [
 	
 		{
-			"name": "(gdb) Train",
+			"name": "(gdb) Classify - Convolution",
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/newral.out",
 			"args": ["cfg/conv_test.cfg","cfg/conv_test_new.weights","cfg/conv_test_new.input"],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}",
+			"environment": [],
+			"externalConsole": false,
+			"MIMode": "gdb",
+			"setupCommands": [
+				{
+					"description": "Enable pretty-printing for gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				}
+			]
+		},
+		{
+			"name": "(gdb) Classify - Maxpool",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/newral.out",
+			"args": ["cfg/maxpool_test.cfg","cfg/conv_test_new.weights","cfg/conv_test_new.input"],
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}",
 			"environment": [],
