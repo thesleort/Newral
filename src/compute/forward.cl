@@ -162,6 +162,7 @@ __kernel void fully_connected_relu(
     __global float *output_layer,
     int layer_size,
     float bias) {
+    unsigned global_size = get_global_size(0);
     unsigned global_id = get_global_id(0);
     unsigned local_size = get_local_size(0);
     unsigned local_id = get_local_id(0);
@@ -190,9 +191,9 @@ __kernel void fully_connected_relu(
 
     // ReLU function
     if (sum > 0) {
-        output_layer[global_id] = sum + bias;
+        output_layer[global_id] = 1;
     } else {
-        output_layer[global_id] = 0,
+        output_layer[0] = 0;
     }
 }
 

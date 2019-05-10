@@ -62,7 +62,15 @@ void setup::load_cfg(std::string &cfg_file) {
             m_net_config.layers.push_back(*current_layer);
 
             current_layer = new Layer;
-            current_layer->filters_config = new FilterConfig;
+            current_layer->maxpool_config = new MaxpoolConfig;
+            current_layer->net_config = &m_net_config;
+            ++num_layers;
+        } else if (fields.at(0).compare("[full]") == 0) {
+            layer_type = FULLY;
+            m_net_config.layers.push_back(*current_layer);
+
+            current_layer = new Layer;
+            current_layer->fully_config = new FullNetConfig;
             current_layer->net_config = &m_net_config;
             ++num_layers;
         } else if (fields.at(0).compare("[end]") == 0) {
@@ -148,9 +156,23 @@ void setup::load_cfg(std::string &cfg_file) {
                 int stride = stoi(fields.at(1));
                 current_layer->maxpool_config->stride = stride;
             }
-        }
+        } else if (layer_type == FULLY) {
+            layer_type = FULLY;
+            current_layer->layer_type = FULLY;
 
-        else if (layer_type == OUTPUT) {
+            if (fields.at(0).compare("size") == 0) {
+                int size = stoi(fields.at(1));
+                current_layer->fully_config->size = size;
+            } else if (fields.at(0).compare("id") == 0) {
+                current_layer->id = fields.at(0);
+
+            } else if (fields.at(0).compare("activation") == 0) {
+                if (fields.at(1).compare("relu") == 0) {
+                    current_layer->fully_config->activation_function = RELU;
+                }
+            }
+
+        } else if (layer_type == OUTPUT) {
             ++num_layers;
             layer_type = OUTPUT;
             current_layer->layer_type = OUTPUT;
@@ -242,7 +264,15 @@ void setup::allocator() {
             std::cout << "Allocation: Fully Connected\n";
 
             size = previous_layer.width * previous_layer.height * previous_layer.depth;
-            // depth = 
+            // depth =
+
+            current_layer.width = size;
+            current_layer.height = 1;
+            current_layer.depth = 1;
+            current_layer.num_filters = 1;
+
+            previous_layer.layer_next = &current_layer;
+            current_layer.layer_prev = &previous_layer;
 
             break;
         case DROPOUT:
@@ -310,8 +340,23 @@ void setup::load_weights(std::string &weights_file_name) {
         case MAXPOOL:
             // Maxpool does not contain any weights
             break;
-        case FULLY:
-            break;
+        case FULLY: {
+            for (int i = 0; i < layers.getLength(); i++) {
+                std::string id;
+                layers[i].lookupValue("id", id);
+
+                if (id.compare(m_net_config.layers[layer_num].id) == 0) {
+                    libconfig::Setting &weights = layers[i]["weights"];
+                    const unsigned filter_size = m_net_config.layers[layer_num].fully_config->size;
+
+                    for (weight_num = 0; weight_num < filter_size; weight_num++) {
+                        m_net_config.layers[layer_num].weights->net_weights[weight_num] = (float)weights[weight_num];
+                    }
+                    m_net_config.layers[layer_num].weights->net_weights[weight_num] = (float)layers[i]["bias"][0];
+                }
+                break;
+            }
+        } break;
         case DROPOUT:
             break;
         case OUTPUT:

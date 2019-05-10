@@ -92,7 +92,7 @@ struct Filter {
 struct Weights {
     FullNetConfig *net_config;
     float *net_weights;
-    float net_delta_weights;
+    float *net_delta_weights;
     float bias;
 };
 
@@ -109,14 +109,17 @@ struct Layer {
     Layer *layer_next;
 
     float *neurons;    // "Dot" product of all filters. PSEUDO data, can be freed from memory after layer is done
-	Filter *filters;
+    union {
+	    Filter *filters;
+        Weights *weights;
+    };
 
     // Filters
     unsigned num_filters;
     union {
         FilterConfig *filters_config;
         MaxpoolConfig *maxpool_config;
-        Weights *weights_config;
+        FullNetConfig *fully_config;
     };
 };
 

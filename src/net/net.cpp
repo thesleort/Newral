@@ -119,10 +119,12 @@ void net::feed_forward(float *input) {
 
             break;
         case CONVOLUTION:
-            std::cout << "Computing convolution, layer:" << layer_num << "\n";
+            std::cout << "Computing convolution, layer: " << layer_num << "\n";
             m_ocl_compute.compute_convolution(this_layer);
             break;
         case FULLY:
+            std::cout << " Computing fully connected, layer: " << layer_num << "\n";
+            m_ocl_compute.compute_fully(this_layer);
             break;
         case DROPOUT:
             break;
@@ -199,10 +201,14 @@ void net::add_layer(Layer &layer, enum type type) {
     case MAXPOOL:
         break;
     case FULLY:
+        layer.weights = new Weights[layer.width];
+
+        layer.fully_config->weights = layer.weights;
+        break;
+    case DROPOUT:
         break;
     case OUTPUT:
         break;
-
     default:
         break;
     }
@@ -217,9 +223,26 @@ void net::add_filter(FilterConfig &config, int filter_num) {
     // config.filter->filter_delta_weights = (float *)malloc(config.height * config.width * config.depth * sizeof(float));
 
     for (int filter_weight = 0; filter_weight < filter_size; ++filter_weight) {
+        if(training) {
+            config.filter[filter_num].filter_weights[filter_weight] = random_weight();
+        }
         // config.filter[filter_num].filter_weights[filter_weight] = random_weight();
         // config.filter[filter_num].filter_weights[filter_weight] = 1;
         config.filter[filter_num].filter_delta_weights[filter_weight] = 0;
+    }
+}
+
+void net::add_filter(FullNetConfig &config) {
+    int num_weights = config.size;
+    config.weights->net_weights = new float[num_weights];
+    config.weights->net_delta_weights = new float[num_weights];
+
+    for(int weight_num = 0; weight_num < num_weights; ++weight_num) {
+        if(training) {
+            config.weights->net_weights[weight_num] = random_weight();
+        }
+
+        config.weights->net_delta_weights[weight_num] = 0;
     }
 }
 
@@ -244,6 +267,6 @@ float net::random_weight() {
     return rand() / float(RAND_MAX);
 }
 
-int net::get_3d_index(unsigned x, unsigned y, unsigned z, unsigned width, unsigned depth) {
-    return (x + width * (y + depth * z));
+int net::get_3d_index(unsigned x, unsigned y, unsigned z, unsigned width, unsigned height) {
+    return (x + y * width + z * width * height);
 }
