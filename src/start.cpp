@@ -138,15 +138,15 @@ void setup::load_cfg(std::string &cfg_file) {
 
             if (fields.at(0).compare("width") == 0) {
                 int width = stoi(fields.at(1));
-                current_layer->filters_config->width = width;
+                current_layer->maxpool_config->width = width;
 
             } else if (fields.at(0).compare("height") == 0) {
                 int height = stoi(fields.at(1));
-                current_layer->filters_config->height = height;
+                current_layer->maxpool_config->height = height;
 
             } else if (fields.at(0).compare("stride") == 0) {
                 int stride = stoi(fields.at(1));
-                current_layer->filters_config->stride = stride;
+                current_layer->maxpool_config->stride = stride;
             }
         }
 
@@ -176,7 +176,7 @@ void setup::allocator() {
         // Layer &previous_layer = m_net_config.layers.at(layer_num);
         Layer &current_layer = m_net_config.layers.at(layer_num);
 
-        float height = 0, width = 0, depth = 0;
+        float height = 0, width = 0, depth = 0, size = 0;
 
         switch (current_layer.layer_type) {
         case INPUT:
@@ -219,10 +219,10 @@ void setup::allocator() {
             // }
             break;
         case MAXPOOL:
-            std::cout << "Allocation: MAXPOOL\n";
+            std::cout << "Allocation: Maxpool\n";
             // Calculate size of layer
-            width = (previous_layer.width - current_layer.filters_config->width) / current_layer.filters_config->stride + 1;
-            height = (previous_layer.height - current_layer.filters_config->height) / current_layer.filters_config->stride + 1;
+            width = (previous_layer.width - current_layer.maxpool_config->width) / current_layer.maxpool_config->stride + 1;
+            height = (previous_layer.height - current_layer.maxpool_config->height) / current_layer.maxpool_config->stride + 1;
             depth = previous_layer.depth;
 
             // Set values in struct
@@ -231,31 +231,30 @@ void setup::allocator() {
             current_layer.depth = depth;
             current_layer.num_filters = depth;
 
-            std::cout << "Width: " << depth << "\n";
-
             // Set pointers between layers
             previous_layer.layer_next = &current_layer;
             current_layer.layer_prev = &previous_layer;
 
-            current_layer.filters_config->layer = &current_layer;
+            // current_layer.filters_config->layer = &current_layer;
 
             break;
         case FULLY:
+            std::cout << "Allocation: Fully Connected\n";
+
+            size = previous_layer.width * previous_layer.height * previous_layer.depth;
+            // depth = 
+
             break;
         case OUTPUT:
-            std::cout << "Allocation: OUTPUT\n";
+            std::cout << "Allocation: Output\n";
             previous_layer.layer_next = &current_layer;
             current_layer.layer_prev = &previous_layer;
             current_layer.layer_next = NULL;
 
             current_layer.width = current_layer.layer_prev->width;
             current_layer.height = current_layer.layer_prev->height;
-            std::cout << "Depthhhh: " << current_layer.depth << "\n";
 
             current_layer.depth = current_layer.layer_prev->depth;
-            std::cout << "Depthhhh: " << current_layer.depth << "\n";
-
-            std::cout << "Allocating: Output (none)\n";
             break;
         }
     }

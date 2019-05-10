@@ -5,6 +5,7 @@
 
 struct NeuronFilter;
 struct Filter;
+struct Weights;
 struct Layer;
 
 class cl_compute;
@@ -15,6 +16,13 @@ enum type { CONVOLUTION,
             INPUT,
 			OUTPUT };
 
+enum Activation {
+    RELU,
+    SIGMOID,
+    STEP,
+    LINEAR,
+    TANH
+}
 // class neuron;
 
 struct FilterConfig {
@@ -23,7 +31,7 @@ struct FilterConfig {
     unsigned stride = 1;
     int padding;
 
-    // Filter size;
+    // Filter size
     unsigned width;
     unsigned height;
     unsigned depth;     // Same as layer depth.
@@ -36,6 +44,31 @@ struct FilterConfig {
     bool initialized = false;
 };
 
+struct MaxpoolConfig {
+    unsigned stride;
+    int padding;
+
+    // Pool size
+    unsigned width;
+    unsigned height;
+
+    Layer *layer;
+
+    bool initialized = false;
+};
+
+struct FullNetConfig {
+    unsigned size;
+
+    Weights *weights;
+
+    Activation activation_function;
+
+    Layer *layer;
+
+    bool initializded = false;
+};
+
 struct NetConfig {
     unsigned input_width;
     unsigned input_height;
@@ -45,10 +78,20 @@ struct NetConfig {
     std::vector<Layer> layers;
 };
 
+// For convolutional filters
 struct Filter {
     FilterConfig *filter_config;
     float *filter_weights; // To make NxNxDepth feature map
 	float *filter_delta_weights;
+    float bias;
+};
+
+
+// For fully connected layers
+struct Weights {
+    FullNetConfig *net_config;
+    float *net_weights;
+    float net_delta_weights;
     float bias;
 };
 
@@ -69,7 +112,11 @@ struct Layer {
 
     // Filters
     unsigned num_filters;
-    FilterConfig *filters_config;
+    union {
+        FilterConfig *filters_config;
+        MaxpoolConfig *maxpool_config;
+        Weights *weights_config;
+    };
 };
 
 // typedef struct Topology {

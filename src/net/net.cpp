@@ -176,16 +176,28 @@ void net::add_layer(Layer &layer, enum type type) {
     layer.neurons = new float[layersize];
     std::cout << "Layersize: " << layersize << "\n";
     // layer.neurons = (float *)malloc(sizeof(float) * layersize);
-    if (type == CONVOLUTION) {
-        layer.filters = new Filter[layer.num_filters];
-    }
 
-    if (type != OUTPUT && type != INPUT && type != MAXPOOL) {
+    switch (type) {
+    case INPUT:
+        break;
+    case CONVOLUTION:
+        layer.filters = new Filter[layer.num_filters];
+
         layer.filters_config->filter = layer.filters;
 
         for (unsigned filter = 0; filter < layer.num_filters; ++filter) {
             add_filter(*layer.filters_config, filter);
         }
+        break;
+    case MAXPOOL:
+        break;
+    case FULLY:
+        break;
+    case OUTPUT:
+        break;
+
+    default:
+        break;
     }
 }
 

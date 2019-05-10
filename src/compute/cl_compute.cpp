@@ -124,11 +124,11 @@ void cl_compute::compute_maxpool(Layer &this_layer) {
     int layer_height = this_layer.height;
     int layer_depth = this_layer.depth;
 
-    int pool_width = this_layer.filters_config->width;
-    int pool_height = this_layer.filters_config->height;
-    int pool_stride = this_layer.filters_config->stride;
+    int pool_width = this_layer.maxpool_config->width;
+    int pool_height = this_layer.maxpool_config->height;
+    int pool_stride = this_layer.maxpool_config->stride;
 
-    int layersize = layer_width * layer_height * layer_depth;
+    // int layersize = layer_width * layer_height * layer_depth;
 
     std::cout << "Width: " << layer_width << " " << "| Height: " << layer_height << "| Depth: " << layer_depth << "| Stride: " << pool_width <<"\n";
     
