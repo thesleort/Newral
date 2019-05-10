@@ -158,6 +158,49 @@ __kernel void maxpool(
 	output_layer[output_column + output_row * output_width + depth * output_width * output_height] = max_value;
 }
 
+__kernel void fully_connected_relu(
+	__global float *input_layer,
+	__constant float *neuron_weights,
+	__local float *local_neurons,
+	__local float *local_weights,
+	__global float *output_layer,
+	int layer_size,
+	float bias
+) {
+	unsigned global_id = get_global_id(0);
+	unsigned local_size = get_local_size(0);
+	unsigned local_id = get_local_id(0);
+	float sum = 0;
+
+	// Copy data into workgroup
+	for(unsigned i = 0; i < layer_size; i += local_size) {
+		for(unsigned j = 0; j < local_size; ++j) {
+			if(local_size + i + j < layer_size) {
+				local_neurons[j] = input_layer[i + j];
+				local_weights[j] = neuron_weights[i + j];
+			}
+		}
+
+		for(unsigned j = 0; j < local_size; ++j) {
+			if(local_size + i + j < layer_size) {
+				sum += local_neurons[j] * local_weights[j];
+				// TODO: Try FMA and vector types
+			}
+		}
+		barrier(CLK_LOCAL_MEM_FENCE);
+	}
+	
+	// Add bias neuron
+	sum += bias;
+
+	// ReLU function
+	if(sum > 0) {
+		output_layer[global_id] = sum + bias;
+	} else {
+		output_layer[global_id] = 0,
+	}
+}
+
 __kernel void gpu_convolution(
 	__global float *input_layer, 
 	int layer_width,

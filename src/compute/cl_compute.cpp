@@ -185,5 +185,5 @@ void cl_compute::output(Layer &this_layer) {
             }
 		std::cout << this_layer.neurons[i] << " ";
 	}
-	std::cout << "\n" << ceil(1.1) << "\n";
+	std::cout << "\n";
 }

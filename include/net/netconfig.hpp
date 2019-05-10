@@ -13,6 +13,7 @@ class cl_compute;
 enum type { CONVOLUTION,
             MAXPOOL,
             FULLY,
+            DROPOUT,
             INPUT,
 			OUTPUT };
 
@@ -22,7 +23,7 @@ enum Activation {
     STEP,
     LINEAR,
     TANH
-}
+};
 // class neuron;
 
 struct FilterConfig {

@@ -245,6 +245,8 @@ void setup::allocator() {
             // depth = 
 
             break;
+        case DROPOUT:
+            break;
         case OUTPUT:
             std::cout << "Allocation: Output\n";
             previous_layer.layer_next = &current_layer;
@@ -309,6 +311,8 @@ void setup::load_weights(std::string &weights_file_name) {
             // Maxpool does not contain any weights
             break;
         case FULLY:
+            break;
+        case DROPOUT:
             break;
         case OUTPUT:
             break;

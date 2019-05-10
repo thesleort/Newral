@@ -45,6 +45,10 @@ net::net(NetConfig &nc, cl_setup &ocl) {
             std::cout << "Adding layer: FULLY CONNECTED\n";
             add_layer(this_layer, FULLY);
             break;
+        case DROPOUT:
+            std::cout << "Adding layer: DROPOUT\n";
+            add_layer(this_layer, DROPOUT);
+            break;
         case OUTPUT:
             std::cout << "Adding layer: OUTPUT\n";
             add_layer(this_layer, OUTPUT);
@@ -120,9 +124,12 @@ void net::feed_forward(float *input) {
             break;
         case FULLY:
             break;
+        case DROPOUT:
+            break;
         case OUTPUT:
             std::cout << "Result\n";
             m_net_config->layers.at(layer_num).depth = m_net_config->layers.at(layer_num - 1).num_filters;
+            // std::cout << "TEST\n";
             m_ocl_compute.output(m_net_config->layers.at(layer_num));
             break;
         }
