@@ -171,8 +171,8 @@ __kernel void fully_connected_relu(
 
     // Copy data into workgroup
     for (unsigned i = 0; i < input_size; i += local_size) {
-        for (unsigned j = 0; j < input_size; ++j) {
-            if (local_id + i + j < input_size) {
+        for (unsigned j = 0; j < local_size; ++j) {
+            if (local_id * i + j < input_size) {
                 local_neurons[local_id + j] = input_layer[i + j];
                 local_weights[local_id + j] = neuron_weights[i + j];
             }
@@ -182,6 +182,8 @@ __kernel void fully_connected_relu(
             if (i + j < input_size) {
                 // sum += local_neurons[i + j] * local_weights[i + j];
                 sum = fma(local_neurons[i + j], local_weights[i + j], sum);
+                // if(local_neurons[i + j ] > local_weights[i + j]) {
+                // }
                 // TODO: Try FMA and vector types
             }
         }
@@ -191,13 +193,15 @@ __kernel void fully_connected_relu(
 
     // Add bias neuron
     sum += bias;
+
+    // sum = sum / input_size;
     // output_layer[global_id] = 1;
 
     // ReLU function
     if (sum > 0) {
         output_layer[position] = sum;
     } else {
-        output_layer[0] = 0;
+        output_layer[position] = 0;
     }
 }
 
