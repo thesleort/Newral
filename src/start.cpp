@@ -162,9 +162,9 @@ void setup::load_cfg(std::string &cfg_file) {
 
             if (fields.at(0).compare("size") == 0) {
                 int size = stoi(fields.at(1));
-                current_layer->fully_config->size = size;
+                current_layer->width = size;
             } else if (fields.at(0).compare("id") == 0) {
-                current_layer->id = fields.at(0);
+                current_layer->id = fields.at(1);
 
             } else if (fields.at(0).compare("activation") == 0) {
                 if (fields.at(1).compare("relu") == 0) {
@@ -263,13 +263,13 @@ void setup::allocator() {
         case FULLY:
             std::cout << "Allocation: Fully Connected\n";
 
-            size = previous_layer.width * previous_layer.height * previous_layer.depth;
-            // depth =
+            size = current_layer.fully_config->size;
 
-            current_layer.width = size;
+            // current_layer.width = size;
             current_layer.height = 1;
             current_layer.depth = 1;
-            current_layer.num_filters = 1;
+            current_layer.num_filters = current_layer.width;
+            current_layer.fully_config->size = previous_layer.width * previous_layer.height * previous_layer.depth;
 
             previous_layer.layer_next = &current_layer;
             current_layer.layer_prev = &previous_layer;
@@ -342,6 +342,7 @@ void setup::load_weights(std::string &weights_file_name) {
             break;
         case FULLY: {
             for (int i = 0; i < layers.getLength(); i++) {
+
                 std::string id;
                 layers[i].lookupValue("id", id);
 
@@ -349,10 +350,13 @@ void setup::load_weights(std::string &weights_file_name) {
                     libconfig::Setting &weights = layers[i]["weights"];
                     const unsigned filter_size = m_net_config.layers[layer_num].fully_config->size;
 
-                    for (weight_num = 0; weight_num < filter_size; weight_num++) {
-                        m_net_config.layers[layer_num].weights->net_weights[weight_num] = (float)weights[weight_num];
+                    for (filter_num = 0; filter_num < m_net_config.layers[layer_num].num_filters; ++filter_num) {
+
+                        for (weight_num = 0; weight_num < filter_size; weight_num++) {
+                            m_net_config.layers[layer_num].weights[filter_num].net_weights[weight_num] = (float)weights[filter_num][weight_num];
+                        }
+                        m_net_config.layers[layer_num].weights[filter_num].net_weights[weight_num] = (float)layers[i]["bias"][0];
                     }
-                    m_net_config.layers[layer_num].weights->net_weights[weight_num] = (float)layers[i]["bias"][0];
                 }
                 break;
             }

@@ -130,7 +130,10 @@ void net::feed_forward(float *input) {
             break;
         case OUTPUT:
             std::cout << "Result\n";
-            m_net_config->layers.at(layer_num).depth = m_net_config->layers.at(layer_num - 1).num_filters;
+            if(m_net_config->layers.at(layer_num - 1).layer_type != FULLY) {
+                //TODO: Make more general, so that if statement is not needed.
+                m_net_config->layers.at(layer_num).depth = m_net_config->layers.at(layer_num - 1).num_filters;
+            }
             // std::cout << "TEST\n";
             m_ocl_compute.output(m_net_config->layers.at(layer_num));
             break;
@@ -182,6 +185,7 @@ unsigned filter_size(unsigned &length, FilterConfig *fmc) {
  */
 void net::add_layer(Layer &layer, enum type type) {
     int layersize = layer.width * layer.height * layer.depth;
+    int num_weights;
     layer.neurons = new float[layersize];
     std::cout << "Layersize: " << layersize << "\n";
     // layer.neurons = (float *)malloc(sizeof(float) * layersize);
@@ -204,6 +208,11 @@ void net::add_layer(Layer &layer, enum type type) {
         layer.weights = new Weights[layer.width];
 
         layer.fully_config->weights = layer.weights;
+
+        num_weights = layer.layer_prev->width * layer.layer_prev->height * layer.layer_prev->depth;
+        for(unsigned filter = 0; filter < layer.num_filters; ++filter) {
+            add_filter(*layer.fully_config, filter, num_weights);
+        }
         break;
     case DROPOUT:
         break;
@@ -232,17 +241,17 @@ void net::add_filter(FilterConfig &config, int filter_num) {
     }
 }
 
-void net::add_filter(FullNetConfig &config) {
-    int num_weights = config.size;
-    config.weights->net_weights = new float[num_weights];
-    config.weights->net_delta_weights = new float[num_weights];
+void net::add_filter(FullNetConfig &config, int filter_num, int filter_size) {
+    int num_weights = filter_size;
+    config.weights[filter_num].net_weights = new float[num_weights];
+    config.weights[filter_num].net_delta_weights = new float[num_weights];
 
     for(int weight_num = 0; weight_num < num_weights; ++weight_num) {
         if(training) {
-            config.weights->net_weights[weight_num] = random_weight();
+            config.weights[filter_num].net_weights[weight_num] = random_weight();
         }
 
-        config.weights->net_delta_weights[weight_num] = 0;
+        config.weights[filter_num].net_delta_weights[weight_num] = 0;
     }
 }
 

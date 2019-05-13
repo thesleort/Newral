@@ -172,29 +172,39 @@ void cl_compute::compute_fully(Layer &this_layer) {
     int input_size = layer_prev_width * layer_prev_height * layer_prev_depth;
     int output_size = this_layer.fully_config->size;
 
+    std::vector<cl::Buffer> filter_buffers;
+
+
     float bias = this_layer.fully_config->weights->bias;
 
-    m_neuron_buffer_1 = cl::Buffer(m_context, CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, layer_prev_height * layer_prev_width * layer_prev_depth * sizeof(float), this_layer.layer_prev->neurons, NULL);
+    int err;
 
-    m_neuron_buffer_2 = cl::Buffer(m_context, CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY, output_size * sizeof(float));
-    
-    cl::Buffer weights_buffer = cl::Buffer(m_context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, input_size * sizeof(float), this_layer.weights->net_weights, NULL);
+    m_neuron_buffer_1 = cl::Buffer(m_context, CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, layer_prev_height * layer_prev_width * layer_prev_depth * sizeof(float), this_layer.layer_prev->neurons, &err);
 
+    m_neuron_buffer_2 = cl::Buffer(m_context, CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY, output_size * sizeof(float), NULL, &err);
 
     switch (this_layer.fully_config->activation_function) {
     case RELU: {
+        std::cout << "RELU\n";
         cl::Kernel kernel(m_program, "fully_connected_relu");
-
         unsigned workgroup_size = kernel.getWorkGroupInfo<CL_KERNEL_WORK_GROUP_SIZE>(m_device, NULL);
-        kernel.setArg(0, m_neuron_buffer_1);
-        kernel.setArg(1, weights_buffer);
-        kernel.setArg(2, workgroup_size * sizeof(float), nullptr);
-        kernel.setArg(3, workgroup_size * sizeof(float), nullptr);
-        kernel.setArg(4, m_neuron_buffer_2);
-        kernel.setArg(5, input_size);
-        kernel.setArg(6, bias);
+        std::cout << "Workgroup size: " << workgroup_size << "\n";
+        for (unsigned neuron = 0; neuron < output_size; neuron++) {
 
-        m_queue.enqueueNDRangeKernel(kernel, cl::NDRange(output_size), cl::NDRange(workgroup_size));
+            filter_buffers.push_back(cl::Buffer(m_context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, input_size * sizeof(float), this_layer.weights[neuron].net_weights, &err));
+
+
+            kernel.setArg(0, m_neuron_buffer_1);
+            kernel.setArg(1, filter_buffers.at(neuron));
+            kernel.setArg(2, workgroup_size * sizeof(float), NULL);
+            kernel.setArg(3, workgroup_size * sizeof(float), NULL);
+            kernel.setArg(4, m_neuron_buffer_2);
+            kernel.setArg(5, input_size);
+            kernel.setArg(6, bias);
+            kernel.setArg(7, neuron);
+
+            m_queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(output_size), cl::NDRange(workgroup_size));
+        }
     } break;
     default:
         break;
@@ -209,6 +219,10 @@ void cl_compute::output(Layer &this_layer) {
 
     std::cout << "\nTotal length: " << total_length;
     std::cout << "\n";
+
+    for (int i = 0; i < total_length; ++i) {
+        this_layer.neurons[i] = 0;
+    }
 
     m_queue.finish();
     std::cout << "Queue: " << m_queue.enqueueReadBuffer(m_neuron_buffer_2, CL_TRUE, 0, sizeof(float) * total_length, this_layer.neurons);
