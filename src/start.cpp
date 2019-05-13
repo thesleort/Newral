@@ -355,7 +355,7 @@ void setup::load_weights(std::string &weights_file_name) {
                         for (weight_num = 0; weight_num < filter_size; weight_num++) {
                             m_net_config.layers[layer_num].weights[filter_num].net_weights[weight_num] = (float)weights[filter_num][weight_num];
                         }
-                        m_net_config.layers[layer_num].weights[filter_num].net_weights[weight_num] = (float)layers[i]["bias"][0];
+                        m_net_config.layers[layer_num].weights[filter_num].bias = (float)layers[i]["bias"][0];
                     }
                 }
                 break;

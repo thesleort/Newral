@@ -189,6 +189,7 @@ void cl_compute::compute_fully(Layer &this_layer) {
         cl::Kernel kernel(m_program, "fully_connected_relu");
         unsigned workgroup_size = kernel.getWorkGroupInfo<CL_KERNEL_WORK_GROUP_SIZE>(m_device, NULL);
         std::cout << "Workgroup size: " << workgroup_size << "\n";
+        std::cout << "Bias: " << bias << "\n";
         for (unsigned neuron = 0; neuron < output_size; neuron++) {
 
             filter_buffers.push_back(cl::Buffer(m_context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, input_size * sizeof(float), this_layer.weights[neuron].net_weights, &err));

@@ -180,7 +180,8 @@ __kernel void fully_connected_relu(
 
         for (unsigned j = 0; j < local_size; ++j) {
             if (i + j < input_size) {
-                sum += local_neurons[i + j] * local_weights[i + j];
+                // sum += local_neurons[i + j] * local_weights[i + j];
+                sum = fma(local_neurons[i + j], local_weights[i + j], sum);
                 // TODO: Try FMA and vector types
             }
         }
