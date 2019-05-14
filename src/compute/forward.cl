@@ -1,5 +1,11 @@
 
 // TODO: Change floats to vectors for hardware optimization
+
+__kernel void relu(
+    __global float *output_layer,
+    int position,
+    float sum);
+
 __kernel void convolution(
     __global float *input_layer,
     int layer_width,
@@ -154,15 +160,14 @@ __kernel void maxpool(
     output_layer[output_column + output_row * output_width + depth * output_width * output_height] = max_value;
 }
 
-__kernel void fully_connected_relu(
+float fully_connected(
     __global float *input_layer,
     __constant float *neuron_weights,
     __local float *local_neurons,
     __local float *local_weights,
     __global float *output_layer,
     int input_size,
-    float bias,
-    int position) {
+    float bias) {
     unsigned global_size = get_global_size(0);
     unsigned global_id = get_global_id(0);
     unsigned local_size = get_local_size(0);
@@ -197,6 +202,36 @@ __kernel void fully_connected_relu(
     // sum = sum / input_size;
     // output_layer[global_id] = 1;
 
+    // ReLU function
+    // if (sum > 0) {
+    //     output_layer[position] = sum;
+    // } else {
+    //     output_layer[position] = 0;
+    // }
+
+    // relu(output_layer, position, sum);
+    return sum;
+}
+
+__kernel void fully_connected_relu(
+    __global float *input_layer,
+    __constant float *neuron_weights,
+    __local float *local_neurons,
+    __local float *local_weights,
+    __global float *output_layer,
+    int input_size,
+    float bias,
+    int position) {
+
+    float sum = fully_connected(input_layer, neuron_weights, local_neurons, local_weights, output_layer, input_size, bias);
+
+    relu(output_layer, position, sum);
+}
+
+void relu(
+    __global float *output_layer,
+    int position,
+    float sum) {
     // ReLU function
     if (sum > 0) {
         output_layer[position] = sum;
