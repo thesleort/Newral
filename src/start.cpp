@@ -215,7 +215,7 @@ void setup::allocator() {
             std::cout << "Allocating: Convolution\n";
             width = (previous_layer.width - current_layer.filters_config->width + 2 * current_layer.filters_config->padding) / current_layer.filters_config->stride + 1;
             height = (previous_layer.height - current_layer.filters_config->height + 2 * current_layer.filters_config->padding) / current_layer.filters_config->stride + 1;
-            depth = previous_layer.num_filters;
+            depth = current_layer.num_filters;
             // current_layer.neurons = (float *)malloc(sizeof(float) * width * height * depth);
 
             // Set values in struct

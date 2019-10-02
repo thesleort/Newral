@@ -70,7 +70,7 @@ void cl_compute::compute_convolution(Layer &this_layer) {
         filter_buffers.push_back(cl::Buffer(m_context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, filter_height * filter_width * filter_depth * sizeof(float), this_layer.filters[filter_num].filter_weights, NULL));
         cl::Kernel kernel(m_program, "convolution");
 
-        std::cout << "\nFilter: \n";
+        std::cout << "\nFilter (" << filter_num << "): \n";
         for (int i = 0; i < (filter_height * filter_width * filter_depth); i++) {
             if (i % filter_width == 0) {
                 std::cout << "\n";

@@ -183,7 +183,7 @@ unsigned filter_size(unsigned &length, FilterConfig *fmc) {
  * 
  * @param config 
  */
-void net::add_layer(Layer &layer, enum type type) {
+void net::add_layer(Layer &layer, type type) {
     int layersize = layer.width * layer.height * layer.depth;
     int num_weights;
     layer.neurons = new float[layersize];
