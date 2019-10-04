@@ -1,148 +1,262 @@
 
 // TODO: Change floats to vectors for hardware optimization
+
+__kernel void relu(
+    __global float *output_layer,
+    int position,
+    float sum);
+
 __kernel void convolution(
-		__global float *input_layer, 
-		int layer_height,
-		int layer_width,
-		int layer_depth,
-		__constant float *filter, 
-		int filter_width,
-		int filter_height,
-		int filter_depth,
-		__global float *output_layer,
-		int filter_padding,
-		int filter_stride,
-		int filter_num,
-		float bias) {
-	int column = get_local_id(0);
-	int row = get_local_id(1);
-	int depth = get_local_id(2);
+    __global float *input_layer,
+    int layer_width,
+    int layer_height,
+    int layer_depth,
+    __constant float *filter,
+    int filter_width,
+    int filter_height,
+    int filter_depth,
+    __global float *output_layer,
+    int filter_padding,
+    int filter_stride,
+    int filter_num,
+    float bias) {
+    int column = get_local_id(0);
+    int row = get_local_id(1);
+    int depth = get_local_id(2);
 
-	// output_layer = input_layer;
+    float sum = 0;
 
-	float sum = 0;
+    int filter_id = 0;
 
-	int filter_id = 0;
+    int half_width = (int)(filter_width / 2);
+    int half_height = (int)(filter_height / 2);
 
-	int half_width = (int)(filter_width / 2);
-	int half_height = (int)(filter_height / 2);
+    int output_column;
+    int output_row;
+    int output_depth;
 
-	int output_column;
-	int output_row;
-	int output_depth;
+    int output_height;
+    int output_width;
 
-	int output_height;
-	int output_width;
+    int3 coord;
 
-	// int3 coords; 
-	int coordX;
-	int coordY;
-	int coordZ;
+    bool padX;
+    bool padY;
 
-	bool pad; 
+    for (int z = 0; z < layer_depth; ++z) {
+        coord.z = z;
 
-	for(int x = -half_width; x <= half_width; ++x) {
-		coordX = x + column;
-		for(int y = -half_height; y <= half_height; ++y) {
-			coordY = y + row;
-			for(int z = 0; z < layer_depth; ++z) {
-				coordZ = z + depth;
-				pad = false;
-				pad = (coordX < 0 || coordX >= layer_width) ? true : false;
-				pad = (coordY < 0 || coordY >= layer_height) ? true : false;
+        for (int y = -half_height; y <= half_height; ++y) {
+            coord.y = -filter_padding + (row * filter_stride) + y + half_height;
 
-				// coords.x = (coords.x < 0) ? 0 : coords.x;
-				// coords.y = (coords.y < 0) ? 0 : coords.y;
+            for (int x = -half_width; x <= half_width; ++x) {
+                coord.x = -filter_padding + (column * filter_stride) + x + half_width;
 
-				// coords.x = (coords.x >= layer_width) ? layer_width-1 : coords.x;
-				// coords.y = (coords.y >= layer_height) ? layer_height-1 : coords.y;
+                padX = false;
+                padY = false;
 
+                padX = (coord.x >= 0 && coord.x < layer_width) ? false : true;
+                padY = (coord.y >= 0 && coord.y < layer_height) ? false : true;
 
-				if(!pad) {
-					sum += 
-					input_layer[
-						coordX + 
-						coordY * 
-						layer_width + 
-						depth * 
-						layer_width * 
-						layer_height] * filter[filter_id++];
-					// sum = coordZ;
-				}
-			}
-		}
-	}
-	barrier(CLK_GLOBAL_MEM_FENCE);
-	output_column = column;
-	output_row = row;
-	output_depth = filter_num;
+                if (!padX && !padY) {
+                    sum +=
+                        input_layer[coord.x +
+                                    coord.y *
+                                        layer_width +
+                                    coord.z *
+                                        layer_width *
+                                        layer_height] *
+                        filter[filter_id];
+                }
+                filter_id++;
+            }
+        }
+    }
+    output_column = column;
+    output_row = row;
+    output_depth = filter_num;
 
-	output_width = (layer_width - filter_width + 2 * filter_padding) / filter_stride + 1;
-	output_height = (layer_height - filter_height + 2 * filter_padding) / filter_stride + 1;
+    output_width = (layer_width - filter_width + 2 * filter_padding) / filter_stride + 1;
+    output_height = (layer_height - filter_height + 2 * filter_padding) / filter_stride + 1;
 
-	output_layer[output_column + output_row * output_width + filter_num * output_width * output_height] = sum + bias;
+    output_layer[output_column + output_row * output_width + filter_num * output_width * output_height] = sum + bias;
 }
 
-// __kernel void maxpool(
-// 	__global float *input_layer, 
-// 	__constant int layer_height,
-// 	__constant int layer_width,
-// 	__constant int layer_depth,
-// 	__constant float *filter, 
-// 	__constant int filter_width,
-// 	__constant int filter_height,
-// 	__constant int filter_depth,
-// 	__global float *output_layer,
-// 	__constant int filter_padding,
-// 	__constant int filter_stride,
-// 	__constant int filter_num
-// )
+__kernel void maxpool(
+    __global float *input_layer,
+    int layer_width,
+    int layer_height,
+    int layer_depth,
+    __global float *output_layer,
+    int pool_width,
+    int pool_height,
+    // int pool_slice,		// Depth where maxpool takes place
+    int pool_stride
+    // int pool_padding
+) {
+    int column = get_local_id(0);
+    int row = get_local_id(1);
+    int depth = get_local_id(2);
 
-__kernel void convolution_new(
-		__global float *input_layer, 
-		int layer_height,
-		int layer_width,
-		int layer_depth,
-		__constant float *filter, 
-		int filter_width,
-		int filter_height,
-		int filter_depth,
-		__global float *output_layer,
-		int filter_padding,
-		int filter_stride,
-		int filter_num) {
-	// int column = get_global_id(0);
-	// int row = get_global_id(1);
-	// int depth = get_global_id(2);
+    float sum = 0;
 
-	// float sum = 0;
+    int filter_id = 0;
 
-	// int output_column;
-	// int output_row;
-	// int output_depth;
+    int half_width = (int)(pool_width / 2);
+    int half_height = (int)(pool_height / 2);
 
-	// int output_height;
-	// int output_width;
+    int output_column;
+    int output_row;
+    int output_depth;
 
-	// output_column = column - filter_stride;
-	// output_row = row - filter_stride;
-	// output_depth = filter_num;
+    int output_height;
+    int output_width;
 
-	// output_width = (layer_width - filter_width + 2 * filter_padding) / filter_stride + 1;
-	// output_height = (layer_height - filter_height + 2 * filter_padding) / filter_stride + 1;
+    int3 coord;
 
-	// output_layer[output_column + output_row * output_width + filter_num * output_width * output_height] = 1;
-	// output_layer[output_column + output_height * (output_row + output_width * output_depth)] = 1;
-	// output_layer[0] = 1.0f;
-	// output_layer[column + row] = 1;
-	// for (int i=0;i>=0;i++){
+    float max_value = 0.0f;
+
+    float current_value;
+
+    bool padX;
+    bool padY;
+
+    for (int y = -half_height; y <= half_height; ++y) {
+        coord.y = (row * pool_stride) + y + half_height;
+
+        for (int x = -half_width; x <= half_width; ++x) {
+            coord.x = (column * pool_stride) + x + half_width;
+
+            padX = false;
+            padY = false;
+
+            padX = (coord.x >= 0 && coord.x < layer_width) ? false : true;
+            padY = (coord.y >= 0 && coord.y < layer_height) ? false : true;
+
+            if (!padX && !padY) {
+                current_value = input_layer[coord.x +
+                                            coord.y *
+                                                layer_width +
+                                            depth *
+                                                layer_width *
+                                                layer_height];
+                if (current_value > max_value) {
+                    max_value = current_value;
+                }
+                // max_value = 2;
+            }
+        }
+    }
+
+    output_column = column;
+    output_row = row;
+    output_depth = depth;
+
+    // output_width = ceil(( (float) layer_width - (float) pool_width ) / (float) pool_stride + 1);
+    // output_height = ceil(( (float) layer_height - (float) pool_height ) / (float) pool_stride + 1);
+    output_width = (layer_width - pool_width) / pool_stride + 1;
+    output_height = (layer_height - pool_height) / pool_stride + 1;
+
+    output_layer[output_column + output_row * output_width + depth * output_width * output_height] = max_value;
+}
+
+float fully_connected(
+    __global float *input_layer,
+    __constant float *neuron_weights,
+    __local float *local_neurons,
+    __local float *local_weights,
+    __global float *output_layer,
+    int input_size,
+    float bias) {
+    unsigned global_size = get_global_size(0);
+    unsigned global_id = get_global_id(0);
+    unsigned local_size = get_local_size(0);
+    unsigned local_id = get_local_id(0);
+    float sum = 0;
+
+    // Copy data into workgroup
+    for (unsigned i = 0; i < input_size; i += local_size) {
+        for (unsigned j = 0; j < local_size; ++j) {
+            if (local_id * i + j < input_size) {
+                local_neurons[local_id + j] = input_layer[i + j];
+                local_weights[local_id + j] = neuron_weights[i + j];
+            }
+        }
+
+        for (unsigned j = 0; j < local_size; ++j) {
+            if (i + j < input_size) {
+                // sum += local_neurons[i + j] * local_weights[i + j];
+                sum = fma(local_neurons[i + j], local_weights[i + j], sum);
+                // if(local_neurons[i + j ] > local_weights[i + j]) {
+                // }
+                // TODO: Try FMA and vector types
+            }
+        }
+        barrier(CLK_LOCAL_MEM_FENCE);
+    }
+    barrier(CLK_LOCAL_MEM_FENCE);
+
+    // Add bias neuron
+    sum += bias;
+
+    // sum = sum / input_size;
+    // output_layer[global_id] = 1;
+
+    // ReLU function
+    // if (sum > 0) {
+    //     output_layer[position] = sum;
+    // } else {
+    //     output_layer[position] = 0;
     // }
-	output_layer[0] = 2.0f;
 
+    // relu(output_layer, position, sum);
+    return sum;
+}
+
+__kernel void fully_connected_relu(
+    __global float *input_layer,
+    __constant float *neuron_weights,
+    __local float *local_neurons,
+    __local float *local_weights,
+    __global float *output_layer,
+    int input_size,
+    float bias,
+    int position) {
+
+    float sum = fully_connected(input_layer, neuron_weights, local_neurons, local_weights, output_layer, input_size, bias);
+
+    relu(output_layer, position, sum);
+}
+
+void relu(
+    __global float *output_layer,
+    int position,
+    float sum) {
+    // ReLU function
+    if (sum > 0) {
+        output_layer[position] = sum;
+    } else {
+        output_layer[position] = 0;
+    }
+}
+
+__kernel void gpu_convolution(
+    __global float *input_layer,
+    int layer_width,
+    int layer_height,
+    int layer_depth,
+    __constant float *filter,
+    int filter_width,
+    int filter_height,
+    int filter_depth,
+    __global float *output_layer,
+    int filter_padding,
+    int filter_stride,
+    int filter_num,
+    float bias) {
 }
 
 __kernel void simple(
-	__global float *output_layer
-) {
-	output_layer[0] = 1.0f;
+    __global float *output_layer) {
+    output_layer[0] = 1.0f;
 }

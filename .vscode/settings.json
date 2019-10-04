@@ -53,7 +53,13 @@
 		"typeindex": "cpp",
 		"variant": "cpp",
 		"algorithm": "cpp",
-		"*.h++": "cpp"
+		"*.h++": "cpp",
+		"strstream": "cpp",
+		"iomanip": "cpp"
 	},
-	"clang-format.executable": "${workspaceRoot}/.clang-format"
+	"clang-format.executable": "${workspaceRoot}/.clang-format",
+	"opencl.formatting.name": "clang-format",
+	"opencl.formatting.args": [
+		"-i"
+	]
 }
