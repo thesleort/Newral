@@ -13,7 +13,7 @@
 #define __START_HPP
 
 #include <vector>
-#include <iostream> 
+#include <iostream>
 #include <fstream>
 // #include <jsoncpp/json/json.h>
 // #include "json.hpp"
@@ -26,41 +26,23 @@
 enum MODE { CLASSIFY,
             TRAIN };
 
-
 class setup {
-	public:
-		setup();
-		void load_cfg(std::string &cfg_file);
-		void load_weights(std::string &weights_file);
-		float* load_input(std::string &input_file, bool is_image);
-		NetConfig* get_cfg();
-	private:
-		std::ifstream m_cfg_file;
-		std::ifstream m_weights_file;
-		std::ifstream m_input_file;
-		NetConfig m_net_config;
-		void allocator();
+  public:
+  setup();
+  void load_cfg(std::string &cfg_file);
+  void load_weights(std::string &weights_file);
+  float *load_input(std::string &input_file, bool is_image);
+  NetConfig *get_cfg();
+
+  private:
+  std::ifstream m_cfg_file;
+  std::ifstream m_weights_file;
+  std::ifstream m_input_file;
+  NetConfig m_net_config;
+  void allocator();
 };
 
-// class load_weights {
-// 	public:
-		
-
-// 	private:
-// 		net_config *m_net_config;
-		
-// };
-
-// class load_input {
-// 	public:
-// 		load_input(std::string &input_file, net_config &net_config);
-		
-// 	private:
-// 		std::ifstream m_input_file;
-// 		net_config *m_net_config;
-// };
-
-int options(int argc, const char * argv[]);
+int options(int argc, const char *argv[]);
 
 void show_vector_vals(std::string label, std::vector<float> &v);
 
