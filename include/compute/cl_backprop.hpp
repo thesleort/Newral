@@ -20,6 +20,7 @@ class cl_backprop {
 
   cl::Buffer m_neuron_buffer_1; // Originally input buffer
   cl::Buffer m_neuron_buffer_2; // Originally output buffer
+	cl::Buffer m_target_buffer;
   cl::Buffer *p_output_neurons;
 };
 
