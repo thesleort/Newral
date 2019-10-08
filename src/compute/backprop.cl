@@ -8,6 +8,9 @@ __kernel void fully_connected_relu(
     __local float *local_targets,
     int input_size) {
 
+  unsigned global_size = get_global_size(0);
+  unsigned global_id = get_global_id(0);
+  unsigned local_size = get_local_size(0);
   unsigned local_id = get_local_id(0);
 
   float net_error = 0;
