@@ -15,6 +15,7 @@ class cl_compute {
   void compute_maxpool(Layer &this_layer);
   void compute_fully(Layer &this_layer);
   void output(Layer &this_layer);
+  void print(Layer &this_layer);
 
   protected:
   private:

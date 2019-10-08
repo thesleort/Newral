@@ -13,6 +13,7 @@
 #include <CL/cl.hpp>
 #include "compute/cl_prepare.hpp"
 #include "compute/cl_compute.hpp"
+#include "compute/cl_backprop.hpp"
 #include "netconfig.hpp"
 
 // #include "neuron/neuron.hpp"
@@ -26,6 +27,7 @@ class net {
   net(NetConfig &nc, cl_setup &ocl);
   Layer get_layer(unsigned index);
   void feed_forward(float *input);
+  void back_propagate(float *input, float *targets);
   // void backpropagate(std::vector<class_object> objects); // TODO: Rewrite to use pointer instead at some point
 
   private:
@@ -41,8 +43,12 @@ class net {
   float random_weight();
   cl_setup m_ocl;
   cl_compute m_ocl_compute;
+  cl_backprop m_ocl_backprop;
   NetConfig *m_net_config;
   bool training = false;
+
+  cl::Program m_prg_forward;
+  cl::Program m_prg_backprop;
 };
 
 unsigned filter_size_calc(unsigned *length, unsigned filter, int padding, unsigned stride);

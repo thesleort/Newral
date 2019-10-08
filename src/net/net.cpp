@@ -18,6 +18,15 @@ net::net(NetConfig &nc, cl_setup &ocl) {
   m_ocl = ocl;
   m_net_config = &nc;
 
+  std::cout << "Building OpenCL kernels...\n";
+  std::string CL_BUILD_VERSION = OPEN_CL_2_0;
+  m_ocl.build("src/compute/forward.cl", CL_BUILD_VERSION.c_str());
+  m_ocl.build("src/compute/backprop.cl", CL_BUILD_VERSION.c_str());
+  std::cout << "Build done.\n";
+
+  m_prg_forward = m_ocl.get_programs()->at(0);
+  m_prg_backprop = m_ocl.get_programs()->at(1);
+
   // m_net_config.layer_num = (layer *)malloc(sizeof(layer) * m_net_config.m_layers.size());
   m_net_config->num_layers = m_net_config->layers.size();
 
@@ -60,10 +69,6 @@ net::net(NetConfig &nc, cl_setup &ocl) {
 }
 
 void net::feed_forward(float *input) {
-  std::cout << "Building OpenCL kernels...\n";
-  m_ocl.build("src/compute/forward.cl", OPEN_CL_2_0);
-  std::cout << "Done.\n";
-  cl::Program program = m_ocl.get_programs()->at(0);
 
   for (unsigned i = 0;
        i <
@@ -96,7 +101,7 @@ void net::feed_forward(float *input) {
     switch (this_layer.layer_type) {
     case INPUT:
       std::cout << "Computation started...\n";
-      m_ocl_compute.load(program);
+      m_ocl_compute.load(m_prg_forward);
       this_layer.neurons = input;
       // for(unsigned i = 0; i < m_net_config.input_width * m_net_config.input_height * m_net_config.input_depth; ++i) {
       // this_layer.neurons[i] =
@@ -142,6 +147,36 @@ void net::feed_forward(float *input) {
       }
       // std::cout << "TEST\n";
       m_ocl_compute.output(m_net_config->layers.at(layer_num));
+      m_ocl_compute.print(m_net_config->layers.at(layer_num));
+      break;
+    }
+  }
+}
+
+void net::back_propagate(float *input, float *targets) {
+
+  feed_forward(input);
+
+  for (unsigned layer_num = m_net_config->num_layers; layer_num >= 0; --layer_num) {
+
+    Layer &this_layer = m_net_config->layers.at(layer_num);
+
+    switch (this_layer.layer_type) {
+    case OUTPUT:
+      std::cout << "Backpropagation started...\n";
+      m_ocl_compute.load(m_prg_backprop);
+      this_layer.neurons = m_net_config->layers[layer_num].neurons;
+      break;
+
+    case FULLY:
+      std::cout << "Backpropagating fully connected, layer: " << layer_num << "\n";
+      m_ocl_backprop.compute_fully(this_layer, targets);
+      break;
+
+    case INPUT:
+      std::cout << "Result\n";
+      m_ocl_compute.print(m_net_config->layers.at(layer_num)); // Might not work
+    default:
       break;
     }
   }
@@ -290,10 +325,10 @@ float net::random_weight() {
 }
 
 int net::get_3d_index(
-    unsigned x, 
-    unsigned y, 
-    unsigned z, 
-    unsigned width, 
+    unsigned x,
+    unsigned y,
+    unsigned z,
+    unsigned width,
     unsigned height) {
   return (x + y * width + z * width * height);
 }

@@ -321,6 +321,20 @@ void cl_compute::compute_fully(Layer &this_layer) {
 }
 
 void cl_compute::output(Layer &this_layer) {
+  unsigned total_length = this_layer.width * this_layer.height * this_layer.depth;
+
+  m_queue.finish();
+
+  m_queue.enqueueReadBuffer(
+    m_neuron_buffer_2,
+    CL_TRUE,
+    0,
+    sizeof(float) * total_length,
+    this_layer.neurons
+  );
+}
+
+void cl_compute::print(Layer &this_layer) {
   std::cout << "Width: " << this_layer.width << " "
             << "| Height: " << this_layer.height 
             << "| Depth: " << this_layer.depth << "\n";
