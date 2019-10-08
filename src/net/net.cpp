@@ -255,9 +255,9 @@ void net::add_layer(Layer &layer, type type) {
     layer.fully_config->weights = layer.weights;
 
     num_weights =
-        layer.layer_prev->width *
-        layer.layer_prev->height *
-        layer.layer_prev->depth;
+        layer.layer_back->width *
+        layer.layer_back->height *
+        layer.layer_back->depth;
     for (unsigned filter = 0; filter < layer.num_filters; ++filter) {
       add_filter(*layer.fully_config, filter, num_weights);
     }

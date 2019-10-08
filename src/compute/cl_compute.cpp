@@ -17,9 +17,9 @@ void cl_compute::compute_convolution(Layer &this_layer) {
   std::cout << "COMPUTE CONVOLUTION\n";
   unsigned num_filters = this_layer.num_filters;
 
-  int layer_prev_width = this_layer.layer_prev->width;
-  int layer_prev_height = this_layer.layer_prev->height;
-  int layer_prev_depth = this_layer.layer_prev->depth;
+  int layer_back_width = this_layer.layer_back->width;
+  int layer_back_height = this_layer.layer_back->height;
+  int layer_back_depth = this_layer.layer_back->depth;
 
   int layer_width = this_layer.width;
   int layer_height = this_layer.height;
@@ -32,7 +32,7 @@ void cl_compute::compute_convolution(Layer &this_layer) {
   int filter_stride;
   float filter_bias;
 
-  int layersize = (layer_prev_width * layer_prev_height * layer_prev_depth);
+  int layersize = (layer_back_width * layer_back_height * layer_back_depth);
 
   std::vector<cl::Buffer> filter_buffers;
 
@@ -40,23 +40,23 @@ void cl_compute::compute_convolution(Layer &this_layer) {
   //     this_layer.layer_prev->neurons[i] = 2;
   // }
   for (int i = 0; i < layersize; i++) {
-    std::cout << this_layer.layer_prev->neurons[i] << ",";
+    std::cout << this_layer.layer_back->neurons[i] << ",";
   }
   std::cout << "\nLayer_prev: " 
-            << (layer_prev_height * layer_prev_width * layer_prev_depth) 
+            << (layer_back_height * layer_back_width * layer_back_depth) 
             << " " 
-            << layer_prev_width 
+            << layer_back_width 
             << " " 
-            << layer_prev_height 
+            << layer_back_height 
             << " " 
-            << layer_prev_depth << "\n";
+            << layer_back_depth << "\n";
 
   // m_neuron_buffer_1 = cl::Buffer(m_context, CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, layer_prev_height * layer_prev_width * layer_prev_depth * sizeof(float), this_layer.layer_prev->neurons, NULL);
   m_neuron_buffer_1 = cl::Buffer(
     m_context, 
     CL_MEM_READ_WRITE | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, 
-    layer_prev_height * layer_prev_width * layer_prev_depth * sizeof(float), 
-    this_layer.layer_prev->neurons, 
+    layer_back_height * layer_back_width * layer_back_depth * sizeof(float), 
+    this_layer.layer_back->neurons, 
     NULL);
 
   // m_neuron_buffer_2 = cl::Buffer(m_context, CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY, layer_height * layer_width * layer_depth * sizeof(float));
@@ -66,12 +66,12 @@ void cl_compute::compute_convolution(Layer &this_layer) {
     layer_height * layer_width * layer_depth * sizeof(float));
 
   for (int i = 0; i < layersize; ++i) {
-    std::cout << this_layer.layer_prev->neurons[i] << ",";
+    std::cout << this_layer.layer_back->neurons[i] << ",";
   }
   std::cout << "\n";
 
   std::cout << "Num filters: " << this_layer.num_filters 
-            << "\nNum filters prev: " << this_layer.layer_prev->num_filters 
+            << "\nNum filters prev: " << this_layer.layer_back->num_filters 
             << "\n";
 
   for (unsigned filter_num = 0; filter_num < num_filters; filter_num++) {
@@ -115,9 +115,9 @@ void cl_compute::compute_convolution(Layer &this_layer) {
     // m_queue.enqueueWriteBuffer(filter_buffers.at(filter_num), CL_TRUE, 0, filter_height * filter_width * filter_depth * sizeof(float), this_layer.filters[filter_num].filter_weights);
 
     kernel.setArg(0, m_neuron_buffer_1);             // input layer
-    kernel.setArg(1, layer_prev_width);              // layer width
-    kernel.setArg(2, layer_prev_height);             // layer height
-    kernel.setArg(3, layer_prev_depth);              // layer depth
+    kernel.setArg(1, layer_back_width);              // layer width
+    kernel.setArg(2, layer_back_height);             // layer height
+    kernel.setArg(3, layer_back_depth);              // layer depth
     kernel.setArg(4, filter_buffers.at(filter_num)); // filter
     kernel.setArg(5, filter_height);                 // filter width
     kernel.setArg(6, filter_width);                  // filter height
@@ -133,11 +133,11 @@ void cl_compute::compute_convolution(Layer &this_layer) {
               << " - Bias: " << this_layer.filters[filter_num].bias << "\n";
 
     std::cout << "Layer prev width/height: " 
-              << layer_prev_width 
+              << layer_back_width 
               << "/" 
-              << layer_prev_height 
+              << layer_back_height 
               << "/" 
-              << layer_prev_depth << "\n";
+              << layer_back_depth << "\n";
 
     std::cout << "Layer width/height: " 
               << layer_width 
@@ -172,9 +172,9 @@ void cl_compute::compute_convolution(Layer &this_layer) {
 
 void cl_compute::compute_maxpool(Layer &this_layer) {
   std::cout << "COMPUTE MAXPOOL\n";
-  int layer_prev_width = this_layer.layer_prev->width;
-  int layer_prev_height = this_layer.layer_prev->height;
-  int layer_prev_depth = this_layer.layer_prev->depth;
+  int layer_back_width = this_layer.layer_back->width;
+  int layer_back_height = this_layer.layer_back->height;
+  int layer_back_depth = this_layer.layer_back->depth;
 
   int layer_width = this_layer.width;
   int layer_height = this_layer.height;
@@ -197,8 +197,8 @@ void cl_compute::compute_maxpool(Layer &this_layer) {
   m_neuron_buffer_1 = cl::Buffer(
     m_context, 
     CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, 
-    layer_prev_height * layer_prev_width * layer_prev_depth * sizeof(float), 
-    this_layer.layer_prev->neurons, 
+    layer_back_height * layer_back_width * layer_back_depth * sizeof(float), 
+    this_layer.layer_back->neurons, 
     NULL);
 
   m_neuron_buffer_2 = cl::Buffer(
@@ -217,9 +217,9 @@ void cl_compute::compute_maxpool(Layer &this_layer) {
   // }
 
   kernel.setArg(0, m_neuron_buffer_1);
-  kernel.setArg(1, layer_prev_width);
-  kernel.setArg(2, layer_prev_height);
-  kernel.setArg(3, layer_prev_depth);
+  kernel.setArg(1, layer_back_width);
+  kernel.setArg(2, layer_back_height);
+  kernel.setArg(3, layer_back_depth);
   kernel.setArg(4, m_neuron_buffer_2);
   kernel.setArg(5, pool_width);
   kernel.setArg(6, pool_height);
@@ -245,9 +245,9 @@ void cl_compute::compute_maxpool(Layer &this_layer) {
 
 void cl_compute::compute_fully(Layer &this_layer) {
   std::cout << "COMPUTE FULLY CONNECTED\n";
-  int layer_prev_width = this_layer.layer_prev->width;
-  int layer_prev_height = this_layer.layer_prev->height;
-  int layer_prev_depth = this_layer.layer_prev->depth;
+  int layer_prev_width = this_layer.layer_back->width;
+  int layer_prev_height = this_layer.layer_back->height;
+  int layer_prev_depth = this_layer.layer_back->depth;
 
   int layer_width = this_layer.width;
   int layer_height = this_layer.height;
@@ -266,7 +266,7 @@ void cl_compute::compute_fully(Layer &this_layer) {
     m_context, 
     CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, 
     layer_prev_height * layer_prev_width * layer_prev_depth * sizeof(float), 
-    this_layer.layer_prev->neurons, 
+    this_layer.layer_back->neurons, 
     &err);
 
   m_neuron_buffer_2 = cl::Buffer(

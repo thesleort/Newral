@@ -104,8 +104,8 @@ struct Layer {
   unsigned depth; // Based on amount of filters in previous layer.
 
   // For neuron
-  Layer *layer_prev;
-  Layer *layer_next;
+  Layer *layer_back;
+  Layer *layer_front;
 
   float *neurons; // "Dot" product of all filters. PSEUDO data, can be freed from memory after layer is done
   union {

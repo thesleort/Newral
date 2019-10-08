@@ -210,7 +210,7 @@ void setup::allocator() {
       std::cout << "Input Height: " << current_layer.height << "\n";
       std::cout << "Input Depth: " << current_layer.depth << "\n";
 
-      current_layer.layer_prev = NULL;
+      current_layer.layer_back = NULL;
       // current_layer.neurons = (float *)malloc(sizeof(float) * current_layer.width * current_layer.height * current_layer.depth);
       break;
     case CONVOLUTION:
@@ -239,8 +239,8 @@ void setup::allocator() {
       current_layer.depth = depth;
 
       // Set pointers between layers
-      previous_layer.layer_next = &current_layer;
-      current_layer.layer_prev = &previous_layer;
+      previous_layer.layer_front = &current_layer;
+      current_layer.layer_back = &previous_layer;
       // current_layer.layer_this = &current_layer;
 
       // Allocate filters
@@ -273,8 +273,8 @@ void setup::allocator() {
       current_layer.num_filters = depth;
 
       // Set pointers between layers
-      previous_layer.layer_next = &current_layer;
-      current_layer.layer_prev = &previous_layer;
+      previous_layer.layer_front = &current_layer;
+      current_layer.layer_back = &previous_layer;
 
       // current_layer.filters_config->layer = &current_layer;
 
@@ -293,22 +293,22 @@ void setup::allocator() {
           previous_layer.height *
           previous_layer.depth;
 
-      previous_layer.layer_next = &current_layer;
-      current_layer.layer_prev = &previous_layer;
+      previous_layer.layer_front = &current_layer;
+      current_layer.layer_back = &previous_layer;
 
       break;
     case DROPOUT:
       break;
     case OUTPUT:
       std::cout << "Allocation: Output\n";
-      previous_layer.layer_next = &current_layer;
-      current_layer.layer_prev = &previous_layer;
-      current_layer.layer_next = NULL;
+      previous_layer.layer_front = &current_layer;
+      current_layer.layer_back = &previous_layer;
+      current_layer.layer_front = NULL;
 
-      current_layer.width = current_layer.layer_prev->width;
-      current_layer.height = current_layer.layer_prev->height;
+      current_layer.width = current_layer.layer_back->width;
+      current_layer.height = current_layer.layer_back->height;
 
-      current_layer.depth = current_layer.layer_prev->depth;
+      current_layer.depth = current_layer.layer_back->depth;
       break;
     }
   }
