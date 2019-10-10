@@ -249,9 +249,9 @@ void cl_compute::compute_fully(Layer &this_layer) {
   int layer_prev_height = this_layer.layer_prev->height;
   int layer_prev_depth = this_layer.layer_prev->depth;
 
-  int layer_width = this_layer.width;
-  int layer_height = this_layer.height;
-  int layer_depth = this_layer.depth;
+  // int layer_width = this_layer.width;
+  // int layer_height = this_layer.height;
+  // int layer_depth = this_layer.depth;
 
   int input_size = layer_prev_width * layer_prev_height * layer_prev_depth;
   int output_size = this_layer.fully_config->size;
@@ -286,7 +286,7 @@ void cl_compute::compute_fully(Layer &this_layer) {
     std::cout << "Workgroup size: " << workgroup_size << "\n";
     std::cout << "Bias: " << bias << "\n";
     
-    for (unsigned neuron = 0; neuron < output_size; neuron++) {
+    for (unsigned neuron = 0; neuron < (unsigned int) output_size; neuron++) {
 
       filter_buffers.push_back(
         cl::Buffer(
@@ -344,7 +344,7 @@ void cl_compute::print(Layer &this_layer) {
   std::cout << "\nTotal length: " << total_length;
   std::cout << "\n";
 
-  for (int i = 0; i < total_length; ++i) {
+  for (unsigned int i = 0; i < total_length; ++i) {
     this_layer.neurons[i] = 0;
   }
 

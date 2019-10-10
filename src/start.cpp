@@ -282,16 +282,17 @@ void setup::allocator() {
     case FULLY:
       std::cout << "Allocation: Fully Connected\n";
 
-      size = current_layer.fully_config->size;
+      size = 
+          previous_layer.width *
+          previous_layer.height *
+          previous_layer.depth;
 
       // current_layer.width = size;
       current_layer.height = 1;
       current_layer.depth = 1;
       current_layer.num_filters = current_layer.width;
-      current_layer.fully_config->size =
-          previous_layer.width *
-          previous_layer.height *
-          previous_layer.depth;
+      current_layer.fully_config->size = size;
+          
 
       previous_layer.layer_next = &current_layer;
       current_layer.layer_prev = &previous_layer;

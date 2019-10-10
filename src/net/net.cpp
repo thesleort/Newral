@@ -19,7 +19,7 @@ net::net(NetConfig &nc, cl_setup &ocl) {
   m_net_config = &nc;
 
   std::cout << "Building OpenCL kernels...\n";
-  std::string CL_BUILD_VERSION = OPEN_CL_2_0;
+  std::string CL_BUILD_VERSION = OPEN_CL_1_2;
   m_ocl.build("src/compute/forward.cl", CL_BUILD_VERSION.c_str());
   m_ocl.build("src/compute/backprop.cl", CL_BUILD_VERSION.c_str());
   std::cout << "Build done.\n";
@@ -157,7 +157,7 @@ void net::back_propagate(float *input, float *targets) {
 
   feed_forward(input);
 
-  for (unsigned layer_num = m_net_config->num_layers; layer_num >= 0; --layer_num) {
+  for (int layer_num = m_net_config->num_layers; layer_num >= 0; --layer_num) {
 
     Layer &this_layer = m_net_config->layers.at(layer_num);
 
