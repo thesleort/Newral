@@ -43,7 +43,7 @@ CC = g++
 CPPFLAGS += $(INC)								# -I is a preprocessor flag, not a compiler flag
 CFLAGS += -std=c++14 `pkg-config --cflags $(PKG)` -Wall -Wextra -pedantic -g	# some warnings about bad code
 
-BOOST = -lboost_regex
+BOOST = -lboost_regex -lboost_program_options
 # -L is a linker flag
 LDFLAGS += -Llib
 # Left empty if no libs are needed

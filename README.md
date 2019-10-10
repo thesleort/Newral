@@ -5,5 +5,5 @@ Artificial neural network for tracking and recognizing objects in images and str
 Ways to test
 
 ```bash
-./newral.out cfg/conv_test.cfg cfg/conv_test.weights cfg/conv_test.input
+./newral.out -c cfg/conv_test.cfg -w cfg/conv_test.weights -i cfg/conv_test.input
 ```
