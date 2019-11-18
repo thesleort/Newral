@@ -55,10 +55,18 @@
 		"algorithm": "cpp",
 		"*.h++": "cpp",
 		"strstream": "cpp",
-		"iomanip": "cpp"
+		"iomanip": "cpp",
+		"complex": "cpp",
+		"iterator": "cpp",
+		"map": "cpp",
+		"memory_resource": "cpp",
+		"random": "cpp",
+		"set": "cpp",
+		"string": "cpp",
+		"cfenv": "cpp"
 	},
 	"clang-format.executable": "${workspaceRoot}/.clang-format",
-	"opencl.formatting.name": "clang-format",
+	"opencl.formatting.name": ".clang-format",
 	"opencl.formatting.args": [
 		"-i"
 	]
